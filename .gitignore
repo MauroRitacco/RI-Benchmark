@@ -1,0 +1,21 @@
+# Python environments
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# IDEs
+.idea/
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data and logs
+data/
+datasets/
+logs/
+training_logs/
+*.pt
+*.pth
