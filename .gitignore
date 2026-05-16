@@ -1,4 +1,5 @@
 # Python environments
+.envs/
 .venv/
 venv/
 env/
@@ -19,3 +20,6 @@ logs/
 training_logs/
 *.pt
 *.pth
+experiments/
+results/
+external/*.log
