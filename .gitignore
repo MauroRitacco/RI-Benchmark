@@ -16,6 +16,7 @@ casa-*.log
 
 # Data and logs
 data/
+!data/simulated/disk_0000/
 datasets/
 logs/
 training_logs/
