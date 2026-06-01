@@ -3,8 +3,26 @@ import argparse
 import numpy as np
 import pandas as pd
 from astropy.io import fits
+from utils.transforms import smoothimage, convert_jybeam_to_jypixel
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
+
+def getpaths(target,method):
+        # Checks if the target is simulated or archival
+    if os.path.exists(os.path.join("data","simulated",target)):
+        ground_truth_path = os.path.join("data","simulated", target, f"{target}.fits")
+        reconstruction_path = os.path.join("experiments", 'simulated', target, f"{target}_{method}", f"{target}_{method}.fits")
+        log_path = os.path.join("experiments", 'simulated', target, f"{target}_{method}", f"{target}_{method}.log")
+        simulated = True
+    else:
+        ground_truth_path = os.path.join("data","archival", target, f"{target}.fits")
+        reconstruction_path = os.path.join("experiments", 'archival', target, f"{target}_{method}", f"{target}_{method}.fits")
+        log_path = os.path.join("experiments", 'archival', target, f"{target}_{method}", f"{target}_{method}.log")
+        simulated = False
+
+    csv_path = os.path.join("results", "tables", f"{target}.csv")
+
+    return ground_truth_path, reconstruction_path, log_path, simulated, csv_path
 
 def compute_ground_truth_metrics(reconstruction, ground_truth):
     """Calculate core image reconstruction metrics."""
@@ -23,38 +41,29 @@ def compute_blind_metrics(reconstruction):
 
 def evaluate_experiment(target, method):
     """Load images, compute metrics, and log results to CSV."""
-    # Checks if the target is simulated or archival
-    if os.path.exists(os.path.join("data","simulated",target)):
-        ground_truth_path = os.path.join("data","simulated", target, f"{target}.fits")
-        reconstruction_path = os.path.join("experiments", 'simulated', target, f"{target}_{method}", f"{target}_{method}.fits")
-        log_path = os.path.join("experiments", 'simulated', target, f"{target}_{method}", f"{target}_{method}.log")
-        simulated = True
-    else:
-        ground_truth_path = os.path.join("data","archival", target, f"{target}.fits")
-        reconstruction_path = os.path.join("experiments", 'archival', target, f"{target}_{method}", f"{target}_{method}.fits")
-        log_path = os.path.join("experiments", 'archival', target, f"{target}_{method}", f"{target}_{method}.log")
-        simulated = False
-
-    csv_path = os.path.join("results", "tables", f"{target}.csv")
-
-    # Handle intensity conversion for CASA/CLEAN results
-    if method == "casa":
-        data, hdr = fits.getdata(reconstruction_path, header=True)
-        # Unit conversion: Jy/beam -> Jy/pixel
-        factor = (4 * np.log(2) * hdr['CDELT1']**2) / (np.pi * hdr['BMAJ'] * hdr['BMIN'])
-        reconstruction = data.squeeze() * factor
-    else:
-        # Standard load for R2D2, DeepInv, etc.
-        reconstruction = fits.getdata(reconstruction_path).squeeze()
-
-    # Load ground truth
-    ground_truth = fits.getdata(ground_truth_path).squeeze()
+    ground_truth_path, reconstruction_path, log_path, simulated, csv_path = getpaths(target, method)
     
+
+    if fits.getheader(reconstruction_path).get('BUNIT') == 'Jy/beam':
+        convert_jybeam_to_jypixel(reconstruction_path)
+
+    smoothed_gt_path = smoothimage(reconstruction_path, ground_truth_path)
+
+
+    # Compute errormap
+    calculate_errormap(reconstruction_path, smoothed_gt_path, target, method)
+
+    # Load image data as numpy arrays
+    reconstruction = fits.getdata(reconstruction_path).squeeze()
+    smoothed_gt = fits.getdata(smoothed_gt_path).squeeze()
+
+
+
     # Run mathematical computation
     if simulated:
-        m = compute_ground_truth_metrics(reconstruction, ground_truth)
+        m = compute_ground_truth_metrics(reconstruction, smoothed_gt)
     else:
-        m = compute_blind_metrics(reconstruction, ) #TODO: Implement blind metrics
+        m = compute_blind_metrics(reconstruction_path, ) #TODO: Implement blind metrics
     
     # Extract runtime
     m["t"] = extract_runtime(log_path)
@@ -90,6 +99,16 @@ def extract_runtime(log_path):
         print(f"Error reading log {log_path}: {e}")
         
     return np.nan
+
+def calculate_errormap(reconstruction_path, ground_truth_path, target, method):
+    """Calculate residual image."""
+    reconstruction = fits.getdata(reconstruction_path).squeeze()
+    ground_truth = fits.getdata(ground_truth_path).squeeze()
+    errormap = reconstruction - ground_truth
+    errormap_path = os.path.join("experiments", "simulated", target, f"{target}_{method}", f"{target}_{method}_errormap.fits")
+    hdr=fits.getheader(reconstruction_path)
+    fits.writeto(errormap_path, errormap, hdr, overwrite=True)
+
 
 if __name__ == "__main__":
     # 1. Setup command line arguments

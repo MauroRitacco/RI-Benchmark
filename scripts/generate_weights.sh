@@ -1,6 +1,11 @@
 #!/bin/bash
 
-TARGET=disk_0000
+if [ -z "$1" ]; then
+    echo "Usage: $0 <target>"
+    exit 1
+fi
+TARGET=$1
+N=${2:-2}  # Super-resolution factor (default: 2)
 
 BASE_DIR=$(pwd)
 WSCLEAN_VENV="$BASE_DIR/.envs/.wsclean/bin/activate"
@@ -20,19 +25,16 @@ mkdir -p "$OUTPUT_DIR"
 cd "$OUTPUT_DIR"
 
 source $WSCLEAN_VENV
-
+PIXEL_SIZE=$($BASE_DIR/.envs/.benchmark/bin/python -c "import sys; sys.path.append('$BASE_DIR/src'); from utils.transforms import calculate_pixel_size; print(f'{calculate_pixel_size(\"$DATA_FILE\", n=$N)}asec')")
+echo $PIXEL_SIZE
 echo "Starting WSClean for $TARGET..."
 echo "Log saved in: $LOG_FILE"
 
 start_time=$(date +%s.%N)
 
 wsclean -size 64 64 \
-    -scale 8.44e-1asec \
+    -scale $PIXEL_SIZE \
     -weight briggs 0 \
-    -mgain 1 -gain 0.1 \
-    -threshold 0.001Jy \
-    -auto-mask 1 \
-    -padding 2 \
     -nmiter 0 \
     -niter 0 \
     -data-column DATA \

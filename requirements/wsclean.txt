@@ -1,0 +1,5 @@
+casaconfig==1.5.0
+casatools==6.7.0.31
+certifi==2026.4.22
+numpy==2.2.6
+scipy==1.15.3

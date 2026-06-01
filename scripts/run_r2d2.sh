@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TARGET=disk_0000
+TARGET=disk_0004
 
 BASE_DIR=$(pwd)
 R2D2_REPO="$BASE_DIR/external/R2D2-RI"
@@ -19,7 +19,6 @@ fi
 mkdir -p "$OUTPUT_DIR"
 
 echo "Starting R2D2 for $TARGET..."
-echo "Log saved in: $LOG_FILE"
 
 pushd "$R2D2_REPO" > /dev/null
 
@@ -37,6 +36,7 @@ start_time=$(date +%s.%N)
     --meas_op_on_gpu \
     --im_dim_x 64 \
     --im_dim_y 64 \
+    --weight_robustness 0 \
     --weight_type briggs \
     --num_iter 3 \
     --series R2D2 \
@@ -61,5 +61,3 @@ if [ -d "$OUTPUT_DIR/$TARGET" ]; then
     # Remove the now empty target directory
     rmdir "$OUTPUT_DIR/$TARGET" 2>/dev/null || true
 fi
-
-echo "✅ Proceso terminado. Tiempo total: $runtime seg."
