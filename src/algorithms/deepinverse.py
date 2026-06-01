@@ -1,3 +1,8 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+from src.utils.transforms import calculate_pixel_size
 import deepinv as dinv
 import torch
 import os
@@ -24,6 +29,7 @@ def main(target):
     
     def savefits(tensor, name=""):
         from astropy.io import fits
+        import scipy.io
         os.makedirs(out_dir, exist_ok=True)
         if isinstance(tensor, (list, tuple)):
             tensor = tensor[0]
@@ -36,9 +42,28 @@ def main(target):
         filename = f"{target}_deepinverse_{name}.fits" if name else f"{target}_deepinverse.fits"
         filepath = os.path.join(out_dir, filename)
         hdu = fits.PrimaryHDU(tensor)
+        
+        # Add basic WCS and beam headers so compute_metrics.py doesn't crash
+        try:
+            mat_data = scipy.io.loadmat(vis_path)
+            pixel_size = float(mat_data.get('nominal_pixelsize').flatten()[0])
+            hdu.header['BMAJ'] = ( 2 * pixel_size) / 3600.0
+            hdu.header['BMIN'] = ( 2 * pixel_size) / 3600.0
+            hdu.header['BPA'] = 0.0
+            hdu.header['CDELT1'] = -pixel_size / 3600.0
+            hdu.header['CDELT2'] = pixel_size / 3600.0
+            hdu.header['BUNIT'] = 'Jy/pixel'
+        except Exception as e:
+            print(f"Warning: could not add header keywords: {e}")
+
         hdu.writeto(filepath, overwrite=True)
         print(f"Saved: {filepath}")
         
+
+    # Clear previous results
+    import glob
+    for f in glob.glob(os.path.join(out_dir, '*')):
+        os.remove(f)
 
     # Load device
     device = dinv.utils.get_device()
@@ -49,25 +74,31 @@ def main(target):
     # Load npy. Important to specify dtype, otherwise it loads as float32
     data = dinv.utils.load_np(vis_path.replace('.mat', '.npy'), dtype=np.complex64, device=device)
     uv = dinv.utils.load_np(vis_path.replace('.mat', '_uv.npy'), dtype=np.float32, device=device)
-    nWimag = dinv.utils.load_np(vis_path.replace('.mat', '_weight.npy'), dtype=np.float32, device=device)
+    briggs = dinv.utils.load_np(vis_path.replace('.mat', '_briggs.npy'), dtype=np.float32, device=device)
+    nW = dinv.utils.load_np(vis_path.replace('.mat', '_nW.npy'), dtype=np.float32, device=device)
     
     print(f"Data: {data.dtype} {data.shape}")
     print(f"UV: {uv.dtype} {uv.shape}")
-    print(f"Weights: {nWimag.dtype} {nWimag.shape}")
+    print(f"Briggs weights: {briggs.dtype} {briggs.shape}")
+    print(f"nW (1/tau): {nW.dtype} {nW.shape}")
 
-    # Shape to (1, 1, N_vis)
-    y = data.view(1, 1, -1).to(device)
-   
-    # Measurement operator
+    # Combine Briggs weighting and natural weighting (nWimag / tau in the tutorial)
+    briggs = briggs.view(1, 1, -1).to(device)
+    nW = nW.view(1, 1, -1).to(device)
+    nWimag = briggs * nW
+    
+    # Apply natural + Briggs weighting to measurements
+    y_raw = data.view(1, 1, -1).to(device)
+    y = y_raw * nWimag
+    
+    # Setup the RadioInterferometry forward operator
     physics = RadioInterferometry(
-        (64, 64),
+        img_size=(64, 64),
         samples_loc=uv.permute((1, 0)),
         real_projection=True,
         device=device,
     )
-
-    # Weights reshape
-    nWimag = nWimag.view(1, 1, -1)
+    # Add image weighting to the sensing operator
     physics.setWeight(nWimag)
     
     # Central Dirac pulse for PSF
@@ -82,14 +113,24 @@ def main(target):
     x_hat = physics.A_adjoint(y).to(device)
     savefits(x_hat, 'dirty')
         
-    # Compute operator norm
+    # Compute operator norm exactly as in DeepInv tutorial
     opnorm = physics.compute_sqnorm(
-        torch.randn_like(x_hat, device=device),
+        torch.randn((1, 1, 64, 64), device=device),
         max_iter=20,
         tol=1e-6,
         verbose=False,
     ).item()
-    print(f"Operator norm: {opnorm}")
+    print(f"Operator norm (raw): {opnorm}")
+    
+    # Normalize weights and data so operator norm ≈ 1.0 across all datasets
+    # This preserves the *relative* Briggs weighting but standardizes the scale
+    scale = 1.0 / (opnorm ** 0.5)
+    nWimag_norm = nWimag * scale
+    y = y * scale
+    physics.setWeight(nWimag_norm)
+    
+    # Recompute dirty image with normalized weights
+    x_hat = physics.A_adjoint(y).to(device)
 
     from deepinv.optim.data_fidelity import L2
     from deepinv.optim.prior import WaveletPrior
@@ -105,10 +146,12 @@ def main(target):
     verbose = True
     plot_convergence_metrics = False # Log performance metrics
     
-    # Algo parameters
-    stepsize = 1.0 / (1.5 * opnorm)
-    lamb = 1e-5 * opnorm  # Regularization parameter
+    # Algo parameters (now consistent across all datasets since opnorm ≈ 1)
+    stepsize = 1.0 / 1.5  # 1 / (1.5 * 1.0)
+    lamb = 1e-3  # Fixed regularization parameter
+    
     params_algo = {"stepsize": stepsize, "lambda": lamb, "a": 3}
+    # Increase max_iter to allow FISTA to fully converge on the sharp edges
     max_iter = 50
     early_stop = True
    
@@ -126,14 +169,18 @@ def main(target):
         params_algo=params_algo,
         custom_init=custom_init,
     )
+
+    init = torch.clamp(x_hat, 0), torch.clamp(x_hat, 0) # FISTA initialization (reuse dirty image)
+    
+    # Warm-up run
+    _ = model(y, physics, init=init)
     
     # Runtime measurement
     if device.type == 'cuda':
         torch.cuda.synchronize()
     start_time = time.time()
 
-    # FISTA reconstruction
-    init = torch.clamp(physics.A_dagger(y), 0), torch.clamp(physics.A_dagger(y), 0) # FISTA initialization
+    # FISTA reconstruction (timed)
     x_model = model(y, physics, init=init)
     
     if device.type == 'cuda':
@@ -141,20 +188,44 @@ def main(target):
     end_time = time.time()
     runtime = end_time - start_time
     
-    # Log execution time
-    with open(os.path.join(out_dir, f"{target}_deepinverse.log"), "w") as f:
-        f.write(f"Execution time: {runtime:.2f} seconds\n")
-    print(f"Execution time: {runtime:.6f} seconds")
-    
     savefits(x_model, '')
+
+    # Log configuration and execution time
+    log_filepath = os.path.join(out_dir, f"{target}_deepinverse.log")
+    with open(log_filepath, "w") as f:
+        f.write("DeepInv Configuration:\n")
+        f.write("----------------------\n")
+        f.write(f"Operator: RadioInterferometry\n")
+        f.write(f"Image size: (64, 64)\n")
+        f.write(f"Real projection: True\n")
+        f.write(f"Device: {device}\n")
+        f.write(f"Operator norm (raw): {opnorm}\n")
+        f.write(f"Normalization scale: {scale} (1/sqrt(opnorm))\n\n")
+        
+        f.write("Optimization / Prior:\n")
+        f.write("---------------------\n")
+        f.write(f"Iteration: FISTA\n")
+        f.write(f"Data Fidelity: L2\n")
+        f.write(f"Prior: WaveletPrior (level=3, wv={wv_list}, p=1, clamp_min=0)\n")
+        f.write(f"Max iterations: {max_iter}\n")
+        f.write(f"Early stop: {early_stop}\n")
+        f.write(f"Stepsize: {stepsize} (1.0 / 1.5, normalized opnorm ~= 1)\n")
+        f.write(f"Lambda: {lamb} (fixed, dataset-independent)\n")
+        f.write(f"Params algo: {params_algo}\n\n")
+        
+        f.write(f"Execution time: {runtime:.2f} seconds\n")
+        
+    print(f"Execution time: {runtime:.2f} seconds")
 
     # Cleanup
     npy_file = vis_path.replace('.mat', '.npy')
     uv_npy_file = vis_path.replace('.mat', '_uv.npy')
-    weight_npy_file = vis_path.replace('.mat', '_weight.npy')
+    briggs_npy_file = vis_path.replace('.mat', '_briggs.npy')
+    nW_npy_file = vis_path.replace('.mat', '_nW.npy')
     if os.path.exists(npy_file): os.remove(npy_file)
     if os.path.exists(uv_npy_file): os.remove(uv_npy_file)
-    if os.path.exists(weight_npy_file): os.remove(weight_npy_file)
+    if os.path.exists(briggs_npy_file): os.remove(briggs_npy_file)
+    if os.path.exists(nW_npy_file): os.remove(nW_npy_file)
 
 
 def normalize_uv(uv):
@@ -167,17 +238,15 @@ def normalize_uv(uv):
 
 def mattonpy(mat):
     mat_data = scipy.io.loadmat(mat)
+    vis_path = mat.replace('.mat', '.MS')
     y = mat_data.get('DATA', mat_data.get('y'))
     u = mat_data.get('u')
     v = mat_data.get('v')
     
-    # Scaling to match pixel scale (0.844 arcsec)
-    cell_size_rad = 0.844 * np.pi / (180.0 * 3600.0)
+    pixel_size = calculate_pixel_size(vis_path,n=2)  # arcsec
+    cell_size_rad = pixel_size * np.pi / (180.0 * 3600.0)
     u = u * (2.0 * np.pi * cell_size_rad)
     v = v * (2.0 * np.pi * cell_size_rad)
-    # max_val = np.abs(uv).max()
-    # if max_val > 0:
-    #     uv = (uv / max_val) * np.pi
     uv = np.concatenate((-v, u), axis=1)
     # uv = normalize_uv(uv)
     
@@ -185,9 +254,17 @@ def mattonpy(mat):
     np.save(mat.replace('.mat', '.npy'), y)
     np.save(mat.replace('.mat', '_uv.npy'), uv)
     
-    weight = mat_data.get('weight')
-    if weight is not None:
-        np.save(mat.replace('.mat', '_weight.npy'), weight)
+    # Save Briggs weights (from wsclean imaging weights)
+    briggs = mat_data.get('weight')
+    if briggs is None:
+        briggs = np.ones((y.shape[0], 1), dtype=np.float32)
+    np.save(mat.replace('.mat', '_briggs.npy'), briggs)
+    
+    # Save natural weights nW = 1/tau (inverse noise std from simulator)
+    nW = mat_data.get('nW')
+    if nW is None:
+        nW = np.ones((y.shape[0], 1), dtype=np.float32)
+    np.save(mat.replace('.mat', '_nW.npy'), nW)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TARGET=disk_0000
+TARGET=disk_0004
 
 BASE_DIR=$(pwd)
 WSCLEAN_VENV="$BASE_DIR/.envs/.wsclean/bin/activate"
@@ -15,6 +15,8 @@ else
     LOG_FILE="$OUTPUT_DIR/${TARGET}_wsclean.log"
 fi
 
+# Eliminate the directory to ensure a fresh run
+rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
 cd "$OUTPUT_DIR"
@@ -24,26 +26,30 @@ source $WSCLEAN_VENV
 echo "Starting WSClean for $TARGET..."
 echo "Log saved in: $LOG_FILE"
 
+PIXEL_SIZE=$($BASE_DIR/.envs/.benchmark/bin/python -c "import sys; sys.path.append('$BASE_DIR/src'); from utils.transforms import calculate_pixel_size; print(f'{calculate_pixel_size(\"$DATA_FILE\")}asec')")
+echo $PIXEL_SIZE
 start_time=$(date +%s.%N)
 
+# Dynamically calculate the pixel scale based on the MS baselines
 wsclean -size 64 64 \
-    -scale 8.44e-1asec \
-    -weight briggs 0 \
-    -mgain 1 -gain 0.1 \
-    -threshold 0.001Jy \
-    -auto-mask 1 \
-    -padding 2 \
-    -nmiter 1 \
-    -niter 500000 \
+    -scale $PIXEL_SIZE \
+    -padding 1.2 \
+    -weight briggs 2 \
+    -multiscale \
+    -mgain 0.8 \
+    -gain 0.1 \
+    -auto-threshold 1 \
+    -auto-mask 3 \
+    -nmiter 10 \
+    -niter 100000 \
     -data-column DATA \
     -name $TARGET \
     "$DATA_FILE" 2>&1 | tee "$LOG_FILE"
 
 mv "${TARGET}-image.fits" "${TARGET}_wsclean.fits"
+$($BASE_DIR/.envs/.benchmark/bin/python -c "import sys; sys.path.append('$BASE_DIR/src'); from utils.transforms import convert_jybeam_to_jypixel; convert_jybeam_to_jypixel(\"$OUTPUT_DIR/${TARGET}_wsclean.fits\")")
 
 end_time=$(date +%s.%N)
 runtime=$(echo "$end_time - $start_time" | bc)
 
-echo -e "\nExecution time: $runtime seconds" >> "$LOG_FILE"
-
-echo "✅ Proceso terminado. Tiempo total: $runtime seg."
+echo "Execution time: $runtime seconds" >> "$LOG_FILE"
