@@ -43,7 +43,7 @@ def main(target):
         filepath = os.path.join(out_dir, filename)
         hdu = fits.PrimaryHDU(tensor)
         
-        # Add basic WCS and beam headers so compute_metrics.py doesn't crash
+        # Add basic WCS and beam headers
         try:
             mat_data = scipy.io.loadmat(vis_path)
             pixel_size = float(mat_data.get('nominal_pixelsize').flatten()[0])
@@ -57,6 +57,12 @@ def main(target):
             print(f"Warning: could not add header keywords: {e}")
 
         hdu.writeto(filepath, overwrite=True)
+        
+        # Normalize the main reconstruction to [0, 1] (skip dirty/psf)
+        if not name:
+            from src.utils.transforms import normalize_fits_peak
+            normalize_fits_peak(filepath)
+        
         print(f"Saved: {filepath}")
         
 
@@ -109,28 +115,32 @@ def main(target):
     PSF = physics.A_adjoint(physics.A(dirac))
     savefits(PSF, 'psf')
    
-    # Compute dirty image
-    x_hat = physics.A_adjoint(y).to(device)
+    # Compute dirty image (single W via operator adjoint: Φᴴ · W · y_raw)
+    x_hat = physics.A_adjoint(y_raw.view(1, 1, -1).to(device))
     savefits(x_hat, 'dirty')
+        
+    # Initialization for FISTA: use double-weighted Aᴴ·y_w = Φᴴ·W²·y_raw
+    # This matches the gradient of ||Ax - y_w||² at x=0
+    x_init_fista = physics.A_adjoint(y).to(device)
         
     # Compute operator norm exactly as in DeepInv tutorial
     opnorm = physics.compute_sqnorm(
         torch.randn((1, 1, 64, 64), device=device),
-        max_iter=20,
+        max_iter=100,
         tol=1e-6,
         verbose=False,
     ).item()
     print(f"Operator norm (raw): {opnorm}")
     
-    # Normalize weights and data so operator norm ≈ 1.0 across all datasets
-    # This preserves the *relative* Briggs weighting but standardizes the scale
-    scale = 1.0 / (opnorm ** 0.5)
-    nWimag_norm = nWimag * scale
-    y = y * scale
-    physics.setWeight(nWimag_norm)
+    # # Normalize weights and data so operator norm ≈ 1.0 across all datasets
+    # # This preserves the *relative* Briggs weighting but standardizes the scale
+    # scale = 1.0 / (opnorm ** 0.5)
+    # nWimag_norm = nWimag * scale
+    # y = y * scale
+    # physics.setWeight(nWimag_norm)
     
-    # Recompute dirty image with normalized weights
-    x_hat = physics.A_adjoint(y).to(device)
+    # # Recompute dirty image with normalized weights
+    # x_hat = physics.A_adjoint(y).to(device)
 
     from deepinv.optim.data_fidelity import L2
     from deepinv.optim.prior import WaveletPrior
@@ -145,10 +155,14 @@ def main(target):
     # Logging parameters
     verbose = True
     plot_convergence_metrics = False # Log performance metrics
-    
-    # Algo parameters (now consistent across all datasets since opnorm ≈ 1)
-    stepsize = 1.0 / 1.5  # 1 / (1.5 * 1.0)
-    lamb = 1e-3  # Fixed regularization parameter
+
+    # Algo parameters
+    stepsize = 1.0 / (1.5 * opnorm)
+    lamb = 2e-3 * opnorm  # Regularization parameter
+   
+    # # Algo parameters (now consistent across all datasets since opnorm ≈ 1)
+    # stepsize = 1.0 / 1.5  # 1 / (1.5 * 1.0)
+    # lamb = 1e-5  # Fixed regularization parameter
     
     params_algo = {"stepsize": stepsize, "lambda": lamb, "a": 3}
     # Increase max_iter to allow FISTA to fully converge on the sharp edges
@@ -170,7 +184,7 @@ def main(target):
         custom_init=custom_init,
     )
 
-    init = torch.clamp(x_hat, 0), torch.clamp(x_hat, 0) # FISTA initialization (reuse dirty image)
+    init = torch.clamp(x_init_fista, 0), torch.clamp(x_init_fista, 0) # FISTA initialization (reuse dirty image)
     
     # Warm-up run
     _ = model(y, physics, init=init)
@@ -178,15 +192,33 @@ def main(target):
     # Runtime measurement
     if device.type == 'cuda':
         torch.cuda.synchronize()
-    start_time = time.time()
+    start_time = time.perf_counter()
 
     # FISTA reconstruction (timed)
     x_model = model(y, physics, init=init)
     
     if device.type == 'cuda':
         torch.cuda.synchronize()
-    end_time = time.time()
-    runtime = end_time - start_time
+    end_time = time.perf_counter()
+    # runtime = end_time - start_time
+    # Read weight computation time from the weights log if it exists
+    weight_time = 0.0
+    if os.path.exists(os.path.join(base_dir, 'data', 'simulated', target)):
+        weights_log = os.path.join(base_dir, 'experiments', 'simulated', target, f"{target}_weights", f"{target}_wsclean.log")
+    else:
+        weights_log = os.path.join(base_dir, 'experiments', 'archival', target, f"{target}_weights", f"{target}_wsclean.log")
+    
+    if os.path.exists(weights_log):
+        try:
+            with open(weights_log, 'r', encoding='utf-8', errors='ignore') as wf:
+                for line in wf:
+                    if "Execution time:" in line:
+                        weight_time = float(line.split("Execution time:")[1].split("seconds")[0].strip())
+        except Exception as e:
+            print(f"Warning: could not read weight computation time: {e}")
+            
+    runtime = (end_time - start_time) + weight_time
+    imaging_time = end_time - start_time
     
     savefits(x_model, '')
 
@@ -200,7 +232,7 @@ def main(target):
         f.write(f"Real projection: True\n")
         f.write(f"Device: {device}\n")
         f.write(f"Operator norm (raw): {opnorm}\n")
-        f.write(f"Normalization scale: {scale} (1/sqrt(opnorm))\n\n")
+        # f.write(f"Normalization scale: {scale} (1/sqrt(opnorm))\n\n")
         
         f.write("Optimization / Prior:\n")
         f.write("---------------------\n")
@@ -213,8 +245,10 @@ def main(target):
         f.write(f"Lambda: {lamb} (fixed, dataset-independent)\n")
         f.write(f"Params algo: {params_algo}\n\n")
         
+        f.write(f"Imaging time: {imaging_time:.2f} seconds\n")
         f.write(f"Execution time: {runtime:.2f} seconds\n")
         
+    print(f"Imaging time: {imaging_time:.2f} seconds")
     print(f"Execution time: {runtime:.2f} seconds")
 
     # Cleanup
@@ -243,7 +277,7 @@ def mattonpy(mat):
     u = mat_data.get('u')
     v = mat_data.get('v')
     
-    pixel_size = calculate_pixel_size(vis_path,n=2)  # arcsec
+    pixel_size = calculate_pixel_size(vis_path,n=3)  # arcsec
     cell_size_rad = pixel_size * np.pi / (180.0 * 3600.0)
     u = u * (2.0 * np.pi * cell_size_rad)
     v = v * (2.0 * np.pi * cell_size_rad)
