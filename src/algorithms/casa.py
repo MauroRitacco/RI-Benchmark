@@ -4,14 +4,15 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 import argparse
+import json
 import casatasks
 import time
 import numpy as np
 from astropy.io import fits
 from src.utils.transforms import convert_jybeam_to_jypixel
-from src.utils.transforms import smoothimage
+# from src.utils.transforms import smoothimage
 
-def main(target):
+def main(target, config_json=None, n=3):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')) # Get the project root directory (2 levels up from this script)
     # Check if the target is simulated or archival
     if os.path.exists(os.path.join(base_dir,'data','simulated',target)):
@@ -39,29 +40,40 @@ def main(target):
 
     import sys
     sys.path.insert(0, base_dir)
-    from src.utils.transforms import calculate_pixel_size
-    pixel_size = calculate_pixel_size(vis_path,n=2)
-    print(f'Pixel size: {pixel_size} arcsec')
+    # Load the nominal_pixelsize from the .mat file — this is the exact pixel scale used
+    # during visibility simulation, so CASA images at the same angular scale as the groundtruth.
+    from scipy.io import loadmat
+    mat_path = vis_path.replace('.MS', '.mat')
+    pixel_size = float(loadmat(mat_path)['nominal_pixelsize'].item())
+    print(f'Pixel size (from .mat): {pixel_size} arcsec')
 
-    # Run tclean task
-    casatasks.tclean(
-        vis=vis_path, 
-        imagename=name, 
-        imsize=64, 
-        cell=f'{pixel_size}arcsec', 
-        specmode='mfs',
-        deconvolver='hogbom', 
-        gridder='standard', 
-        weighting='briggs',
-        robust=0,
-        niter=0,
-        datacolumn='data'
-    )
+    # Parse user-provided tclean config (JSON dict from shell script)
+    user_config = {}
+    if config_json:
+        user_config = json.loads(config_json)
+        print(f"User tclean config: {user_config}")
+
+    t0_start = time.perf_counter()
+    # Build dirty image kwargs: start from user config, then force the dirty-specific overrides
+    dirty_kwargs = dict(user_config)
+    dirty_kwargs.update({
+        'vis': vis_path,
+        'imagename': name,
+        'cell': f'{pixel_size}arcsec',
+        'niter': 0,
+    })
+    # Remove clean-only keys that don't apply to the dirty run
+    for key in ['scales', 'gain', 'cyclefactor', 'usemask', 'nsigma', 'noisethreshold']:
+        dirty_kwargs.pop(key, None)
+
+    casatasks.tclean(**dirty_kwargs)
+    t0_end = time.perf_counter()
+    setup_time = t0_end - t0_start
     
     # Erase every output of the first tclean except .image
     import glob
     for f in glob.glob(f"{name}.*"):
-        if f not in [f"{name}.image"]:
+        if f not in [f"{name}.image", f"{name}.log"]:
             if os.path.isdir(f):
                 shutil.rmtree(f)
             else:
@@ -72,47 +84,61 @@ def main(target):
         os.rename(f"{name}.image", f"{name}.dirty")
     
     start = time.perf_counter()
-    tclean_kwargs = {
-        'vis': vis_path, 
-        'imagename': name, 
-        'imsize': 64, 
-        'cell': f'{pixel_size}arcsec', 
-        'specmode': 'mfs',
-        'deconvolver': 'hogbom', 
-        'gridder': 'standard', 
-        'weighting': 'briggs',
-        'robust': 0,
-        'gain': 0.1,
-        'niter': 1000000,
-        'threshold': '0.001Jy',
-        'datacolumn': 'data'
-    }
+
+    # Use user config directly, then force computed values
+    tclean_kwargs = dict(user_config)
+    tclean_kwargs['vis'] = vis_path
+    tclean_kwargs['imagename'] = name
+    tclean_kwargs['cell'] = f'{pixel_size}arcsec'
+
     casatasks.tclean(**tclean_kwargs)
     
     # Stop timer
     end = time.perf_counter()
     duration = end - start
+    imaging_time = duration - setup_time
+    if imaging_time < 0:
+        imaging_time = duration
     
-    # Export the image to a FITS file
-    casatasks.exportfits(
-        imagename=f'{name}.image', 
-        fitsimage=f'{name}.fits', 
-        overwrite=True
-    )
-    smoothimage(f'{name}.fits', os.path.join(base_dir,'data','simulated',target, target + '.fits'))
-    
-    # Convert units to Jy/pixel
-    convert_jybeam_to_jypixel(f'{name}.fits')
+    # Export the dirty image to a FITS file if it exists
+    if os.path.exists(f'{name}.dirty'):
+        casatasks.exportfits(
+            imagename=f'{name}.dirty', 
+            fitsimage=f'{name}_dirty.fits', 
+            overwrite=True
+        )
+        
+    # Export the clean image to a FITS file if it exists
+    if os.path.exists(f'{name}.image'):
+        casatasks.exportfits(
+            imagename=f'{name}.image', 
+            fitsimage=f'{name}.fits', 
+            overwrite=True
+        )
+        # smoothimage(f'{name}.fits', os.path.join(base_dir,'data','simulated',target, target + '.fits'))
+        
+        # # Convert units to Jy/pixel
+        convert_jybeam_to_jypixel(f'{name}.fits')
+
+        # Normalize to [0, 1] via peak normalization
+        # from src.utils.transforms import normalize_fits_peak
+        # normalize_fits_peak(f'{name}.fits')
     
     # Write the execution time and tclean config to the log file
     with open(name+'.log', 'a') as f:
-        f.write(f"tclean config: {tclean_kwargs}\n")
+        f.write("tclean config:\n")
+        f.write(json.dumps(tclean_kwargs, indent=2, default=str) + "\n")
         f.write(f"\nExecution time: {duration:.2f} seconds\n")
+        f.write(f"Imaging time: {imaging_time:.2f} seconds\n")
     print(f"Execution time: {duration:.2f} seconds")
+    print(f"Imaging time: {imaging_time:.2f} seconds")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run CASA Hogbom clean on a target.")
     parser.add_argument("--target", required=True, help="Name of the object to image")
+    parser.add_argument("--config", type=str, default=None,
+                        help="JSON string with tclean parameters to override defaults")
+    parser.add_argument("--nval", type=int, default=3, help="Factor for pixel size calculation")
     args = parser.parse_args()
-    main(args.target)
+    main(args.target, config_json=args.config, n=args.nval)

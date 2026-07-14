@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 TARGET=$1
-N=${2:-2}  # Super-resolution factor (default: 2)
+N=${2:-2}
 
 BASE_DIR=$(pwd)
 WSCLEAN_VENV="$BASE_DIR/.envs/.wsclean/bin/activate"
