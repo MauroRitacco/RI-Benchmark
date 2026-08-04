@@ -25,13 +25,9 @@ def getpaths(target, method):
 
     return ground_truth_path, reconstruction_path, log_path, simulated, csv_path, base_exp_dir
 
-# def normalize_to_01(data):
-#     """Normalize data to the range [0, 1] using min-max normalization."""
-#     dmin = data.min()
-#     dmax = data.max()
-#     if dmax - dmin == 0:
-#         return np.zeros_like(data)
-#     return (data - dmin) / (dmax - dmin)
+def clip_negatives(data):
+    """Take the negative values of the reconstruction and clip them to zero."""
+    return np.clip(data, 0, None)
 
 def normalize_to_01(data):
     """Normalize data to [0, 1] via standard min-max normalization after clipping negatives."""
@@ -136,7 +132,7 @@ def evaluate_target_all_methods(target):
 
         # Normalization for the metrics
         # recon_data = normalize_to_01(recon_data)
-
+        recon_data = clip_negatives(recon_data)
         m = {}
 
         if has_gt:

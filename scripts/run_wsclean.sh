@@ -1,10 +1,26 @@
 #!/bin/bash
+set -euo pipefail
 
-TARGET=disk_1111
-N=1
+TARGET=""
+DRY_RUN=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --target)
+      TARGET="$2"; shift 2 ;;
+    --dry-run)
+      DRY_RUN=1; shift ;;
+    *)
+      echo "Unknown option: $1"; exit 1 ;;
+  esac
+done
 
-BASE_DIR=$(pwd)
+if [ -z "$TARGET" ]; then
+  TARGET="${TARGET:-disk_1111}"
+fi
+
+BASE_DIR=$(cd "$(dirname "$0")/.." && pwd)
 WSCLEAN_VENV="$BASE_DIR/.envs/.wsclean/bin/activate"
+BENCH_PYTHON="$BASE_DIR/.envs/.benchmark/bin/python"
 
 if [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
     DATA_FILE="$BASE_DIR/data/simulated/$TARGET/${TARGET}.MS"
@@ -16,59 +32,130 @@ else
     LOG_FILE="$OUTPUT_DIR/${TARGET}_wsclean.log"
 fi
 
-# Eliminate the directory to ensure a fresh run
-rm -rf "$OUTPUT_DIR"
-mkdir -p "$OUTPUT_DIR"
+YAML_PATH=""
+if [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
+    YAML_PATH="$BASE_DIR/data/simulated/$TARGET/${TARGET}.yaml"
+else
+    YAML_PATH="$BASE_DIR/data/archival/$TARGET/${TARGET}.yaml"
+fi
 
-cd "$OUTPUT_DIR"
+METHOD="wsclean"
+METHOD_CONFIG=""
+if [ -f "$YAML_PATH" ]; then
+  METHOD_CONFIG=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
+    --target "$TARGET" --method "$METHOD" 2>/dev/null) || true
+fi
 
-source $WSCLEAN_VENV
+USE_DEFAULTS=0
+if [ -z "$METHOD_CONFIG" ] || [ "$METHOD_CONFIG" = "null" ]; then
+  if [ -f "$YAML_PATH" ]; then
+    echo "Warning: $METHOD section missing from $YAML_PATH; using hardcoded defaults." >&2
+  fi
+  USE_DEFAULTS=1
+fi
 
-echo "Starting WSClean for $TARGET..."
-echo "Log saved in: $LOG_FILE"
+# Read nval from top-level YAML or default to 1
+NVAL="1"
+if [ -f "$YAML_PATH" ]; then
+  NVAL=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
+    --target "$TARGET" --key nval 2>/dev/null) || true
+fi
+if [ -z "$NVAL" ]; then
+  NVAL="1"
+fi
 
-# Old dynamic pixel-size calculation from the MS baselines
-# PIXEL_SIZE=$($BASE_DIR/.envs/.benchmark/bin/python -c "import sys; sys.path.append('$BASE_DIR/src'); from utils.transforms import calculate_pixel_size; print(f'{calculate_pixel_size(\"$DATA_FILE\", n=$N)}asec')")
-# echo $PIXEL_SIZE
+# Helper to extract a single key from YAML or fallback to default
+yaml_get() {
+  local key="$1"
+  local default_val="$2"
+  if [ "$USE_DEFAULTS" -eq 1 ]; then
+    echo "$default_val"
+    return
+  fi
+  local val
+  val=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
+    --target "$TARGET" --method "$METHOD" --key "$key" 2>/dev/null) || true
+  if [ -z "$val" ]; then
+    echo "$default_val"
+  else
+    echo "$val"
+  fi
+}
 
-# Load the nominal_pixelsize from the .mat file — this is the exact pixel scale used
-# during visibility simulation, so WSClean images at the same angular scale as the groundtruth.
+# Build wsclean config
+SIZE=$(yaml_get "size" "64")
+PADDING=$(yaml_get "padding" "2")
+J=$(yaml_get "j" "1")
+WEIGHT=$(yaml_get "weight" "briggs 2")
+MULTISCALE=$(yaml_get "multiscale" "true")
+MULTISCALE_SCALES=$(yaml_get "multiscale_scales" "0,5,15")
+MGAIN=$(yaml_get "mgain" "0.8")
+GAIN=$(yaml_get "gain" "0.1")
+AUTO_THRESHOLD=$(yaml_get "auto_threshold" "0.5")
+AUTO_MASK=$(yaml_get "auto_mask" "1.5")
+NITER=$(yaml_get "niter" "200000")
+DATA_COLUMN=$(yaml_get "data_column" "DATA")
+
+# Load pixel size from .mat file
 MAT_FILE="${DATA_FILE%.MS}.mat"
-PIXEL_SIZE=$($BASE_DIR/.envs/.benchmark/bin/python -c "
+PIXEL_SIZE=$($BENCH_PYTHON -c "
 from scipy.io import loadmat
 pixel_size = float(loadmat('$MAT_FILE')['nominal_pixelsize'].item())
 print(f'{pixel_size}asec')
 ")
-echo "Pixel size (from .mat): $PIXEL_SIZE"
+
+# Eliminate the directory to ensure a fresh run
+if [ "$DRY_RUN" -eq 1 ]; then
+    echo "[DRY-RUN] rm -rf $OUTPUT_DIR"
+    echo "[DRY-RUN] mkdir -p $OUTPUT_DIR"
+    echo "[DRY-RUN] cd $OUTPUT_DIR"
+else
+    rm -rf "$OUTPUT_DIR"
+    mkdir -p "$OUTPUT_DIR"
+    cd "$OUTPUT_DIR"
+fi
+
+echo "Starting WSClean for $TARGET..."
+echo "Log saved in: $LOG_FILE"
+
+# Build dynamic multiscale flags
+MULTISCALE_FLAGS=""
+if [ "$MULTISCALE" = "true" ]; then
+    MULTISCALE_FLAGS="-multiscale -multiscale-scales $MULTISCALE_SCALES"
+fi
+
 start_time=$(date +%s.%N)
 
-# Dynamically calculate the pixel scale based on the MS baselines
-WSCLEAN_CONFIG="-size 64 64 \
--scale $PIXEL_SIZE \
--padding 2 \
--j 1 \
--weight briggs 2 \
--multiscale \
--multiscale-scales 0,5,15 \
--mgain 0.8 \
--gain 0.1 \
--auto-threshold 0.5 \
--auto-mask 1.5 \
--niter 200000 \
--data-column DATA"
+if [ "$DRY_RUN" -eq 1 ]; then
+    echo "[DRY-RUN] source $WSCLEAN_VENV"
+    echo "[DRY-RUN] wsclean -size $SIZE $SIZE -scale $PIXEL_SIZE -padding $PADDING -j $J -weight $WEIGHT $MULTISCALE_FLAGS -mgain $MGAIN -gain $GAIN -auto-threshold $AUTO_THRESHOLD -auto-mask $AUTO_MASK -niter $NITER -data-column $DATA_COLUMN -name $TARGET $DATA_FILE"
+    echo "[DRY-RUN] mv ${TARGET}-image.fits ${TARGET}_wsclean.fits"
+    echo "[DRY-RUN] $BENCH_PYTHON -c 'convert_jybeam_to_jypixel on ${TARGET}_wsclean.fits'"
+    runtime="0"
+else
+    source "$WSCLEAN_VENV"
 
-wsclean $WSCLEAN_CONFIG \
-    -name $TARGET \
-    "$DATA_FILE" 2>&1 | tee "$LOG_FILE"
+    wsclean -size "$SIZE" "$SIZE" \
+        -scale "$PIXEL_SIZE" \
+        -padding "$PADDING" \
+        -j "$J" \
+        -weight $WEIGHT \
+        $MULTISCALE_FLAGS \
+        -mgain "$MGAIN" \
+        -gain "$GAIN" \
+        -auto-threshold "$AUTO_THRESHOLD" \
+        -auto-mask "$AUTO_MASK" \
+        -niter "$NITER" \
+        -data-column "$DATA_COLUMN" \
+        -name "$TARGET" \
+        "$DATA_FILE" 2>&1 | tee "$LOG_FILE"
 
-mv "${TARGET}-image.fits" "${TARGET}_wsclean.fits"
-$($BASE_DIR/.envs/.benchmark/bin/python -c "import sys; sys.path.append('$BASE_DIR/src'); from utils.transforms import convert_jybeam_to_jypixel; convert_jybeam_to_jypixel(\"$OUTPUT_DIR/${TARGET}_wsclean.fits\")")
+    mv "${TARGET}-image.fits" "${TARGET}_wsclean.fits"
+    "$BENCH_PYTHON" -c "import sys; sys.path.append('$BASE_DIR/src'); from utils.transforms import convert_jybeam_to_jypixel; convert_jybeam_to_jypixel('$OUTPUT_DIR/${TARGET}_wsclean.fits')"
 
-# Normalize to [0, 1] via peak normalization
-# $($BASE_DIR/.envs/.benchmark/bin/python -c "import sys; sys.path.append('$BASE_DIR/src'); from utils.transforms import normalize_fits_peak; normalize_fits_peak(\"$OUTPUT_DIR/${TARGET}_wsclean.fits\")")
+    end_time=$(date +%s.%N)
+    runtime=$(echo "$end_time - $start_time" | bc)
 
-end_time=$(date +%s.%N)
-runtime=$(echo "$end_time - $start_time" | bc)
-
-echo "wsclean config: $WSCLEAN_CONFIG" >> "$LOG_FILE"
-echo "Execution time: $runtime seconds" >> "$LOG_FILE"
+    echo "wsclean config: -size $SIZE $SIZE -scale $PIXEL_SIZE -padding $PADDING -j $J -weight $WEIGHT $MULTISCALE_FLAGS -mgain $MGAIN -gain $GAIN -auto-threshold $AUTO_THRESHOLD -auto-mask $AUTO_MASK -niter $NITER -data-column $DATA_COLUMN" >> "$LOG_FILE"
+    echo "Execution time: $runtime seconds" >> "$LOG_FILE"
+fi

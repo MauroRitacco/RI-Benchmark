@@ -34,7 +34,7 @@ start_time=$(date +%s.%N)
 
 wsclean -size 64 64 \
     -scale $PIXEL_SIZE \
-    -weight briggs 0 \
+    -weight briggs 2 \
     -nmiter 0 \
     -niter 0 \
     -data-column DATA \
@@ -45,7 +45,7 @@ wsclean -size 64 64 \
 
 
 echo "Extracting IMAGING_WEIGHT_SPECTRUM and saving to ${TARGET}.mat..."
-python3 -c "
+$BASE_DIR/.envs/.wsclean/bin/python -c "
 import scipy.io as sio
 from casatools import table
 
