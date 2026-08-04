@@ -17,7 +17,42 @@ from deepinv.utils import load_np_url, get_image_url, get_degradation_url
 from deepinv.utils.tensorlist import dirac_like
 
 
-def main(target):  
+def main(target, config_json=None, n=1):  
+    # Default configuration
+    cfg = {
+        "img_size": [64, 64],
+        "real_projection": True,
+        "prior": "wavelet",
+        "prior_level": 3,
+        "prior_wavelets": ["db1", "db2", "db3", "db4", "db5", "db6", "db7", "db8"],
+        "prior_p": 1,
+        "prior_clamp_min": 0,
+        "stepsize_factor": 1.5,
+        "lambda_factor": 1e-3,
+        "params_algo_a": 3,
+        "max_iter": 50,
+        "early_stop": True,
+        "thres_conv": 1e-5,
+    }
+    if config_json:
+        import json
+        user_cfg = json.loads(config_json)
+        cfg.update(user_cfg)
+
+    img_size = tuple(cfg["img_size"])
+    real_projection = cfg["real_projection"]
+    prior_name = cfg["prior"]
+    prior_level = cfg["prior_level"]
+    prior_wavelets = cfg["prior_wavelets"]
+    prior_p = cfg["prior_p"]
+    prior_clamp_min = cfg["prior_clamp_min"]
+    stepsize_factor = cfg["stepsize_factor"]
+    lambda_factor = cfg["lambda_factor"]
+    params_algo_a = cfg["params_algo_a"]
+    max_iter = cfg["max_iter"]
+    early_stop = cfg["early_stop"]
+    thres_conv = cfg["thres_conv"]
+
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')) # Project root
     # Check if target is simulated or archival
     if os.path.exists(os.path.join(base_dir,'data','simulated',target)):
@@ -59,9 +94,9 @@ def main(target):
         hdu.writeto(filepath, overwrite=True)
         
         # Normalize the main reconstruction to [0, 1] (skip dirty/psf)
-        if not name:
-            from src.utils.transforms import normalize_fits_peak
-            normalize_fits_peak(filepath)
+        # if not name:
+        #     from src.utils.transforms import normalize_fits_peak
+        #     normalize_fits_peak(filepath)
         
         print(f"Saved: {filepath}")
         
@@ -75,7 +110,7 @@ def main(target):
     device = dinv.utils.get_device()
 
     # Convert mat to npy
-    mattonpy(vis_path)
+    mattonpy(vis_path, n=n)
     
     # Load npy. Important to specify dtype, otherwise it loads as float32
     data = dinv.utils.load_np(vis_path.replace('.mat', '.npy'), dtype=np.complex64, device=device)
@@ -99,16 +134,16 @@ def main(target):
     
     # Setup the RadioInterferometry forward operator
     physics = RadioInterferometry(
-        img_size=(64, 64),
+        img_size=img_size,
         samples_loc=uv.permute((1, 0)),
-        real_projection=True,
+        real_projection=real_projection,
         device=device,
     )
     # Add image weighting to the sensing operator
     physics.setWeight(nWimag)
     
     # Central Dirac pulse for PSF
-    mock = torch.randint(5, (1, 1, 64, 64))
+    mock = torch.randint(5, (1, 1, img_size[0], img_size[1]))
     dirac = dirac_like(mock).to(device)
     
     # Compute PSF
@@ -116,16 +151,15 @@ def main(target):
     savefits(PSF, 'psf')
    
     # Compute dirty image (single W via operator adjoint: Φᴴ · W · y_raw)
-    x_hat = physics.A_adjoint(y_raw.view(1, 1, -1).to(device))
+    x_hat = physics.A_adjoint(y.view(1, 1, -1).to(device))
     savefits(x_hat, 'dirty')
         
-    # Initialization for FISTA: use double-weighted Aᴴ·y_w = Φᴴ·W²·y_raw
-    # This matches the gradient of ||Ax - y_w||² at x=0
-    x_init_fista = physics.A_adjoint(y).to(device)
+    # Initialization for FISTA: use pseudo-inverse (A_dagger) for better starting point
+    x_init_fista = physics.A_dagger(y).to(device)
         
     # Compute operator norm exactly as in DeepInv tutorial
     opnorm = physics.compute_sqnorm(
-        torch.randn((1, 1, 64, 64), device=device),
+        torch.randn((1, 1, img_size[0], img_size[1]), device=device),
         max_iter=100,
         tol=1e-6,
         verbose=False,
@@ -144,48 +178,44 @@ def main(target):
 
     from deepinv.optim.data_fidelity import L2
     from deepinv.optim.prior import WaveletPrior
-    
+    from deepinv.optim import FISTA
+
     # Select the data fidelity term
     data_fidelity = L2()
     # Specify the prior (we redefine it with a smaller number of iteration for faster computation)
-    wv_list = ["db1", "db2", "db3", "db4", "db5", "db6", "db7", "db8"]
-    prior = WaveletPrior(level=3, wv=wv_list, p=1, device=device, clamp_min=0)
-   
-    from deepinv.optim.optimizers import optim_builder
+    wv_list = prior_wavelets
+    prior = WaveletPrior(level=prior_level, wv=wv_list, p=prior_p, device=device, clamp_min=prior_clamp_min)
+
     # Logging parameters
     verbose = True
     plot_convergence_metrics = False # Log performance metrics
 
-    # Algo parameters
-    stepsize = 1.0 / (1.5 * opnorm)
-    lamb = 2e-3 * opnorm  # Regularization parameter
-   
-    # # Algo parameters (now consistent across all datasets since opnorm ≈ 1)
-    # stepsize = 1.0 / 1.5  # 1 / (1.5 * 1.0)
-    # lamb = 1e-5  # Fixed regularization parameter
-    
-    params_algo = {"stepsize": stepsize, "lambda": lamb, "a": 3}
-    # Increase max_iter to allow FISTA to fully converge on the sharp edges
-    max_iter = 50
-    early_stop = True
-   
-    def custom_init(y, physics):
-        x_init = torch.clamp(physics.A_adjoint(y), 0)
-        return {"est": (x_init, x_init)}
+    # Algo parameters (aligned with demo_ri_basic.py)
+    stepsize = 1.0 / (stepsize_factor * opnorm)
+    lambda_reg = lambda_factor * opnorm  # Regularization parameter
 
-    model = optim_builder(
-        iteration="FISTA",
+    # Increase max_iter to allow FISTA to fully converge on the sharp edges
+    max_iter = max_iter
+    early_stop = early_stop
+
+    def custom_init(y, physics):
+        x_init = torch.clamp(physics.A_dagger(y), 0)
+        return x_init
+
+    model = FISTA(
         prior=prior,
         data_fidelity=data_fidelity,
+        stepsize=stepsize,
+        lambda_reg=lambda_reg,
         early_stop=early_stop,
         max_iter=max_iter,
+        thres_conv=thres_conv,
         verbose=verbose,
-        params_algo=params_algo,
         custom_init=custom_init,
     )
 
     init = torch.clamp(x_init_fista, 0), torch.clamp(x_init_fista, 0) # FISTA initialization (reuse dirty image)
-    
+
     # Warm-up run
     _ = model(y, physics, init=init)
     
@@ -220,6 +250,25 @@ def main(target):
     runtime = (end_time - start_time) + weight_time
     imaging_time = end_time - start_time
     
+    # PSF peak normalization is intentionally disabled to match the demo_ri_basic.py
+    # workflow, which returns the FISTA solution in the input image scale without
+    # rescaling by the PSF maximum.
+    # psf_max = PSF.max().item()
+    # if psf_max > 0:
+    #     x_model = x_model / psf_max
+    # print(f"PSF max: {psf_max:.6f} — reconstruction normalized by PSF max")
+
+    # Flux-conserving calibration: scale the reconstruction so its total flux
+    # matches the estimated total flux from the maximum visibility amplitude
+    # (near-zero-spacing visibility ≈ total flux for compact/centred sources).
+    total_flux_estimate = y_raw.abs().max().item()
+    recon_sum = torch.clamp(x_model, min=0).sum().item()
+    if recon_sum > 0 and total_flux_estimate > 0:
+        flux_scale = total_flux_estimate / recon_sum
+        x_model = x_model * flux_scale
+        print(f"Flux calibration: estimated total flux = {total_flux_estimate:.4f}, "
+              f"recon sum before = {recon_sum:.4f}, scale = {flux_scale:.6f}")
+
     savefits(x_model, '')
 
     # Log configuration and execution time
@@ -228,22 +277,25 @@ def main(target):
         f.write("DeepInv Configuration:\n")
         f.write("----------------------\n")
         f.write(f"Operator: RadioInterferometry\n")
-        f.write(f"Image size: (64, 64)\n")
-        f.write(f"Real projection: True\n")
+        f.write(f"Image size: {img_size}\n")
+        f.write(f"Real projection: {real_projection}\n")
         f.write(f"Device: {device}\n")
         f.write(f"Operator norm (raw): {opnorm}\n")
+        f.write(f"Flux estimate (max_visibility): {total_flux_estimate:.6f}\n")
+        f.write(f"Flux calibration scale (flux_estimate / recon_sum): {flux_scale:.6e}\n\n")
         # f.write(f"Normalization scale: {scale} (1/sqrt(opnorm))\n\n")
         
         f.write("Optimization / Prior:\n")
         f.write("---------------------\n")
         f.write(f"Iteration: FISTA\n")
         f.write(f"Data Fidelity: L2\n")
-        f.write(f"Prior: WaveletPrior (level=3, wv={wv_list}, p=1, clamp_min=0)\n")
+        f.write(f"Prior: WaveletPrior (level={prior_level}, wv={wv_list}, p={prior_p}, clamp_min={prior_clamp_min})\n")
         f.write(f"Max iterations: {max_iter}\n")
         f.write(f"Early stop: {early_stop}\n")
-        f.write(f"Stepsize: {stepsize} (1.0 / 1.5, normalized opnorm ~= 1)\n")
-        f.write(f"Lambda: {lamb} (fixed, dataset-independent)\n")
-        f.write(f"Params algo: {params_algo}\n\n")
+        f.write(f"Convergence threshold: {thres_conv}\n")
+        f.write(f"Stepsize: {stepsize} (1.0 / ({stepsize_factor} * opnorm))\n")
+        f.write(f"Lambda: {lambda_reg} ({lambda_factor} * opnorm)\n")
+        f.write(f"PSF peak normalization: disabled\n\n")
         
         f.write(f"Imaging time: {imaging_time:.2f} seconds\n")
         f.write(f"Execution time: {runtime:.2f} seconds\n")
@@ -270,14 +322,15 @@ def normalize_uv(uv):
     return uv
 
 
-def mattonpy(mat):
+def mattonpy(mat, n=3):
     mat_data = scipy.io.loadmat(mat)
     vis_path = mat.replace('.mat', '.MS')
     y = mat_data.get('DATA', mat_data.get('y'))
     u = mat_data.get('u')
     v = mat_data.get('v')
     
-    pixel_size = calculate_pixel_size(vis_path,n=3)  # arcsec
+    pixel_size = float(mat_data.get('nominal_pixelsize').flatten()[0])  # arcsec
+    print(f'Pixel size (from .mat): {pixel_size} arcsec')
     cell_size_rad = pixel_size * np.pi / (180.0 * 3600.0)
     u = u * (2.0 * np.pi * cell_size_rad)
     v = v * (2.0 * np.pi * cell_size_rad)
@@ -304,6 +357,8 @@ def mattonpy(mat):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert MAT to NPY.')
     parser.add_argument('--target', type=str, required=True, help='Target target name')
+    parser.add_argument('--config', type=str, default=None, help='JSON string with DeepInverse parameters to override defaults')
+    parser.add_argument('--nval', type=int, default=1, help='Factor for pixel size calculation')
     args = parser.parse_args()
     
-    main(args.target)
+    main(args.target, config_json=args.config, n=args.nval)
