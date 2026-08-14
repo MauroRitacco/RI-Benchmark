@@ -92,7 +92,8 @@ MULTISCALE_SCALES=$(yaml_get "multiscale_scales" "0,5,15")
 MGAIN=$(yaml_get "mgain" "0.8")
 GAIN=$(yaml_get "gain" "0.1")
 AUTO_THRESHOLD=$(yaml_get "auto_threshold" "0.5")
-AUTO_MASK=$(yaml_get "auto_mask" "1.5")
+ABS_THRESHOLD=$(yaml_get "abs_threshold" "")
+AUTO_MASK=$(yaml_get "auto_mask" "")
 NITER=$(yaml_get "niter" "200000")
 DATA_COLUMN=$(yaml_get "data_column" "DATA")
 
@@ -118,17 +119,29 @@ fi
 echo "Starting WSClean for $TARGET..."
 echo "Log saved in: $LOG_FILE"
 
-# Build dynamic multiscale flags
+# Build dynamic multiscale and auto-mask flags
 MULTISCALE_FLAGS=""
 if [ "$MULTISCALE" = "true" ]; then
     MULTISCALE_FLAGS="-multiscale -multiscale-scales $MULTISCALE_SCALES"
+fi
+
+AUTO_MASK_FLAGS=""
+if [ -n "$AUTO_MASK" ] && [ "$AUTO_MASK" != "null" ]; then
+    AUTO_MASK_FLAGS="-auto-mask $AUTO_MASK"
+fi
+
+THRESHOLD_FLAGS=""
+if [ -n "$ABS_THRESHOLD" ] && [ "$ABS_THRESHOLD" != "null" ]; then
+    THRESHOLD_FLAGS="-abs-threshold $ABS_THRESHOLD"
+else
+    THRESHOLD_FLAGS="-auto-threshold $AUTO_THRESHOLD"
 fi
 
 start_time=$(date +%s.%N)
 
 if [ "$DRY_RUN" -eq 1 ]; then
     echo "[DRY-RUN] source $WSCLEAN_VENV"
-    echo "[DRY-RUN] wsclean -size $SIZE $SIZE -scale $PIXEL_SIZE -padding $PADDING -j $J -weight $WEIGHT $MULTISCALE_FLAGS -mgain $MGAIN -gain $GAIN -auto-threshold $AUTO_THRESHOLD -auto-mask $AUTO_MASK -niter $NITER -data-column $DATA_COLUMN -name $TARGET $DATA_FILE"
+    echo "[DRY-RUN] wsclean -size $SIZE $SIZE -scale $PIXEL_SIZE -padding $PADDING -j $J -weight $WEIGHT $MULTISCALE_FLAGS -mgain $MGAIN -gain $GAIN $THRESHOLD_FLAGS $AUTO_MASK_FLAGS -niter $NITER -data-column $DATA_COLUMN -name $TARGET $DATA_FILE"
     echo "[DRY-RUN] mv ${TARGET}-image.fits ${TARGET}_wsclean.fits"
     echo "[DRY-RUN] $BENCH_PYTHON -c 'convert_jybeam_to_jypixel on ${TARGET}_wsclean.fits'"
     runtime="0"
@@ -143,8 +156,8 @@ else
         $MULTISCALE_FLAGS \
         -mgain "$MGAIN" \
         -gain "$GAIN" \
-        -auto-threshold "$AUTO_THRESHOLD" \
-        -auto-mask "$AUTO_MASK" \
+        $THRESHOLD_FLAGS \
+        $AUTO_MASK_FLAGS \
         -niter "$NITER" \
         -data-column "$DATA_COLUMN" \
         -name "$TARGET" \
@@ -156,6 +169,6 @@ else
     end_time=$(date +%s.%N)
     runtime=$(echo "$end_time - $start_time" | bc)
 
-    echo "wsclean config: -size $SIZE $SIZE -scale $PIXEL_SIZE -padding $PADDING -j $J -weight $WEIGHT $MULTISCALE_FLAGS -mgain $MGAIN -gain $GAIN -auto-threshold $AUTO_THRESHOLD -auto-mask $AUTO_MASK -niter $NITER -data-column $DATA_COLUMN" >> "$LOG_FILE"
+    echo "wsclean config: -size $SIZE $SIZE -scale $PIXEL_SIZE -padding $PADDING -j $J -weight $WEIGHT $MULTISCALE_FLAGS -mgain $MGAIN -gain $GAIN $THRESHOLD_FLAGS $AUTO_MASK_FLAGS -niter $NITER -data-column $DATA_COLUMN" >> "$LOG_FILE"
     echo "Execution time: $runtime seconds" >> "$LOG_FILE"
 fi
