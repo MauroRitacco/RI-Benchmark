@@ -118,7 +118,9 @@ def evaluate_target_all_methods(target):
     has_gt = os.path.exists(ground_truth_path)
     if has_gt:
         gt_data = fits.getdata(ground_truth_path).squeeze().astype(np.float64)
+        gt_total_flux = gt_data.sum()
         print(f"Ground truth range: [{gt_data.min():.4f}, {gt_data.max():.4f}]")
+        print(f"Ground truth total flux: {gt_total_flux:.4f}")
 
     # Prepare DataFrame collection for CSV
     rows = []
@@ -133,6 +135,7 @@ def evaluate_target_all_methods(target):
         # Normalization for the metrics
         # recon_data = normalize_to_01(recon_data)
         recon_data = clip_negatives(recon_data)
+        total_flux = recon_data.sum()
         m = {}
 
         if has_gt:
@@ -144,23 +147,29 @@ def evaluate_target_all_methods(target):
         if not simulated or not has_gt:
             m = compute_blind_metrics(recon_data)
 
-        m["t"] = extract_runtime(log_path, method)
+        m["t"] = round(extract_runtime(log_path, method), 2)
 
-        # Create row
+        # Create row with total flux as third column
         row = {
             "target": target,
             "simulated": simulated,
+            "total_flux": total_flux,
             "method": method,
             **m
         }
         rows.append(row)
-        print(f"  PSNR: {m.get('psnr')} | SSIM: {m.get('ssim')} | MSE: {m.get('mse')} | t: {m.get('t')}")
+        print(f"  Total flux: {total_flux:.4f} | PSNR: {m.get('psnr')} | SSIM: {m.get('ssim')} | MSE: {m.get('mse')} | t: {m.get('t')}")
 
     # Save results to CSV
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     df_new = pd.DataFrame(rows)
+    column_order = ["target", "simulated", "total_flux", "method", "psnr", "ssim", "mse", "t"]
+    # Keep only columns that exist in the DataFrame
+    df_new = df_new[[c for c in column_order if c in df_new.columns]]
 
     with open(csv_path, 'w') as f:
+        if has_gt:
+            f.write(f"# GT total flux: {gt_total_flux:.4f}\n")
         df_new.to_csv(f, index=False)
 
 def discover_targets():
