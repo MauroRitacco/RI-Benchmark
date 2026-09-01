@@ -104,6 +104,7 @@ from scipy.io import loadmat
 pixel_size = float(loadmat('$MAT_FILE')['nominal_pixelsize'].item())
 print(f'{pixel_size}asec')
 ")
+PIXEL_SIZE_VALUE=$(echo "$PIXEL_SIZE" | sed 's/asec//')
 
 # Eliminate the directory to ensure a fresh run
 if [ "$DRY_RUN" -eq 1 ]; then
@@ -131,10 +132,62 @@ if [ -n "$AUTO_MASK" ] && [ "$AUTO_MASK" != "null" ]; then
 fi
 
 THRESHOLD_FLAGS=""
+AUTO_MULTIPLIER=""
 if [ -n "$ABS_THRESHOLD" ] && [ "$ABS_THRESHOLD" != "null" ]; then
-    THRESHOLD_FLAGS="-abs-threshold $ABS_THRESHOLD"
+    case "$ABS_THRESHOLD" in
+        auto:*)
+            AUTO_MULTIPLIER="${ABS_THRESHOLD#auto:}"
+            ;;
+        *)
+            THRESHOLD_FLAGS="-abs-threshold $ABS_THRESHOLD"
+            ;;
+    esac
 else
     THRESHOLD_FLAGS="-auto-threshold $AUTO_THRESHOLD"
+fi
+
+# If an auto threshold was requested, run a WSClean dirty pass and compute sigma.
+if [ -n "$AUTO_MULTIPLIER" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then
+        echo "[DRY-RUN] auto threshold: would run wsclean -niter 0 and compute sigma * $AUTO_MULTIPLIER"
+        THRESHOLD_FLAGS="-abs-threshold <AUTO>"
+    else
+        # Ground-truth FITS for point-source filtering.
+        GT_PATH=""
+        if [ -f "$BASE_DIR/data/simulated/$TARGET/${TARGET}.fits" ]; then
+            GT_PATH="$BASE_DIR/data/simulated/$TARGET/${TARGET}.fits"
+        elif [ -f "$BASE_DIR/data/archival/$TARGET/${TARGET}.fits" ]; then
+            GT_PATH="$BASE_DIR/data/archival/$TARGET/${TARGET}.fits"
+        fi
+        gt_arg=""
+        if [ -n "$GT_PATH" ]; then
+            gt_arg="--gt-path $GT_PATH"
+        fi
+
+        # Use the same target-level cache as the sweep driver so standalone and
+        # sweep runs reuse each other's dirty noise estimates when parameters match.
+        WSCLEAN_DIRTY_PREFIX="$BASE_DIR/experiments/simulated/$TARGET/${TARGET}_wsclean_dirty_pass"
+        WSCLEAN_DIRTY_CACHE="$BASE_DIR/experiments/simulated/$TARGET/.wsclean_dirty_noise.json"
+
+        noise_result=$($BENCH_PYTHON "$BASE_DIR/src/utils/wsclean_dirty_noise.py" \
+            --ms "$DATA_FILE" \
+            --size "$SIZE" \
+            --pixel-size "$PIXEL_SIZE_VALUE" \
+            --weight "$WEIGHT" \
+            --data-column "$DATA_COLUMN" \
+            $gt_arg \
+            --dirty-prefix "$WSCLEAN_DIRTY_PREFIX" \
+            --cache "$WSCLEAN_DIRTY_CACHE" \
+            --multiplier "$AUTO_MULTIPLIER" \
+            --log "$LOG_FILE")
+
+        eval "$noise_result"
+        if [ -z "${threshold:-}" ]; then
+            echo "Error: failed to compute auto threshold for $TARGET" >&2
+            exit 1
+        fi
+        THRESHOLD_FLAGS="-abs-threshold $threshold"
+    fi
 fi
 
 start_time=$(date +%s.%N)

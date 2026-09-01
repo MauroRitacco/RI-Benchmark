@@ -1,56 +1,71 @@
 #!/bin/bash
+# Generate Briggs imaging weights for DeepInverse and store them inside the
+# target's data directory (<target>.mat). All temporary WSClean outputs are
+# removed afterwards so that only the original target files plus the weights
+# remain.
 
 if [ -z "$1" ]; then
-    echo "Usage: $0 <target>"
+    echo "Usage: $0 <target> [nval] [robust]"
     exit 1
 fi
 TARGET=$1
 N=${2:-2}
+ROBUST=${3:-2}
 
 BASE_DIR=$(pwd)
 WSCLEAN_VENV="$BASE_DIR/.envs/.wsclean/bin/activate"
 
 if [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
-    DATA_FILE="$BASE_DIR/data/simulated/$TARGET/${TARGET}.MS"
-    OUTPUT_DIR="$BASE_DIR/experiments/simulated/$TARGET/${TARGET}_weights"
-    LOG_FILE="$OUTPUT_DIR/${TARGET}_wsclean.log"
+    DATA_DIR="$BASE_DIR/data/simulated/$TARGET"
 else
-    DATA_FILE="$BASE_DIR/data/archival/$TARGET/${TARGET}.MS"
-    OUTPUT_DIR="$BASE_DIR/experiments/archival/$TARGET/${TARGET}_weights"
-    LOG_FILE="$OUTPUT_DIR/${TARGET}_wsclean.log"
+    DATA_DIR="$BASE_DIR/data/archival/$TARGET"
 fi
 
-mkdir -p "$OUTPUT_DIR"
+DATA_FILE="$DATA_DIR/${TARGET}.MS"
+MAT_FILE="$DATA_DIR/${TARGET}.mat"
 
-cd "$OUTPUT_DIR"
+# Temporary working directory for WSClean (deleted at the end)
+TMP_DIR=$(mktemp -d "/tmp/${TARGET}_weights_XXXXXX")
+LOG_FILE="$TMP_DIR/${TARGET}_wsclean.log"
+
+echo "Generating DeepInverse weights for $TARGET ..."
+echo "  MS: $DATA_FILE"
+echo "  MAT: $MAT_FILE"
+echo "  Temp dir: $TMP_DIR"
 
 source $WSCLEAN_VENV
 PIXEL_SIZE=$($BASE_DIR/.envs/.benchmark/bin/python -c "import sys; sys.path.append('$BASE_DIR/src'); from utils.transforms import calculate_pixel_size; print(f'{calculate_pixel_size(\"$DATA_FILE\", n=$N)}asec')")
-echo $PIXEL_SIZE
-echo "Starting WSClean for $TARGET..."
-echo "Log saved in: $LOG_FILE"
+echo "  Pixel size: $PIXEL_SIZE"
 
 start_time=$(date +%s.%N)
 
+cd "$TMP_DIR"
+
 wsclean -size 64 64 \
     -scale $PIXEL_SIZE \
-    -weight briggs 2 \
+    -weight briggs $ROBUST \
     -nmiter 0 \
     -niter 0 \
     -data-column DATA \
     -no-dirty \
     -name $TARGET \
     -store-imaging-weights \
-    "$DATA_FILE" 2>&1 | tee "$LOG_FILE"
+    "$DATA_FILE" > "$LOG_FILE" 2>&1
 
+WSCLEAN_EXIT=$?
 
-echo "Extracting IMAGING_WEIGHT_SPECTRUM and saving to ${TARGET}.mat..."
+if [ $WSCLEAN_EXIT -ne 0 ]; then
+    echo "ERROR: WSClean failed for $TARGET. Log left at $LOG_FILE"
+    exit 1
+fi
+
+echo "Extracting IMAGING_WEIGHT_SPECTRUM and saving to $MAT_FILE ..."
 $BASE_DIR/.envs/.wsclean/bin/python -c "
 import scipy.io as sio
 from casatools import table
 
 ms = '${DATA_FILE}'
-mat = '${DATA_FILE%.MS}.mat'
+mat = '${MAT_FILE}'
 
 tb = table()
 tb.open(ms)
@@ -61,14 +76,24 @@ tb.close()
 # Extract weights for unflagged data
 w = weights[0, 0, mask]
 
-# Append to .mat file
+# Append to .mat file (overwriting only the 'weight' variable)
 mat_data = sio.loadmat(mat)
 mat_data['weight'] = w.reshape(-1, 1)
 sio.savemat(mat, mat_data)
+print(f'Saved weights for {len(w)} visibilities to {mat}')
 "
+
+PYTHON_EXIT=$?
+
 end_time=$(date +%s.%N)
 runtime=$(echo "$end_time - $start_time" | bc)
 
-echo -e "\nExecution time: $runtime seconds" >> "$LOG_FILE"
+# Clean up all temporary WSClean outputs, keeping only the weights inside the .mat
+rm -rf "$TMP_DIR"
 
-echo "✅ Proceso terminado. Tiempo total: $runtime seg."
+if [ $PYTHON_EXIT -ne 0 ]; then
+    echo "ERROR: Failed to write weights to $MAT_FILE"
+    exit 1
+fi
+
+echo "✅ Weights generated for $TARGET in ${runtime}s. Temporary files removed."

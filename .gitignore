@@ -5,6 +5,7 @@ venv/
 env/
 __pycache__/
 *.pyc
+sweep*.log
 
 # IDEs
 .idea/

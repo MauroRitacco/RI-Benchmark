@@ -1,20 +1,23 @@
 import sys
 import os
+import json
+import argparse
+import glob
+import time
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from src.utils.transforms import calculate_pixel_size
-import deepinv as dinv
-import torch
-import os
-import argparse
-import scipy.io
 import numpy as np
-import time
+import torch
+import scipy.io
+import deepinv as dinv
 from tqdm import tqdm
+from astropy.io import fits
 from deepinv.physics import RadioInterferometry
 from deepinv.utils.plotting import plot, plot_curves, scatter_plot, plot_inset
 from deepinv.utils import load_np_url, get_image_url, get_degradation_url
 from deepinv.utils.tensorlist import dirac_like
+from src.utils.transforms import calculate_pixel_size
 
 
 def main(target, config_json=None, n=1):  
@@ -33,13 +36,28 @@ def main(target, config_json=None, n=1):
         "max_iter": 50,
         "early_stop": True,
         "thres_conv": 1e-5,
+        # Optional cached operator norm (avoids recomputing it for every config).
+        "opnorm": None,
+        # Skip the FISTA warm-up run. Useful when a global warm-up has already been done.
+        "skip_warmup": False,
     }
     if config_json:
-        import json
         user_cfg = json.loads(config_json)
         cfg.update(user_cfg)
 
-    img_size = tuple(cfg["img_size"])
+    # Optional per-cell output directory override (used by the sweep driver).
+    # Keep default behaviour when it is not supplied.
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')) # Project root
+    if os.path.exists(os.path.join(base_dir,'data','simulated',target)):
+        vis_path = os.path.join(base_dir, 'data','simulated',target, target + '.mat')
+        default_out_dir = os.path.join(base_dir, 'experiments', 'simulated', target, target + '_deepinverse') + '/'
+    else:
+        vis_path = os.path.join(base_dir, 'data','archival',target, target + '.mat')
+        default_out_dir = os.path.join(base_dir, 'experiments', 'archival', target, target + '_deepinverse') + '/'
+    
+    out_dir = cfg.pop('out_dir', default_out_dir)
+    if not out_dir.endswith('/'):
+        out_dir += '/'
     real_projection = cfg["real_projection"]
     prior_name = cfg["prior"]
     prior_level = cfg["prior_level"]
@@ -52,16 +70,8 @@ def main(target, config_json=None, n=1):
     max_iter = cfg["max_iter"]
     early_stop = cfg["early_stop"]
     thres_conv = cfg["thres_conv"]
+    img_size = tuple(cfg["img_size"])
 
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')) # Project root
-    # Check if target is simulated or archival
-    if os.path.exists(os.path.join(base_dir,'data','simulated',target)):
-        vis_path = os.path.join(base_dir, 'data','simulated',target, target + '.mat')
-        out_dir = os.path.join(base_dir, 'experiments', 'simulated', target, target + '_deepinverse') + '/'
-    else:
-        vis_path = os.path.join(base_dir, 'data','archival',target, target + '.mat')
-        out_dir = os.path.join(base_dir, 'experiments', 'archival', target, target + '_deepinverse') + '/'
-    
     def savefits(tensor, name=""):
         from astropy.io import fits
         import scipy.io
@@ -157,14 +167,29 @@ def main(target, config_json=None, n=1):
     # Initialization for FISTA: use pseudo-inverse (A_dagger) for better starting point
     x_init_fista = physics.A_dagger(y).to(device)
         
-    # Compute operator norm exactly as in DeepInv tutorial
-    opnorm = physics.compute_sqnorm(
-        torch.randn((1, 1, img_size[0], img_size[1]), device=device),
-        max_iter=100,
-        tol=1e-6,
-        verbose=False,
-    ).item()
-    print(f"Operator norm (raw): {opnorm}")
+    # Operator norm cache path lives next to the input .mat file.
+    opnorm_cache_path = vis_path.replace('.mat', '_opnorm.json')
+    cached_opnorm = cfg.get("opnorm")
+
+    if cached_opnorm is not None:
+        opnorm = float(cached_opnorm)
+        print(f"Using cached operator norm: {opnorm}")
+    else:
+        # Compute operator norm exactly as in DeepInv tutorial
+        opnorm = physics.compute_sqnorm(
+            torch.randn((1, 1, img_size[0], img_size[1]), device=device),
+            max_iter=100,
+            tol=1e-6,
+            verbose=False,
+        ).item()
+        print(f"Operator norm (raw): {opnorm}")
+        # Save it next to the .mat so later configs can reuse it.
+        try:
+            with open(opnorm_cache_path, 'w') as f:
+                json.dump({"opnorm": opnorm}, f)
+            print(f"Cached operator norm to {opnorm_cache_path}")
+        except Exception as e:
+            print(f"Warning: could not cache operator norm: {e}")
     
     # # Normalize weights and data so operator norm ≈ 1.0 across all datasets
     # # This preserves the *relative* Briggs weighting but standardizes the scale
@@ -216,8 +241,9 @@ def main(target, config_json=None, n=1):
 
     init = torch.clamp(x_init_fista, 0), torch.clamp(x_init_fista, 0) # FISTA initialization (reuse dirty image)
 
-    # Warm-up run
-    _ = model(y, physics, init=init)
+    # Optional warm-up run. Skipped when a global warm-up has already been performed.
+    if not cfg.get("skip_warmup", False):
+        _ = model(y, physics, init=init)
     
     # Runtime measurement
     if device.type == 'cuda':
@@ -230,24 +256,8 @@ def main(target, config_json=None, n=1):
     if device.type == 'cuda':
         torch.cuda.synchronize()
     end_time = time.perf_counter()
-    # runtime = end_time - start_time
-    # Read weight computation time from the weights log if it exists
-    weight_time = 0.0
-    if os.path.exists(os.path.join(base_dir, 'data', 'simulated', target)):
-        weights_log = os.path.join(base_dir, 'experiments', 'simulated', target, f"{target}_weights", f"{target}_wsclean.log")
-    else:
-        weights_log = os.path.join(base_dir, 'experiments', 'archival', target, f"{target}_weights", f"{target}_wsclean.log")
-    
-    if os.path.exists(weights_log):
-        try:
-            with open(weights_log, 'r', encoding='utf-8', errors='ignore') as wf:
-                for line in wf:
-                    if "Execution time:" in line:
-                        weight_time = float(line.split("Execution time:")[1].split("seconds")[0].strip())
-        except Exception as e:
-            print(f"Warning: could not read weight computation time: {e}")
-            
-    runtime = (end_time - start_time) + weight_time
+
+    runtime = end_time - start_time
     imaging_time = end_time - start_time
     
     # PSF peak normalization is intentionally disabled to match the demo_ri_basic.py
