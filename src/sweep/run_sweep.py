@@ -64,7 +64,7 @@ CASA_BASE = {
     "robust": 2,
     "stokes": "I",
     "datacolumn": "data",
-    "niter": 100000,
+    "niter": 1000000000,
     "cyclefactor": 0.0,
     "savemodel": "none",
 }
@@ -73,7 +73,7 @@ WSCLEAN_BASE = {
     "size": 64,
     "weight": ["briggs", 2],
     "mgain": 1.0,  # single deep major cycle, matching CASA cyclefactor=0.0 behaviour
-    "niter": 100000,
+    "niter": 1000000000,
     "nmiter": 0,  # unlimited major cycles, matching CASA's convergence to threshold
     "j": 1,
     "no-update-model-required": True,
@@ -216,7 +216,7 @@ def build_wsclean_args(target, pixel_size, prefix, params):
     args += ["-gridder", "wstacking"]
     args += ["-wstack-nwlayers", "1"]
     args += ["-mgain", "0.8"]
-    args += ["-niter", "100000"]
+    args += ["-niter", "1000000000"]
     args += ["-nmiter", "0"]  # unlimited major cycles: converge to absolute threshold like CASA
     args += ["-j", "1"]
     args += ["-no-update-model-required"]
