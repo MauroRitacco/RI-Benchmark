@@ -10,10 +10,10 @@
 # casa.py and run_wsclean.sh compute sigma_noise per target from their own
 # dirty image and set threshold = multiplier * sigma_noise.
 casa,gain,0.1,0.05
-casa,threshold,auto:3,auto:1.5,auto:1
+casa,threshold,auto:3,auto:2.5
 
 wsclean,gain,0.1,0.05
-wsclean,threshold,auto:3,auto:1.5,auto:1
+wsclean,threshold,auto:3,auto:2.5
 
 deepinv,lambda_factor,3e-2, 1e-1, 3e-1
 deepinv,max_iter,50
