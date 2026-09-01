@@ -211,6 +211,10 @@ def build_wsclean_args(target, pixel_size, prefix, params):
     args += ["-size", "64", "64"]
     args += ["-scale", f"{pixel_size}asec"]
     args += ["-weight", "briggs", "2"]
+    # Use a single w-layer so WSClean behaves like a 2D gridder, matching CASA's
+    # standard gridder and DeepInverse's NUFFT.
+    args += ["-gridder", "wstacking"]
+    args += ["-wstack-nwlayers", "1"]
     args += ["-mgain", "0.8"]
     args += ["-niter", "100000"]
     args += ["-nmiter", "0"]  # unlimited major cycles: converge to absolute threshold like CASA
