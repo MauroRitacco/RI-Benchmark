@@ -154,10 +154,35 @@ def smooth_to_beam(input_path, output_path, bmaj_deg, bmin_deg, bpa_deg):
     
     return output_path
     
+def _get_mat_pixel_size(mat_path):
+    """Return the nominal pixel size in arcsec from a .mat file, if available."""
+    if not os.path.isfile(mat_path):
+        return None
+    try:
+        from scipy.io import loadmat
+        mat_data = loadmat(mat_path)
+        if 'nominal_pixelsize' in mat_data:
+            return float(np.squeeze(mat_data['nominal_pixelsize']))
+    except Exception:
+        pass
+    try:
+        import h5py
+        with h5py.File(mat_path, 'r') as h5f:
+            if 'nominal_pixelsize' in h5f:
+                return float(np.squeeze(np.array(h5f['nominal_pixelsize'])))
+    except Exception:
+        pass
+    return None
+
+
 def formatfits(fits_path, ms_path, beam_params=None):
     """Add proper WCS headers to a FITS file so CASA can read it.
     
-    Derives image dimensions from the data itself and computes pixel size from the MS.
+    Derives image dimensions from the data itself and computes pixel size.
+    Preferentially reads ``nominal_pixelsize`` from the companion ``.mat``
+    file (same basename as the MS), which is the pixel scale used by the
+    reconstruction algorithms. Falls back to calculating the pixel size from
+    the MS if no ``nominal_pixelsize`` is available.
     Optionally adds beam parameters (BMAJ, BMIN, BPA) to the header.
     Overwrites the FITS file in-place with the new header.
     
@@ -182,8 +207,19 @@ def formatfits(fits_path, ms_path, beam_params=None):
     hdr['NAXIS2'] = ny
     hdr['BUNIT'] = 'Jy/pixel'
 
-    # Compute cell size in degrees from the MS
-    cell_deg = calculate_pixel_size(ms_path) / 3600.0
+    # Determine pixel size. Prefer nominal_pixelsize from the .mat file
+    # (same scale used by R2D2/DeepInverse), fall back to MS-based estimate.
+    mat_path = ms_path.rstrip(os.sep)
+    if mat_path.lower().endswith('.ms'):
+        mat_path = mat_path[:-3] + '.mat'
+    else:
+        mat_path = mat_path + '.mat'
+    cell_arcsec = _get_mat_pixel_size(mat_path)
+    if cell_arcsec is not None:
+        print(f"  Using nominal_pixelsize from {mat_path}: {cell_arcsec:.6f} arcsec")
+    else:
+        cell_arcsec = calculate_pixel_size(ms_path)
+    cell_deg = cell_arcsec / 3600.0
 
     # WCS coordinate keywords required by CASA
     hdr['CTYPE1'] = 'RA---SIN'

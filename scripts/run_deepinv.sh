@@ -30,6 +30,7 @@ else
     OUTPUT_DIR="$BASE_DIR/experiments/archival/$TARGET/${TARGET}_deepinverse"
 fi
 
+mkdir -p "$OUTPUT_DIR"
 LOG_FILE="$OUTPUT_DIR/${TARGET}_deepinverse_script.log"
 
 YAML_PATH=""
@@ -87,11 +88,21 @@ fi
 
 echo "Starting DeepInv for $TARGET..."
 
+# Read weight robustness for DeepInverse weight generation (default 2)
+WEIGHT_ROBUST="2"
+if [ -f "$YAML_PATH" ]; then
+  WEIGHT_ROBUST=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
+    --target "$TARGET" --method "$METHOD" --key weight_robustness 2>/dev/null) || true
+fi
+if [ -z "$WEIGHT_ROBUST" ]; then
+  WEIGHT_ROBUST="2"
+fi
+
 # Generate Briggs weights
 if [ "$DRY_RUN" -eq 1 ]; then
-    echo "[DRY-RUN] ./scripts/generate_weights.sh $TARGET $NVAL"
+    echo "[DRY-RUN] ./scripts/generate_weights.sh $TARGET $NVAL $WEIGHT_ROBUST"
 else
-    ./scripts/generate_weights.sh "$TARGET" "$NVAL"
+    ./scripts/generate_weights.sh "$TARGET" "$NVAL" "$WEIGHT_ROBUST"
 fi
 
 if [ "$DRY_RUN" -eq 1 ]; then

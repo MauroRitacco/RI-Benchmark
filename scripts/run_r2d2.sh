@@ -3,12 +3,18 @@ set -euo pipefail
 
 TARGET=""
 DRY_RUN=0
+OUTPUT_DIR=""
+CONFIG_JSON=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target)
       TARGET="$2"; shift 2 ;;
     --dry-run)
       DRY_RUN=1; shift ;;
+    --output-dir)
+      OUTPUT_DIR="$2"; shift 2 ;;
+    --config)
+      CONFIG_JSON="$2"; shift 2 ;;
     *)
       echo "Unknown option: $1"; exit 1 ;;
   esac
@@ -26,16 +32,20 @@ BENCH_PYTHON="$BASE_DIR/.envs/.benchmark/bin/python"
 if [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
     MS_FILE="$BASE_DIR/data/simulated/$TARGET/${TARGET}.MS"
     DATA_FILE="$BASE_DIR/data/simulated/$TARGET/${TARGET}.mat"
-    OUTPUT_DIR="$BASE_DIR/experiments/simulated/$TARGET/${TARGET}_r2d2"
-    LOG_FILE="$OUTPUT_DIR/${TARGET}_r2d2.log"
+    CATEGORY="simulated"
     UV_CUTOFF_FLAG=""
 else
     MS_FILE="$BASE_DIR/data/archival/$TARGET/${TARGET}.MS"
     DATA_FILE="$BASE_DIR/data/archival/$TARGET/${TARGET}.mat"
-    OUTPUT_DIR="$BASE_DIR/experiments/archival/$TARGET/${TARGET}_r2d2"
-    LOG_FILE="$OUTPUT_DIR/${TARGET}_r2d2.log"
+    CATEGORY="archival"
     UV_CUTOFF_FLAG="--uv_cutoff=2000000"
 fi
+
+# Default output dir follows the standard benchmark layout; --output-dir overrides it.
+if [ -z "$OUTPUT_DIR" ]; then
+    OUTPUT_DIR="$BASE_DIR/experiments/$CATEGORY/$TARGET/${TARGET}_r2d2"
+fi
+LOG_FILE="$OUTPUT_DIR/${TARGET}_r2d2.log"
 
 YAML_PATH=""
 if [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
@@ -47,16 +57,27 @@ fi
 METHOD="r2d2"
 METHOD_CONFIG=""
 if [ -f "$YAML_PATH" ]; then
-  METHOD_CONFIG=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
-    --target "$TARGET" --method "$METHOD" 2>/dev/null) || true
+  if [ -n "$CONFIG_JSON" ]; then
+    METHOD_CONFIG=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
+      --target "$TARGET" --method "$METHOD" --config "$CONFIG_JSON" 2>/dev/null) || true
+  else
+    METHOD_CONFIG=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
+      --target "$TARGET" --method "$METHOD" 2>/dev/null) || true
+  fi
 fi
 
 USE_DEFAULTS=0
 if [ -z "$METHOD_CONFIG" ] || [ "$METHOD_CONFIG" = "null" ]; then
-  if [ -f "$YAML_PATH" ]; then
-    echo "Warning: $METHOD section missing from $YAML_PATH; using hardcoded defaults." >&2
+  if [ -n "$CONFIG_JSON" ]; then
+    # A JSON config was supplied explicitly; use it even if the target YAML has no method section.
+    METHOD_CONFIG=$("$BENCH_PYTHON" -c "import json,sys; print(json.dumps(json.loads(sys.argv[1])))" "$CONFIG_JSON" 2>/dev/null) || true
   fi
-  USE_DEFAULTS=1
+  if [ -z "$METHOD_CONFIG" ] || [ "$METHOD_CONFIG" = "null" ]; then
+    if [ -f "$YAML_PATH" ]; then
+      echo "Warning: $METHOD section missing from $YAML_PATH; using hardcoded defaults." >&2
+    fi
+    USE_DEFAULTS=1
+  fi
 fi
 
 # Helper to extract a single key from YAML or fallback to default
@@ -68,8 +89,13 @@ yaml_get() {
     return
   fi
   local val
-  val=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
-    --target "$TARGET" --method "$METHOD" --key "$key" 2>/dev/null) || true
+  if [ -n "$CONFIG_JSON" ]; then
+    val=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
+      --target "$TARGET" --method "$METHOD" --key "$key" --config "$CONFIG_JSON" 2>/dev/null) || true
+  else
+    val=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
+      --target "$TARGET" --method "$METHOD" --key "$key" 2>/dev/null) || true
+  fi
   if [ -z "$val" ]; then
     echo "$default_val"
   else

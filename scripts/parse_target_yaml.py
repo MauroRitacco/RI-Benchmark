@@ -33,6 +33,11 @@ def main():
         default=None,
         help="Extract a specific key from the method section or top level.",
     )
+    parser.add_argument(
+        "--config",
+        default=None,
+        help="JSON string with method parameters that override the YAML values.",
+    )
     args = parser.parse_args()
 
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -44,8 +49,30 @@ def main():
             break
 
     if yaml_path is None:
-        print(f"{args.target}.yaml not found for target {args.target}", file=sys.stderr)
-        sys.exit(1)
+        if not args.config:
+            print(f"{args.target}.yaml not found for target {args.target}", file=sys.stderr)
+            sys.exit(1)
+        # No YAML present but a JSON config was supplied explicitly; use it as
+        # the method configuration. Top-level key lookups without a method still
+        # fail because there is no target metadata.
+        try:
+            method_config = json.loads(args.config)
+        except json.JSONDecodeError as exc:
+            print(f"Invalid --config JSON: {exc}", file=sys.stderr)
+            sys.exit(4)
+        if args.key:
+            value = method_config.get(args.key)
+            if value is None:
+                sys.exit(3)
+            if isinstance(value, bool):
+                print("true" if value else "false")
+            elif isinstance(value, (list, dict)):
+                print(json.dumps(value))
+            else:
+                print(value)
+        else:
+            print(json.dumps(method_config))
+        return
 
     with open(yaml_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
@@ -68,6 +95,16 @@ def main():
     if method_config is None:
         print(f"Method {args.method} not found in {yaml_path}", file=sys.stderr)
         sys.exit(2)
+
+    # Apply JSON overrides (e.g. from a sweep driver) on top of the YAML config.
+    if args.config:
+        try:
+            overrides = json.loads(args.config)
+            if isinstance(overrides, dict):
+                method_config = {**method_config, **overrides}
+        except json.JSONDecodeError as exc:
+            print(f"Invalid --config JSON: {exc}", file=sys.stderr)
+            sys.exit(4)
 
     if args.key:
         value = method_config.get(args.key)
