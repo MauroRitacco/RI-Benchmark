@@ -64,6 +64,10 @@ def _build_dirty_pass_args(
     args += ["-size", str(size), str(size)]
     args += ["-scale", f"{pixel_size}asec"]
     args += _weight_to_cli(weight)
+    # Use w-stacking with a single layer to match the 2D gridding used by CASA
+    # standard gridder and DeepInverse's NUFFT.
+    args += ["-gridder", "wstacking"]
+    args += ["-wstack-nwlayers", "1"]
     args += ["-niter", "0"]
     args += ["-data-column", data_column]
     args += ["-pol", "I"]
@@ -86,7 +90,8 @@ def _read_cache(cache_path: Path) -> dict | None:
 
 
 def _cache_is_valid(cache: dict, ms_path: Path, size: int, pixel_size: float,
-                    weight: str, data_column: str) -> bool:
+                    weight: str, data_column: str,
+                    gridder: str = "wstacking", wstack_nwlayers: int = 1) -> bool:
     """Check whether the cache entry matches the requested dirty-pass parameters."""
     try:
         if not ms_path.exists():
@@ -102,6 +107,10 @@ def _cache_is_valid(cache: dict, ms_path: Path, size: int, pixel_size: float,
             return False
         if cache.get("data_column") != data_column:
             return False
+        if cache.get("gridder") != gridder:
+            return False
+        if cache.get("wstack_nwlayers") != wstack_nwlayers:
+            return False
         sigma = float(cache.get("sigma_noise", float("nan")))
         if not np.isfinite(sigma) or sigma <= 0:
             return False
@@ -111,7 +120,8 @@ def _cache_is_valid(cache: dict, ms_path: Path, size: int, pixel_size: float,
 
 
 def _write_cache(cache_path: Path, result: NoiseResult, ms_path: Path,
-                 size: int, pixel_size: float, weight: str, data_column: str) -> None:
+                 size: int, pixel_size: float, weight: str, data_column: str,
+                 gridder: str = "wstacking", wstack_nwlayers: int = 1) -> None:
     """Serialize the noise result together with the dirty-pass parameters."""
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache = {
@@ -121,6 +131,8 @@ def _write_cache(cache_path: Path, result: NoiseResult, ms_path: Path,
         "pixel_size": float(pixel_size),
         "weight": weight,
         "data_column": data_column,
+        "gridder": gridder,
+        "wstack_nwlayers": wstack_nwlayers,
         "sigma_noise": result.sigma_noise,
         "multiplier": result.multiplier,
         "threshold": result.threshold,

@@ -194,7 +194,7 @@ start_time=$(date +%s.%N)
 
 if [ "$DRY_RUN" -eq 1 ]; then
     echo "[DRY-RUN] source $WSCLEAN_VENV"
-    echo "[DRY-RUN] wsclean -size $SIZE $SIZE -scale $PIXEL_SIZE -padding $PADDING -j $J -weight $WEIGHT $MULTISCALE_FLAGS -mgain $MGAIN -gain $GAIN $THRESHOLD_FLAGS $AUTO_MASK_FLAGS -niter $NITER -data-column $DATA_COLUMN -name $TARGET $DATA_FILE"
+    echo "[DRY-RUN] wsclean -size $SIZE $SIZE -scale $PIXEL_SIZE -padding $PADDING -gridder wstacking -wstack-nwlayers 1 -j $J -weight $WEIGHT $MULTISCALE_FLAGS -mgain $MGAIN -gain $GAIN $THRESHOLD_FLAGS $AUTO_MASK_FLAGS -niter $NITER -data-column $DATA_COLUMN -name $TARGET $DATA_FILE"
     echo "[DRY-RUN] mv ${TARGET}-image.fits ${TARGET}_wsclean.fits"
     echo "[DRY-RUN] $BENCH_PYTHON -c 'convert_jybeam_to_jypixel on ${TARGET}_wsclean.fits'"
     runtime="0"
@@ -204,6 +204,8 @@ else
     wsclean -size "$SIZE" "$SIZE" \
         -scale "$PIXEL_SIZE" \
         -padding "$PADDING" \
+        -gridder wstacking \
+        -wstack-nwlayers 1 \
         -j "$J" \
         -weight $WEIGHT \
         $MULTISCALE_FLAGS \
