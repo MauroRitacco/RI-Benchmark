@@ -48,9 +48,15 @@ def main(target, config_json=None, n=1):
     # Optional per-cell output directory override (used by the sweep driver).
     # Keep default behaviour when it is not supplied.
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')) # Project root
-    if os.path.exists(os.path.join(base_dir,'data','simulated',target)):
-        vis_path = os.path.join(base_dir, 'data','simulated',target, target + '.mat')
-        default_out_dir = os.path.join(base_dir, 'experiments', 'simulated', target, target + '_deepinverse') + '/'
+    if os.environ.get("RI_BENCH_TEST") == "1":
+        sim_dir = os.path.join(base_dir, 'data', 'simulated', 'test')
+        exp_dir = os.path.join(base_dir, 'experiments', 'test')
+    else:
+        sim_dir = os.path.join(base_dir, 'data', 'simulated')
+        exp_dir = os.path.join(base_dir, 'experiments', 'simulated')
+    if os.path.exists(os.path.join(sim_dir, target)):
+        vis_path = os.path.join(sim_dir, target, target + '.mat')
+        default_out_dir = os.path.join(exp_dir, target, target + '_deepinverse') + '/'
     else:
         vis_path = os.path.join(base_dir, 'data','archival',target, target + '.mat')
         default_out_dir = os.path.join(base_dir, 'experiments', 'archival', target, target + '_deepinverse') + '/'
