@@ -15,7 +15,9 @@ ROBUST=${3:-2}
 BASE_DIR=$(pwd)
 WSCLEAN_VENV="$BASE_DIR/.envs/.wsclean/bin/activate"
 
-if [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
+if [ "${RI_BENCH_TEST:-0}" = "1" ]; then
+    DATA_DIR="$BASE_DIR/data/simulated/test/$TARGET"
+elif [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
     DATA_DIR="$BASE_DIR/data/simulated/$TARGET"
 else
     DATA_DIR="$BASE_DIR/data/archival/$TARGET"

@@ -1,0 +1,12 @@
+# Final-evaluation configs (test set): one winning config per method.
+# Format: method,param,value
+casa,gain,0.1
+casa,threshold,auto:1.0
+
+wsclean,gain,0.1
+wsclean,threshold,auto:1.0
+
+deepinv,lambda_factor,0.1
+deepinv,max_iter,50
+
+r2d2,config,k5

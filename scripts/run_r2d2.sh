@@ -29,10 +29,20 @@ R2D2_REPO="$BASE_DIR/external/R2D2-RI"
 VENV_PYTHON="$BASE_DIR/.envs/.r2d2/bin/python"
 BENCH_PYTHON="$BASE_DIR/.envs/.benchmark/bin/python"
 
-if [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
-    MS_FILE="$BASE_DIR/data/simulated/$TARGET/${TARGET}.MS"
-    DATA_FILE="$BASE_DIR/data/simulated/$TARGET/${TARGET}.mat"
-    CATEGORY="simulated"
+if [ "${RI_BENCH_TEST:-0}" = "1" ]; then
+    SIM_DIR="$BASE_DIR/data/simulated/test"
+else
+    SIM_DIR="$BASE_DIR/data/simulated"
+fi
+
+if [ -d "$SIM_DIR/$TARGET" ]; then
+    MS_FILE="$SIM_DIR/$TARGET/${TARGET}.MS"
+    DATA_FILE="$SIM_DIR/$TARGET/${TARGET}.mat"
+    if [ "${RI_BENCH_TEST:-0}" = "1" ]; then
+        CATEGORY="test"
+    else
+        CATEGORY="simulated"
+    fi
     UV_CUTOFF_FLAG=""
 else
     MS_FILE="$BASE_DIR/data/archival/$TARGET/${TARGET}.MS"
@@ -48,8 +58,8 @@ fi
 LOG_FILE="$OUTPUT_DIR/${TARGET}_r2d2.log"
 
 YAML_PATH=""
-if [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
-    YAML_PATH="$BASE_DIR/data/simulated/$TARGET/${TARGET}.yaml"
+if [ -d "$SIM_DIR/$TARGET" ]; then
+    YAML_PATH="$SIM_DIR/$TARGET/${TARGET}.yaml"
 else
     YAML_PATH="$BASE_DIR/data/archival/$TARGET/${TARGET}.yaml"
 fi

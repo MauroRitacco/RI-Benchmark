@@ -42,7 +42,10 @@ def main():
 
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     yaml_path = None
-    for data_type in ["simulated", "archival"]:
+    search_dirs = ["simulated", "archival"]
+    if os.environ.get("RI_BENCH_TEST") == "1":
+        search_dirs = [os.path.join("simulated", "test")] + search_dirs
+    for data_type in search_dirs:
         candidate = os.path.join(base_dir, "data", data_type, args.target, f"{args.target}.yaml")
         if os.path.exists(candidate):
             yaml_path = candidate

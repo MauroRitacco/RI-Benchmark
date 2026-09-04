@@ -252,12 +252,39 @@ def build_r2d2_config(params):
 # -----------------------------------------------------------------------------
 # Paths and utilities
 # -----------------------------------------------------------------------------
+# Test mode (--test): inputs are read from data/simulated/test/, outputs go to
+# experiments/test/ and results/test/. Controlled by the TEST_MODE global set
+# in main(); subprocesses are told via the RI_BENCH_TEST environment variable.
+TEST_MODE = False
+
+
+def data_root():
+    """Directory holding the input target folders (MS/.mat/FITS)."""
+    if TEST_MODE:
+        return BASE_DIR / "data" / "simulated" / "test"
+    return BASE_DIR / "data" / "simulated"
+
+
+def exp_root():
+    """Root directory for reconstruction outputs."""
+    if TEST_MODE:
+        return BASE_DIR / "experiments" / "test"
+    return BASE_DIR / "experiments" / "simulated"
+
+
+def results_root():
+    """Root directory for sweep state files and reports."""
+    if TEST_MODE:
+        return BASE_DIR / "results" / "test"
+    return BASE_DIR / "results" / "sweep"
+
+
 def target_dir(base_dir, target):
-    return base_dir / "data" / "simulated" / target
+    return data_root() / target
 
 
 def exp_target_dir(base_dir, target):
-    return base_dir / "experiments" / "simulated" / target
+    return exp_root() / target
 
 
 def opnorm_cache_path(target):
@@ -279,7 +306,7 @@ def load_cached_opnorm(target):
 
 
 def sweep_dir(base_dir):
-    d = base_dir / "results" / "sweep"
+    d = results_root()
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -301,6 +328,9 @@ def _auto_multiplier(threshold):
 
 def _find_gt_path(base_dir, target):
     """Return the ground-truth FITS path if it exists, else None."""
+    if TEST_MODE:
+        gt = data_root() / target / f"{target}.fits"
+        return str(gt) if gt.exists() else None
     for category in ("simulated", "archival"):
         gt = base_dir / "data" / category / target / f"{target}.fits"
         if gt.exists():
@@ -576,15 +606,17 @@ def evaluate_job(target, method, config_id):
     Mirrors the logic in src/compute_metrics.py but adapted to the per-config
     output layout used by the sweep driver.
     """
-    if os.path.exists(str(BASE_DIR / "data" / "simulated" / target)):
-        category = "simulated"
+    if TEST_MODE:
+        gt_path = data_root() / target / f"{target}.fits"
+        cell_dir = exp_root() / target / f"{target}_{method}" / f"{target}_{method}_{config_id}"
+    elif os.path.exists(str(BASE_DIR / "data" / "simulated" / target)):
+        gt_path = BASE_DIR / "data" / "simulated" / target / f"{target}.fits"
+        cell_dir = BASE_DIR / "experiments" / "simulated" / target / f"{target}_{method}" / f"{target}_{method}_{config_id}"
     elif os.path.exists(str(BASE_DIR / "data" / "archival" / target)):
-        category = "archival"
+        gt_path = BASE_DIR / "data" / "archival" / target / f"{target}.fits"
+        cell_dir = BASE_DIR / "experiments" / "archival" / target / f"{target}_{method}" / f"{target}_{method}_{config_id}"
     else:
         return {"psnr": "", "ssim": "", "mse": "", "imaging_time": ""}
-
-    gt_path = BASE_DIR / "data" / category / target / f"{target}.fits"
-    cell_dir = BASE_DIR / "experiments" / category / target / f"{target}_{method}" / f"{target}_{method}_{config_id}"
     recon_path = cell_dir / f"{target}_{method}_{config_id}.fits"
     # CASA and WSClean write logs named after the config_id.  DeepInverse's
     # wrapper writes <target>_deepinverse.log inside the cell directory.
@@ -1229,10 +1261,14 @@ def gpu_worker(target_queue_gpu, gpu_target_locks, state_csv, state_lock, state_
 # -----------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser(description="Hyper-parameter sweep for RI reconstruction methods.")
-    parser.add_argument("--targets", default=str(BASE_DIR / "scripts" / "sweep_targets.txt"),
-                        help="Text file with one target name per line.")
-    parser.add_argument("--sweep-config", default=str(BASE_DIR / "scripts" / "sweep_config.txt"),
-                        help="Text file with sweep grids (method,param,value1,... per line).")
+    parser.add_argument("--targets", default=None,
+                        help="Text file with one target name per line. Default: sweep_targets.txt, or test_targets.txt with --test.")
+    parser.add_argument("--sweep-config", default=None,
+                        help="Text file with sweep grids (method,param,value1,... per line). Default: sweep_config.txt, or test_config.txt with --test.")
+    parser.add_argument("--test", action="store_true",
+                        help="Final-evaluation mode: read targets from data/simulated/test/, write to "
+                             "experiments/test/ and results/test/. Exactly one config per method is required; "
+                             "workers are forced to 1.")
     parser.add_argument("--cpu-workers", type=int, default=1,
                         help="Number of CPU workers for CASA + WSClean targets.")
     parser.add_argument("--gpu-workers", type=int, default=1,
@@ -1245,6 +1281,20 @@ def main():
                         help="Analyze sweep_state.csv and write a summary report without running any reconstruction.")
     args = parser.parse_args()
 
+    global TEST_MODE
+    if args.test:
+        TEST_MODE = True
+        os.environ["RI_BENCH_TEST"] = "1"
+        if args.cpu_workers != 1 or args.gpu_workers != 1:
+            print("[test] forcing --cpu-workers 1 and --gpu-workers 1")
+        args.cpu_workers = 1
+        args.gpu_workers = 1
+
+    if args.targets is None:
+        args.targets = str(BASE_DIR / "scripts" / ("test_targets.txt" if TEST_MODE else "sweep_targets.txt"))
+    if args.sweep_config is None:
+        args.sweep_config = str(BASE_DIR / "scripts" / ("test_config.txt" if TEST_MODE else "sweep_config.txt"))
+
     sweep_config_file = Path(args.sweep_config)
     if not sweep_config_file.exists():
         print(f"Sweep config file not found: {sweep_config_file}")
@@ -1255,9 +1305,17 @@ def main():
     SWEEP_GRIDS = build_sweep_grids(sweep_config_file)
     print("Loaded sweep methods:", list(SWEEP_GRIDS.keys()))
 
+    if TEST_MODE:
+        # Guardrail: the test set is evaluated once with a single winning config
+        # per method, not swept. Abort if any method expands to more than one cell.
+        for method, combos in SWEEP_GRIDS.items():
+            if len(combos) != 1:
+                print(f"[test] ERROR: method '{method}' has {len(combos)} configs in test mode; exactly 1 is required.")
+                sys.exit(1)
+
     if args.evaluate:
-        state_csv = sweep_dir(BASE_DIR) / "sweep_state.csv"
-        output_path = sweep_dir(BASE_DIR) / "sweep_results.txt"
+        state_csv = sweep_dir(BASE_DIR) / ("test_state.csv" if TEST_MODE else "sweep_state.csv")
+        output_path = sweep_dir(BASE_DIR) / ("test_results.txt" if TEST_MODE else "sweep_results.txt")
         evaluate_state(state_csv, output_path)
         return
 
@@ -1274,7 +1332,7 @@ def main():
     print(f"Loaded {len(targets)} targets: {targets}")
 
     sweep_root = sweep_dir(BASE_DIR)
-    state_csv = sweep_root / "sweep_state.csv"
+    state_csv = sweep_root / ("test_state.csv" if TEST_MODE else "sweep_state.csv")
     state_lock = threading.Lock()
     state_rows = load_state(state_csv)
     if not args.dry_run:

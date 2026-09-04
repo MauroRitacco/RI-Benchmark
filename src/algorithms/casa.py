@@ -26,6 +26,9 @@ def _parse_auto_threshold(threshold):
 
 def _find_gt_path(base_dir, target):
     """Return the ground-truth FITS path if it exists, else None."""
+    if os.environ.get("RI_BENCH_TEST") == "1":
+        gt = os.path.join(base_dir, "data", "simulated", "test", target, f"{target}.fits")
+        return gt if os.path.exists(gt) else None
     for category in ("simulated", "archival"):
         gt = os.path.join(base_dir, "data", category, target, f"{target}.fits")
         if os.path.exists(gt):
@@ -49,10 +52,16 @@ def _append_noise_log(log_path, noise_result, multiplier, threshold):
 
 def main(target, config_json=None, n=3):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')) # Get the project root directory (2 levels up from this script)
-    # Check if the target is simulated or archival
-    if os.path.exists(os.path.join(base_dir,'data','simulated',target)):
-        vis_path = os.path.join(base_dir, 'data','simulated',target, target + '.MS') #Path to the MS file
-        default_out_dir = os.path.join(base_dir, 'experiments', 'simulated', target, target + '_casa') + '/' #Output directory for the experiment
+    # Check if the target is simulated or archival (test mode reads from data/simulated/test/)
+    if os.environ.get("RI_BENCH_TEST") == "1":
+        sim_dir = os.path.join(base_dir, 'data', 'simulated', 'test')
+        exp_dir = os.path.join(base_dir, 'experiments', 'test')
+    else:
+        sim_dir = os.path.join(base_dir, 'data', 'simulated')
+        exp_dir = os.path.join(base_dir, 'experiments', 'simulated')
+    if os.path.exists(os.path.join(sim_dir, target)):
+        vis_path = os.path.join(sim_dir, target, target + '.MS') #Path to the MS file
+        default_out_dir = os.path.join(exp_dir, target, target + '_casa') + '/' #Output directory for the experiment
     else:
         vis_path = os.path.join(base_dir, 'data','archival',target, target + '.MS') #Path to the MS file
         default_out_dir = os.path.join(base_dir, 'experiments', 'archival', target, target + '_casa') + '/' #Output directory for the experiment
