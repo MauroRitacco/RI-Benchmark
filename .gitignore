@@ -31,3 +31,6 @@ results/*
 results/test/*
 !results/test/test_results.txt
 external/
+
+# Pure-noise SNR study outputs
+results/noise_snr/
