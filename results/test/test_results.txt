@@ -1,0 +1,90 @@
+================================================================================
+RI-Benchmark Sweep Evaluation
+Generated: 2026-09-05T02:43:20.175350
+State file: /home/mauro/projects/Thesis/RI-Benchmark/results/test/test_state.csv
+================================================================================
+
+Global summary
+--------------------------------------------------------------------------------
+Total rows in state file: 1800
+Completed jobs: 1440
+Failed jobs: 0
+Running/interrupted jobs: 0
+Warmup rows: 360
+
+Per-method summary
+--------------------------------------------------------------------------------
+Method: casa
+  Completed jobs: 360
+  Failed jobs: 0
+  Configurations tried: 1
+    gain=[0.1]
+    threshold=['auto:1.0']
+  Best PSNR: g0p1_t1p0 = 29.77 dB (std=6.37, var=40.58, SSIM=0.8192, MSE=0.002846, n=360, t=3.47s, time=11.38s)
+  PSNR range: [13.4900, 43.6600]
+  SSIM range: [0.1211, 0.9889]
+  MSE range: [0.0000, 0.0447]
+  T range: [0.7100, 8.2200]
+
+Method: deepinv
+  Completed jobs: 360
+  Failed jobs: 0
+  Configurations tried: 1
+    lambda_factor=[0.1]
+    max_iter=[50]
+  Best PSNR: l0p1_i50 = 46.48 dB (std=11.48, var=131.73, SSIM=0.9876, MSE=0.000321, n=360, t=13.89s, time=27.55s)
+  PSNR range: [23.3100, 67.1800]
+  SSIM range: [0.8637, 0.9999]
+  MSE range: [0.0000, 0.0047]
+  T range: [6.6300, 22.8800]
+
+Method: r2d2
+  Completed jobs: 360
+  Failed jobs: 0
+  Configurations tried: 1
+  Best PSNR: k5 = 37.72 dB (std=9.91, var=98.14, SSIM=0.9494, MSE=0.001177, n=360, t=1.48s, time=9.62s)
+  PSNR range: [14.6200, 62.3000]
+  SSIM range: [0.3168, 0.9999]
+  MSE range: [0.0000, 0.0345]
+  T range: [1.0000, 2.6400]
+
+Method: wsclean
+  Completed jobs: 360
+  Failed jobs: 0
+  Configurations tried: 1
+    gain=[0.1]
+    threshold=['auto:1.0']
+  Best PSNR: g0p1_t1p0 = 29.26 dB (std=6.54, var=42.83, SSIM=0.8034, MSE=0.003297, n=360, t=1.11s, time=4.16s)
+  PSNR range: [13.1500, 43.7400]
+  SSIM range: [0.0785, 0.9875]
+  MSE range: [0.0000, 0.0484]
+  T range: [0.3400, 2.0800]
+
+Global rankings by average
+--------------------------------------------------------------------------------
+Best PSNR (higher better): deepinv l0p1_i50 = 46.4816 (n=360, t=13.89s, time=27.55s)
+Best SSIM (higher better): deepinv l0p1_i50 = 0.9876 (n=360, t=13.89s, time=27.55s)
+Best MSE (lower better):  deepinv l0p1_i50 = 0.0003 (n=360, t=13.89s, time=27.55s)
+
+Top 3 configs per method by average PSNR
+--------------------------------------------------------------------------------
+Method: casa
+  1. g0p1_t1p0: PSNR=29.77, SSIM=0.8192, MSE=0.0028 (n=360, t=3.47s, time=11.38s)
+
+Method: deepinv
+  1. l0p1_i50: PSNR=46.48, SSIM=0.9876, MSE=0.0003 (n=360, t=13.89s, time=27.55s)
+
+Method: r2d2
+  1. k5: PSNR=37.72, SSIM=0.9494, MSE=0.0012 (n=360, t=1.48s, time=9.62s)
+
+Method: wsclean
+  1. g0p1_t1p0: PSNR=29.26, SSIM=0.8034, MSE=0.0033 (n=360, t=1.11s, time=4.16s)
+
+All configurations (averages)
+--------------------------------------------------------------------------------
+method       config_id                n     psnr     ssim      mse     t(s)  time(s)
+casa         g0p1_t1p0              360    29.77   0.8192   0.0028     3.47    11.38
+deepinv      l0p1_i50               360    46.48   0.9876   0.0003    13.89    27.55
+r2d2         k5                     360    37.72   0.9494   0.0012     1.48     9.62
+wsclean      g0p1_t1p0              360    29.26   0.8034   0.0033     1.11     4.16
+

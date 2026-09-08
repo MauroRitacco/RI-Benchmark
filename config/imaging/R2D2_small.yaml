@@ -1,0 +1,28 @@
+# i/o
+output_path: ./results/
+data_file: ./data/disk_0016.mat
+save_all_outputs: True
+architecture: unet
+prune: True
+sigma_res_tol: 1e-4
+super_resolution: 1
+save_all_outputs: True
+
+# measurement operator
+meas_op_on_gpu: True
+meas_dtype: double
+im_dim_x: 64
+im_dim_y: 64
+
+# weighting
+natural_weight: True
+weight_type: briggs
+
+# algo
+num_iter: 5
+num_chans: 32
+series: R2D2
+layers: 1
+ckpt_path: ./ckpt/R2D2_small_ALMA3/
+ckpt_realisations: 1
+

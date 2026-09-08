@@ -15,7 +15,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$TARGET" ]; then
-  TARGET="${TARGET:-disk_1111}"
+  echo "Usage: $0 --target <target> [--dry-run]"
+  exit 1
 fi
 
 BASE_DIR=$(cd "$(dirname "$0")/.." && pwd)
