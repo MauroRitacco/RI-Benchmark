@@ -52,7 +52,6 @@ def generate_dirty(target: str, base_dir: Path, out_dir: Path) -> Path:
         niter=0,
     )
 
-    # Export .image to FITS and rename to dirty
     dirty_fits = Path(f"{name}_dirty.fits")
     casatasks.exportfits(
         imagename=f"{name}.image",

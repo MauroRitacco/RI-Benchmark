@@ -1,8 +1,7 @@
 """Generate a WSClean dirty image and estimate its corner-patch noise.
 
-This helper is used both by the sweep driver (run_sweep.py) and by the
-standalone WSClean wrapper (run_wsclean.sh) so that both paths share the same
-noise-estimation logic and the same per-target cache.
+Shared by run_sweep.py and run_wsclean.sh so both paths use the same
+noise-estimation logic and per-target cache.
 """
 
 from __future__ import annotations
@@ -35,13 +34,7 @@ from src.utils.dirty_noise import (
 
 
 def _weight_to_cli(weight: str | Iterable) -> list[str]:
-    """Convert a weight spec into WSClean CLI tokens.
-
-    Examples
-    --------
-    "briggs 2" -> ["-weight", "briggs", "2"]
-    ["briggs", 2] -> ["-weight", "briggs", "2"]
-    """
+    """Convert a weight spec ("briggs 2" or ["briggs", 2]) into WSClean CLI tokens."""
     if isinstance(weight, str):
         parts = weight.split()
     else:
@@ -163,40 +156,11 @@ def get_wsclean_sigma_noise(
     log_func: callable = logging.info,
     cwd: str | Path | None = None,
 ) -> NoiseResult:
-    """Run a WSClean dirty pass (niter=0) and estimate noise from corner patches.
+    """Run a WSClean dirty pass (niter=0), estimate noise from corner patches.
 
-    Parameters
-    ----------
-    ms_path
-        Path to the Measurement Set.
-    size
-        Image size in pixels (square).
-    pixel_size
-        Pixel size in arcseconds.
-    weight
-        WSClean weight spec, e.g. "briggs 2" or ["briggs", 2].
-    data_column
-        Visibility data column name, e.g. "DATA".
-    dirty_prefix
-        Prefix passed to WSClean ``-name`` for the dirty pass. The dirty image will
-        be ``{dirty_prefix}-dirty.fits``.
-    gt_path
-        Ground-truth FITS containing HAS_EXT/EXT_X/EXT_Y for point-source filtering.
-    cache_path
-        Optional JSON cache path. If provided and the cache is valid, the dirty pass
-        is skipped and the cached result is returned.
-    log_func
-        Logging callable used for diagnostic messages.
-
-    Returns
-    -------
-    NoiseResult with sigma_noise, threshold (for multiplier=1.0) and patch details.
-
-    Raises
-    ------
-    RuntimeError
-        If the dirty pass fails, the dirty image is missing, or the noise estimate
-        is invalid (NaN, zero, or no valid patches).
+    If a valid cache_path is given, the dirty pass is skipped and the cached
+    NoiseResult is returned. Raises RuntimeError if the pass fails or the
+    noise estimate is invalid.
     """
     ms_path = Path(ms_path).resolve()
     dirty_prefix = Path(dirty_prefix).resolve()

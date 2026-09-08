@@ -1,8 +1,6 @@
 #!/bin/bash
-# Generate Briggs imaging weights for DeepInverse and store them inside the
-# target's data directory (<target>.mat). All temporary WSClean outputs are
-# removed afterwards so that only the original target files plus the weights
-# remain.
+# Generate Briggs imaging weights for DeepInverse and store them in <target>.mat.
+# Temporary WSClean outputs are removed at the end.
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <target> [nval] [robust]"
@@ -26,7 +24,7 @@ fi
 DATA_FILE="$DATA_DIR/${TARGET}.MS"
 MAT_FILE="$DATA_DIR/${TARGET}.mat"
 
-# Temporary working directory for WSClean (deleted at the end)
+# Temp WSClean working dir
 TMP_DIR=$(mktemp -d "/tmp/${TARGET}_weights_XXXXXX")
 LOG_FILE="$TMP_DIR/${TARGET}_wsclean.log"
 
@@ -75,7 +73,6 @@ weights = tb.getcol('IMAGING_WEIGHT_SPECTRUM')
 mask = tb.getcol('FLAG')[0, 0, :] == False
 tb.close()
 
-# Extract weights for unflagged data
 w = weights[0, 0, mask]
 
 # Append to .mat file (overwriting only the 'weight' variable)
@@ -90,7 +87,7 @@ PYTHON_EXIT=$?
 end_time=$(date +%s.%N)
 runtime=$(echo "$end_time - $start_time" | bc)
 
-# Clean up all temporary WSClean outputs, keeping only the weights inside the .mat
+# Remove temp outputs; weights are already stored in the .mat
 rm -rf "$TMP_DIR"
 
 if [ $PYTHON_EXIT -ne 0 ]; then

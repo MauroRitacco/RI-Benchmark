@@ -100,7 +100,7 @@ def plot_comparison(casa_data, r2d2_data, casa_time=None, r2d2_time=None, output
             interpolation="nearest",
         )
 
-        # Title at upper-left, matching reference font size
+        # Title style matched to the reference figure
         ax.text(
             0.03,
             0.98,
@@ -113,7 +113,7 @@ def plot_comparison(casa_data, r2d2_data, casa_time=None, r2d2_time=None, output
             ha="left",
         )
 
-        # Imaging time at bottom-left, matching reference metric style
+        # Time label matched to the reference figure
         if time is not None:
             ax.text(
                 0.03,

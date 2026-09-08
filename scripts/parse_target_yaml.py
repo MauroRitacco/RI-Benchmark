@@ -14,7 +14,6 @@ import sys
 try:
     import yaml
 except ImportError:
-    # Fallback for environments where yaml is not available
     print("PyYAML is required. Install with: pip install pyyaml", file=sys.stderr)
     sys.exit(1)
 
@@ -55,9 +54,8 @@ def main():
         if not args.config:
             print(f"{args.target}.yaml not found for target {args.target}", file=sys.stderr)
             sys.exit(1)
-        # No YAML present but a JSON config was supplied explicitly; use it as
-        # the method configuration. Top-level key lookups without a method still
-        # fail because there is no target metadata.
+        # No YAML but an explicit --config: use it directly. Top-level key
+        # lookups without a method still fail (no target metadata).
         try:
             method_config = json.loads(args.config)
         except json.JSONDecodeError as exc:
@@ -80,7 +78,6 @@ def main():
     with open(yaml_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
-    # Top-level key lookup (no method required)
     if args.key and not args.method:
         value = data.get(args.key)
         if value is None:
@@ -99,7 +96,7 @@ def main():
         print(f"Method {args.method} not found in {yaml_path}", file=sys.stderr)
         sys.exit(2)
 
-    # Apply JSON overrides (e.g. from a sweep driver) on top of the YAML config.
+    # JSON overrides (e.g. from a sweep driver)
     if args.config:
         try:
             overrides = json.loads(args.config)

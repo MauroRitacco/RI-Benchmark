@@ -55,7 +55,6 @@ if [ -z "$NVAL" ]; then
   NVAL="1"
 fi
 
-# Build tclean config JSON
 if [ "$USE_DEFAULTS" -eq 1 ]; then
   TCLEAN_CONFIG='{
     "imsize": 64,

@@ -121,13 +121,11 @@ def crop_and_downsample(archival_path, r2d2_path, zoom_factor=1.0):
 
     cropped = archival_data[start_y:end_y, start_x:end_x]
 
-    # The archival image is in Jy/beam. Convert the cropped high-resolution image
-    # to Jy/pixel using the original DSHARP beam *before* changing the pixel scale.
+    # Convert to Jy/pixel with the original DSHARP beam before changing the pixel scale
     cropped_jypix = jybeam_to_jypixel(cropped, archival_hdr)
 
-    # Degrade to 64x64 without interpolation (nearest neighbor) to keep pure pixels,
-    # then scale by the pixel-area ratio so the output values represent the approximate
-    # total flux per new pixel in Jy/pixel.
+    # Nearest-neighbour resize (pure pixels), scaled by pixel-area ratio to keep
+    # the total flux per new pixel in Jy/pixel
     downsampled = resize(
         cropped_jypix,
         (r2d2_ny, r2d2_nx),
@@ -140,7 +138,6 @@ def crop_and_downsample(archival_path, r2d2_path, zoom_factor=1.0):
     area_ratio = (r2d2_nx * r2d2_ny) / (crop_nx * crop_ny)
     downsampled_jypix = downsampled / area_ratio
 
-    # Header for the cropped/degraded FITS file
     new_hdr = archival_hdr.copy()
     new_hdr["NAXIS"] = 2
     new_hdr["NAXIS1"] = r2d2_nx
@@ -171,7 +168,6 @@ def plot_comparison(
     cropped_fits_dir = Path(cropped_fits_dir)
     cropped_fits_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save the single modified FITS file
     cropped_path = cropped_fits_dir / "HD163296_continuum_cropped64.fits"
     fits.writeto(cropped_path, archival_data, header=cropped_hdr, overwrite=True)
     print(f"Saved cropped archival FITS: {cropped_path}")
@@ -198,7 +194,7 @@ def plot_comparison(
             interpolation="nearest",
         )
 
-        # Title at upper-left, matching reference font size
+        # Title at upper-left
         ax.text(
             0.03,
             0.98,
@@ -211,7 +207,7 @@ def plot_comparison(
             ha="left",
         )
 
-        # Imaging time at bottom-left, matching reference metric style
+        # Imaging time at bottom-left
         if time is not None:
             ax.text(
                 0.03,

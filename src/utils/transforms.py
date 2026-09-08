@@ -6,11 +6,7 @@ from astropy.io import fits
 from casatasks import imsmooth
 
 def normalize_fits_peak(fits_path):
-    """Normalize a FITS image to [0, 1] via peak normalization and clip negatives.
-    
-    Divides all pixel values by the maximum and clips negatives to zero,
-    so the output range is [0, 1]. Overwrites the file in place.
-    """
+    """Normalize a FITS image to [0, 1] via peak normalization; overwrite in place."""
     data, hdr = fits.getdata(fits_path, header=True)
     data = data.astype(np.float64)
     dmax = data.max()
@@ -23,13 +19,12 @@ def normalize_fits_peak(fits_path):
 def calculate_pixel_size(ms_path, n=2.0):
     tb = table()
     
-    # Get the longest projected baseline in meters (u, v)
+    # Longest projected baseline (u, v) in meters
     tb.open(ms_path)
     uvw = tb.getcol('UVW')
     tb.close()
     longest_baseline_meters = np.max(np.sqrt(uvw[0]**2 + uvw[1]**2))
-    
-    # Get the reference frequency and calculate wavelength
+
     tb.open(ms_path + '/SPECTRAL_WINDOW')
     try:
         frequency = tb.getcol('CHAN_FREQ')[0, 0]
@@ -46,7 +41,6 @@ def calculate_pixel_size(ms_path, n=2.0):
 def convert_jybeam_to_jypixel(fits_path):
     """Convert a FITS image from Jy/beam to Jy/pixel."""
     data, hdr = fits.getdata(fits_path, header=True)
-    # Unit conversion: Jy/beam -> Jy/pixel
     factor = (4 * np.log(2) * hdr['CDELT1']**2) / (np.pi * hdr['BMAJ'] * hdr['BMIN'])
     data = data * factor
     if 'BUNIT' in hdr:
@@ -57,8 +51,7 @@ def convert_jypixel_to_jybeam(fits_path):
     """Convert a FITS image from Jy/pixel to Jy/beam."""
     data, hdr = fits.getdata(fits_path, header=True)
     if 'BMAJ' not in hdr or 'BMIN' not in hdr:
-        return # Can't convert without beam params
-    # Unit conversion: Jy/pixel -> Jy/beam
+        return  # can't convert without beam params
     factor = (np.pi * hdr['BMAJ'] * hdr['BMIN']) / (4 * np.log(2) * hdr['CDELT1']**2)
     data = data * factor
     if 'BUNIT' in hdr:
@@ -66,22 +59,8 @@ def convert_jypixel_to_jybeam(fits_path):
     fits.writeto(fits_path, data, hdr, overwrite=True)
 
 def smooth_to_beam(input_path, output_path, bmaj_deg, bmin_deg, bpa_deg):
-    """Smooth an image to a specified beam using CASA imsmooth.
-    
-    Parameters
-    ----------
-    input_path : str
-        Path to the input FITS file to be smoothed.
-    output_path : str
-        Path where the smoothed FITS file will be saved.
-    bmaj_deg : float
-        Major axis of the target beam in degrees.
-    bmin_deg : float
-        Minor axis of the target beam in degrees.
-    bpa_deg : float
-        Position angle of the target beam in degrees.
-    """
-    # Delete output file if it exists to avoid CASA collision issues
+    """Smooth an image to the target beam via CASA imsmooth."""
+    # Delete existing output to avoid CASA collisions
     if os.path.exists(output_path):
         try:
             import shutil
@@ -99,7 +78,7 @@ def smooth_to_beam(input_path, output_path, bmaj_deg, bmin_deg, bpa_deg):
     temp_dir = os.path.dirname(output_path)
     os.makedirs(temp_dir, exist_ok=True)
     
-    # imsmooth outputs a CASA image directory. We write to a temporary .image first.
+    # imsmooth writes a CASA .image dir; export to FITS afterwards
     base_name = os.path.splitext(os.path.basename(output_path))[0]
     temp_casa_image = os.path.join(temp_dir, f"{base_name}_temp_smoothed.image")
     if os.path.exists(temp_casa_image):
@@ -147,7 +126,6 @@ def smooth_to_beam(input_path, output_path, bmaj_deg, bmin_deg, bpa_deg):
         else:
             raise e
     
-    # Cleanup temporary files
     if os.path.exists(temp_casa_image):
         import shutil
         shutil.rmtree(temp_casa_image, ignore_errors=True)
@@ -176,24 +154,10 @@ def _get_mat_pixel_size(mat_path):
 
 
 def formatfits(fits_path, ms_path, beam_params=None):
-    """Add proper WCS headers to a FITS file so CASA can read it.
-    
-    Derives image dimensions from the data itself and computes pixel size.
-    Preferentially reads ``nominal_pixelsize`` from the companion ``.mat``
-    file (same basename as the MS), which is the pixel scale used by the
-    reconstruction algorithms. Falls back to calculating the pixel size from
-    the MS if no ``nominal_pixelsize`` is available.
-    Optionally adds beam parameters (BMAJ, BMIN, BPA) to the header.
-    Overwrites the FITS file in-place with the new header.
-    
-    Parameters
-    ----------
-    fits_path : str
-        Path to the FITS file to format.
-    ms_path : str
-        Path to the measurement set, used to derive pixel size.
-    beam_params : dict, optional
-        Dictionary with keys 'bmaj' (arcsec), 'bmin' (arcsec), 'bpa' (deg).
+    """Write minimal WCS headers so CASA can read the FITS file (overwrite in place).
+
+    Pixel size comes from ``nominal_pixelsize`` in the companion .mat file if
+    present, else from the MS. Optionally adds beam params (arcsec/deg).
     """
     data = fits.getdata(fits_path)
     data_2d = data.squeeze()
@@ -207,8 +171,7 @@ def formatfits(fits_path, ms_path, beam_params=None):
     hdr['NAXIS2'] = ny
     hdr['BUNIT'] = 'Jy/pixel'
 
-    # Determine pixel size. Prefer nominal_pixelsize from the .mat file
-    # (same scale used by R2D2/DeepInverse), fall back to MS-based estimate.
+    # Pixel size: .mat nominal_pixelsize (same scale as R2D2/DeepInverse), else MS estimate
     mat_path = ms_path.rstrip(os.sep)
     if mat_path.lower().endswith('.ms'):
         mat_path = mat_path[:-3] + '.mat'
@@ -234,7 +197,7 @@ def formatfits(fits_path, ms_path, beam_params=None):
     hdr['CRPIX2'] = (ny / 2) + 0.5
     hdr['CUNIT2'] = 'deg'
 
-    # Add beam parameters if provided (stored in degrees per FITS convention)
+    # beam params in deg per FITS convention
     if beam_params is not None:
         hdr['BMAJ'] = beam_params['bmaj'] / 3600.0  # arcsec -> deg
         hdr['BMIN'] = beam_params['bmin'] / 3600.0  # arcsec -> deg
@@ -243,23 +206,9 @@ def formatfits(fits_path, ms_path, beam_params=None):
     fits.writeto(fits_path, data_2d, hdr, overwrite=True)
 
 def calculate_beam(psf_path, ms_path, box_radius=3):
-    """Calculate beam parameters (bmaj, bmin, bpa) by fitting a 2D Gaussian to the PSF.
-    
-    Uses astropy.modeling to fit the PSF directly, avoiding CASA format issues.
-    
-    Parameters
-    ----------
-    psf_path : str
-        Path to the PSF FITS file.
-    ms_path : str
-        Path to the measurement set, used to derive pixel size.
-    box_radius : int, optional
-        Half-size of the bounding box around the PSF center for fitting (default: 20).
-    
-    Returns
-    -------
-    dict
-        Dictionary with keys 'bmaj' (arcsec), 'bmin' (arcsec), 'bpa' (deg).
+    """Fit a 2D Gaussian to the PSF to get beam params (arcsec, arcsec, deg).
+
+    Pixel scale derived from the MS. Avoids CASA PSF format issues.
     """
     from astropy.modeling import models, fitting
 
@@ -271,14 +220,13 @@ def calculate_beam(psf_path, ms_path, box_radius=3):
     ny, nx = data_2d.shape
     y_center, x_center = ny // 2, nx // 2
 
-    # Extract the central box for fitting
+    # Central box for fitting
     y_lo = max(y_center - box_radius, 0)
     y_hi = min(y_center + box_radius, ny)
     x_lo = max(x_center - box_radius, 0)
     x_hi = min(x_center + box_radius, nx)
     cutout = data_2d[y_lo:y_hi, x_lo:x_hi]
 
-    # Create coordinate grids for the cutout
     y_grid, x_grid = np.mgrid[0:cutout.shape[0], 0:cutout.shape[1]]
 
     # Initial guess: peak at center of cutout, sigma ~3 pixels
@@ -303,20 +251,15 @@ def calculate_beam(psf_path, ms_path, box_radius=3):
     fwhm_x = abs(gauss_fit.x_stddev.value) * fwhm_factor  # pixels
     fwhm_y = abs(gauss_fit.y_stddev.value) * fwhm_factor  # pixels
 
-    # bmaj = larger FWHM, bmin = smaller FWHM
     bmaj_pix = max(fwhm_x, fwhm_y)
     bmin_pix = min(fwhm_x, fwhm_y)
 
-    # Position angle: astropy theta is measured counter-clockwise from +x axis.
-    # In radio astronomy FITS images, North is +y and East is -x.
-    # BPA is measured from North through East (counter-clockwise).
-    # Therefore, the North axis (+y) corresponds to 90 deg in astropy, 
-    # and we want to measure from there towards East (-x, which is 180 deg in astropy).
-    # So BPA = theta_astropy - 90 deg.
+    # astropy theta is CCW from +x; BPA is measured from North (+y) through East (-x),
+    # i.e. from 90 deg in astropy coords towards 180 deg, so BPA = theta - 90 deg.
     theta_deg = np.degrees(gauss_fit.theta.value)
-    
-    # If major axis is along y (fwhm_y > fwhm_x), the true position angle of the major axis
-    # is shifted by 90 degrees compared to astropy's theta (which tracks the x_stddev axis).
+
+    # astropy theta tracks the x_stddev axis; if the major axis is along y,
+    # its true PA is shifted by 90 deg
     if fwhm_y > fwhm_x:
         theta_deg += 90.0
         
@@ -325,7 +268,7 @@ def calculate_beam(psf_path, ms_path, box_radius=3):
     # Normalize to [-90, 90] for standard BPA representation
     bpa_deg = ((bpa_deg + 90.0) % 180.0) - 90.0
 
-    # Convert from pixels to arcsec using the pixel scale from the MS
+    # pixels -> arcsec
     cell_arcsec = calculate_pixel_size(ms_path)
     bmaj_arcsec = bmaj_pix * cell_arcsec
     bmin_arcsec = bmin_pix * cell_arcsec

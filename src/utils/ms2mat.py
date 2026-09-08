@@ -1,4 +1,4 @@
-# script to extra data and relevant information in .mat file
+# Extract data from MS into a .mat file
 # Author: A. Dabbech
 import os
 import sys
@@ -8,8 +8,7 @@ import scipy.io as sio
 import math
 from casacore import tables
 
-# constants
-c = 299792458
+c = 299792458  # speed of light (m/s)
 
 
 def main():
@@ -25,11 +24,10 @@ def main():
     srcid = args.srcid
     freqid = args.freqid
 
-    # get data
     tab = tables.table(msfile)
     print("INFO: MS table columns:", *(tab.colnames()))
     print("INFO: Reading data ..Freq %s" % freqid)
-    ## freq : table & freq. channels
+    ## freq channels
     spwtab = tables.table("%s/SPECTRAL_WINDOW"%msfile)
     try:
         freqs = spwtab.getcol("CHAN_FREQ")
@@ -39,7 +37,6 @@ def main():
         frequency = freqs[freqid]
     spwtab.close()
 
-    ## load remaining specs
     print("INFO: Extracting data from all Spectral Windows...")
     spw_ids = np.unique(tab.getcol("DATA_DESC_ID"))
     
@@ -59,7 +56,7 @@ def main():
             spw_freq = frequency # fallback to global frequency
         spwtab.close()
 
-        ## natural weights: noise vect:  1/variance
+        ## natural weights = 1/variance
         try:
             weight_ch = subtab.getcol("WEIGHT_SPECTRUM")
             ncorr = weight_ch.shape[2]
@@ -72,7 +69,6 @@ def main():
             w1 = weight[:, 0]
             w4 = weight[:, ncorr - 1]
 
-        ## data
         try:
             data = subtab.getcol("CORRECTED_DATA")
         except:
@@ -83,7 +79,6 @@ def main():
         data = np.reshape(np.array(data), (nmeas, 1))
         weight_natural = np.reshape(np.array(w1 + w4), (nmeas, 1))
 
-        ## flag
         flag_row = subtab.getcol("FLAG_ROW")
         flag_row = (np.reshape(np.array(flag_row), (nmeas,))).astype(float)
         flag = subtab.getcol("FLAG")
@@ -93,7 +88,6 @@ def main():
         flag = (flag + flag_data + flag_row) == False
         flag = np.reshape(np.array(flag), (nmeas,))
 
-        ## u,v,w,
         uvw = subtab.getcol("UVW")
 
         ## briggs/uniform imaging weights
@@ -110,7 +104,6 @@ def main():
                 
         subtab.close()
 
-        ## applying flags
         y_spw = data[flag]
         nmeasflag = len(y_spw)
         u_spw = np.reshape(uvw[flag, 0] / (c / spw_freq), (nmeasflag, 1))
@@ -139,7 +132,7 @@ def main():
     nW = np.concatenate(all_nW)
     nWimag = np.concatenate(all_nWimag) if len(all_nWimag) > 0 else []
 
-    ## maximum projected baseline (used for pixel size)
+    ## max projected baseline (for pixel size)
     uv_dist = np.sqrt(u ** 2 + v ** 2)
     
     if args.uv_cutoff is not None:
@@ -157,7 +150,6 @@ def main():
     maxProjBaseline = np.max(uv_dist).astype(float)
     nominal_pixelsize = (180.0 * 3600.0 / np.pi) * (1.0 / (2.0 * maxProjBaseline))
 
-    ## save data
     data_dir = os.path.dirname(os.path.abspath(msfile))
     datamatfile = os.path.join(data_dir, f"{srcname}.mat")
     print("INFO: Saving data ..Freq %s" % freqid)

@@ -7,7 +7,6 @@ from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
 
 def getpaths(target, method):
-    # Checks if the target is simulated or archival
     if os.path.exists(os.path.join("data", "simulated", target)):
         ground_truth_path = os.path.join("data", "simulated", target, f"{target}.fits")
         reconstruction_path = os.path.join("experiments", "simulated", target, f"{target}_{method}", f"{target}_{method}.fits")
@@ -26,11 +25,11 @@ def getpaths(target, method):
     return ground_truth_path, reconstruction_path, log_path, simulated, csv_path, base_exp_dir
 
 def clip_negatives(data):
-    """Take the negative values of the reconstruction and clip them to zero."""
+    """Clip negative values to zero."""
     return np.clip(data, 0, None)
 
 def normalize_to_01(data):
-    """Normalize data to [0, 1] via standard min-max normalization after clipping negatives."""
+    """Min-max normalization to [0, 1] after clipping negatives."""
     data = np.clip(data, 0, None)
     dmin = data.min()
     dmax = data.max()
@@ -39,7 +38,7 @@ def normalize_to_01(data):
     return (data - dmin) / (dmax - dmin)
 
 def compute_ground_truth_metrics(reconstruction, ground_truth):
-    """Calculate core image reconstruction metrics."""
+    """PSNR, SSIM and MSE against ground truth."""
     data_range = ground_truth.max() - ground_truth.min()
     return {
         "psnr": round(psnr(reconstruction, ground_truth, data_range=data_range), 2),
@@ -48,7 +47,7 @@ def compute_ground_truth_metrics(reconstruction, ground_truth):
     }
 
 def compute_blind_metrics(reconstruction):
-    """Calculate blind image reconstruction metrics."""
+    """Blind metrics (not implemented)."""
     return {}
 
 def extract_runtime(log_path, method):
@@ -81,7 +80,7 @@ def extract_runtime(log_path, method):
     return np.nan
 
 def calculate_errormap(recon_path, gt_data, recon_data, target, method):
-    """Calculate residual image."""
+    """Save residual image (recon - gt) as FITS."""
     errormap = recon_data - gt_data
     recon_dir = os.path.dirname(recon_path)
     errormap_path = os.path.join(recon_dir, f"{target}_{method}_errormap.fits")
@@ -89,17 +88,15 @@ def calculate_errormap(recon_path, gt_data, recon_data, target, method):
     fits.writeto(errormap_path, errormap, hdr, overwrite=True)
 
 def evaluate_target_all_methods(target):
-    """Process a target by comparing reconstructions directly against the original ground truth."""
+    """Evaluate all available method reconstructions for a target."""
     methods = ['casa', 'wsclean', 'deepinverse', 'r2d2']
     available_methods = []
 
-    # Check if target exists
     if not (os.path.exists(os.path.join("data", "simulated", target)) or 
             os.path.exists(os.path.join("data", "archival", target))):
         print(f"Target {target} not found in data directories.")
         return
 
-    # Grab basic paths
     ground_truth_path, _, _, simulated, csv_path, base_exp_dir = getpaths(target, "dummy")
 
     for method in methods:
@@ -114,7 +111,7 @@ def evaluate_target_all_methods(target):
     print(f"\n--- Processing target: {target} ---")
     print(f"Found methods: {available_methods}")
 
-    # Load ground truth (already in [0,1])
+    # Ground truth is already in [0,1]
     has_gt = os.path.exists(ground_truth_path)
     if has_gt:
         gt_data = fits.getdata(ground_truth_path).squeeze().astype(np.float64)
@@ -122,7 +119,6 @@ def evaluate_target_all_methods(target):
         print(f"Ground truth range: [{gt_data.min():.4f}, {gt_data.max():.4f}]")
         print(f"Ground truth total flux: {gt_total_flux:.4f}")
 
-    # Prepare DataFrame collection for CSV
     rows = []
 
     for method in available_methods:
@@ -132,14 +128,11 @@ def evaluate_target_all_methods(target):
         recon_data = fits.getdata(recon_path).squeeze().astype(np.float64)
         print(f"  Reconstruction range: [{recon_data.min():.4e}, {recon_data.max():.4e}]")
 
-        # Normalization for the metrics
-        # recon_data = normalize_to_01(recon_data)
         recon_data = clip_negatives(recon_data)
         total_flux = recon_data.sum()
         m = {}
 
         if has_gt:
-            # Generate error map
             calculate_errormap(recon_path, gt_data, recon_data, target, method)
             if simulated:
                 m = compute_ground_truth_metrics(recon_data, gt_data)
@@ -149,7 +142,6 @@ def evaluate_target_all_methods(target):
 
         m["t"] = round(extract_runtime(log_path, method), 2)
 
-        # Create row with total flux as third column
         row = {
             "target": target,
             "simulated": simulated,
@@ -160,11 +152,9 @@ def evaluate_target_all_methods(target):
         rows.append(row)
         print(f"  Total flux: {total_flux:.4f} | PSNR: {m.get('psnr')} | SSIM: {m.get('ssim')} | MSE: {m.get('mse')} | t: {m.get('t')}")
 
-    # Save results to CSV
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     df_new = pd.DataFrame(rows)
     column_order = ["target", "simulated", "total_flux", "method", "psnr", "ssim", "mse", "t"]
-    # Keep only columns that exist in the DataFrame
     df_new = df_new[[c for c in column_order if c in df_new.columns]]
 
     with open(csv_path, 'w') as f:

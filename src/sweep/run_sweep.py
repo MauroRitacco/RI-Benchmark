@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """Hyper-parameter sweep driver for CASA tclean, WSClean and DeepInverse.
 
-Runs the full Cartesian product of configured grids for every target listed in
-a text file, reuses the existing Python wrappers and the WSClean binary, and
-renames the produced FITS files so that each configuration can be identified.
-
-The driver is resumable: completed outputs are skipped on re-runs.
+Resumable: completed outputs are skipped on re-runs.
 """
 
 import argparse
@@ -26,35 +22,23 @@ import numpy as np
 from astropy.io import fits
 from scipy.io import loadmat
 
-# Make project imports available (e.g. src.utils.transforms)
+# Make project imports available
 BASE_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BASE_DIR))
 
-# Reuse metric helpers from the benchmark harness
 from src.compute_metrics import clip_negatives, compute_ground_truth_metrics, extract_runtime
 from src.utils.wsclean_dirty_noise import get_wsclean_sigma_noise
 
-# Parsed sweep configuration: {method: [(config_id, params_dict), ...]}
+# {method: [(config_id, params_dict), ...]}
 SWEEP_GRIDS = None
 
 
-# -----------------------------------------------------------------------------
-# Sweep grids -- read from a simple text file instead of hardcoded constants.
-#
-# Format (one line per swept parameter, no header, '#' starts a comment):
+# Sweep grids are read from a text file (one line per swept parameter,
+# '#' starts a comment):
 #   method,param,value1,value2,...
-#
-# Example:
-#   casa,gain,0.1,0.2
-#   casa,threshold,0.01,0.05,0.1,0.2,0.5
-#   wsclean,gain,0.1,0.2
-#   wsclean,threshold,0.01,0.05,0.1,0.2,0.5
-#   deepinv,lambda_factor,5e-4,1e-3,5e-3
-#   deepinv,max_iter,100,200
-# -----------------------------------------------------------------------------
+# e.g.  casa,gain,0.1,0.2
 import itertools
 
-# Base configurations that are kept fixed for each method.
 CASA_BASE = {
     "imsize": 64,
     "specmode": "mfs",
@@ -154,11 +138,9 @@ def parse_sweep_config(path):
 
 
 def _config_id_from_params(params):
-    """Build a short config id from a {param: value} dict.
+    """Build a short config id from a {param: value} dict, in insertion order.
 
-    Params are processed in insertion order (Python 3.7+ dicts preserve order).
-    Sigma-multiplier (auto) thresholds use a 'ts' tag so they never collide
-    with legacy absolute-threshold ids ('t<value>').
+    'auto:' thresholds use a 'ts' tag so they never collide with legacy 't' ids.
     """
     parts = []
     for param, value in params.items():
@@ -170,11 +152,9 @@ def _config_id_from_params(params):
 
 
 def build_sweep_grids(sweep_path):
-    """Return a dict of generators: {method: [(config_id, params), ...]}.
+    """Return {method: [(config_id, params), ...]} over the Cartesian product of params.
 
-    The product is taken over the declared params for each method.
-    A special single-value parameter named 'config' is interpreted as a fixed
-    config id (used for methods such as R2D2 that do not sweep hyperparameters).
+    A single 'config' param is a fixed config id (e.g. R2D2, no swept params).
     """
     grids = parse_sweep_config(sweep_path)
     result = {}
@@ -184,7 +164,6 @@ def build_sweep_grids(sweep_path):
         combos = []
         for combo in itertools.product(*values):
             param_dict = dict(zip(keys, combo))
-            # Fixed-config shortcut: method,config,<id> yields config_id=<id> and no params.
             if keys == ["config"] and len(combo) == 1:
                 cid = str(combo[0])
                 combos.append((cid, {}))
@@ -253,12 +232,8 @@ def build_r2d2_config(params):
     return cfg
 
 
-# -----------------------------------------------------------------------------
-# Paths and utilities
-# -----------------------------------------------------------------------------
-# Test mode (--test): inputs are read from data/simulated/test/, outputs go to
-# experiments/test/ and results/test/. Controlled by the TEST_MODE global set
-# in main(); subprocesses are told via the RI_BENCH_TEST environment variable.
+# Test mode (--test): inputs from data/simulated/test/, outputs to
+# experiments/test/ and results/test/. Subprocesses see RI_BENCH_TEST=1.
 TEST_MODE = False
 
 
@@ -342,14 +317,10 @@ def _find_gt_path(base_dir, target):
     return None
 
 
-# -----------------------------------------------------------------------------
-# State / index bookkeeping
-# -----------------------------------------------------------------------------
 def load_state(state_csv):
     """Return dict mapping (target, method, config_id) -> row dict.
 
-    Any row still marked 'running' from a previous interrupted run is converted to
-    'interrupted' so that it is retried on the next pass.
+    Rows still 'running' from an interrupted run become 'interrupted' so they are retried.
     """
     state_rows = {}
     if not state_csv.exists():
@@ -395,12 +366,7 @@ def count_job_states(state_rows):
 
 
 def progress_reporter(state_rows, state_lock, stop_event, total_jobs, interval=60):
-    """Print a short progress summary to the terminal every interval seconds.
-
-    The summary is written directly to /dev/tty so it appears in the terminal
-    even when stdout/stderr are redirected to a log file. If /dev/tty is not
-    available, it falls back to stderr.
-    """
+    """Print a progress summary to /dev/tty every interval seconds (fallback: stderr)."""
     while not stop_event.is_set():
         stop_event.wait(interval)
         if stop_event.is_set():
@@ -419,7 +385,7 @@ def progress_reporter(state_rows, state_lock, stop_event, total_jobs, interval=6
 def evaluate_state(state_csv, output_path):
     """Analyze sweep_state.csv and write a text report with per-cell averages.
 
-    Only rows with status='completed' are included in the metric averages.
+    Only rows with status='completed' are included.
     """
     if not state_csv.exists():
         print(f"State file not found: {state_csv}")
@@ -435,7 +401,6 @@ def evaluate_state(state_csv, output_path):
     failed = [r for r in rows if r.get("status") == "failed" and r.get("config_id") != "warmup"]
     running = [r for r in rows if r.get("status") in ("running", "interrupted") and r.get("config_id") != "warmup"]
 
-    # Convert numeric fields for completed rows.
     for r in completed:
         for k in ("psnr", "ssim", "mse", "time", "t"):
             try:
@@ -443,7 +408,6 @@ def evaluate_state(state_csv, output_path):
             except (ValueError, TypeError):
                 r[k] = None
 
-    # Group by (method, config_id)
     groups = {}
     for r in completed:
         key = (r["method"], r["config_id"])
@@ -495,7 +459,6 @@ def evaluate_state(state_csv, output_path):
         "mse": _best("mse", False),
     }
 
-    # Top 3 per method by PSNR.
     top3_by_method = {}
     for method in methods:
         method_stats = sorted(
@@ -532,7 +495,6 @@ def evaluate_state(state_csv, output_path):
         lines.append(f"  Failed jobs: {len(method_failed)}")
         n_configs = len(SWEEP_GRIDS[method]) if (SWEEP_GRIDS and method in SWEEP_GRIDS) else 0
         lines.append(f"  Configurations tried: {n_configs}")
-        # List swept parameters and their values from SWEEP_GRIDS
         if SWEEP_GRIDS and method in SWEEP_GRIDS and SWEEP_GRIDS[method]:
             param_names = list(SWEEP_GRIDS[method][0][1].keys())
             for pname in param_names:
@@ -546,7 +508,6 @@ def evaluate_state(state_csv, output_path):
                 f"SSIM={best['ssim_mean']:.4f}, MSE={best['mse_mean']:.6f}, "
                 f"n={best['n']}, t={best['t_mean']:.2f}s, time={best['time_mean']:.2f}s)"
             )
-        # Max/min across all completed cells for this method
         if method_completed:
             for metric in ("psnr", "ssim", "mse", "t"):
                 vals = [r[metric] for r in method_completed if r[metric] is not None]
@@ -605,11 +566,7 @@ def evaluate_state(state_csv, output_path):
 
 
 def evaluate_job(target, method, config_id):
-    """Compute PSNR/SSIM/MSE and imaging time for a finished sweep cell.
-
-    Mirrors the logic in src/compute_metrics.py but adapted to the per-config
-    output layout used by the sweep driver.
-    """
+    """Compute PSNR/SSIM/MSE and imaging time for a finished sweep cell."""
     if TEST_MODE:
         gt_path = data_root() / target / f"{target}.fits"
         cell_dir = exp_root() / target / f"{target}_{method}" / f"{target}_{method}_{config_id}"
@@ -622,10 +579,8 @@ def evaluate_job(target, method, config_id):
     else:
         return {"psnr": "", "ssim": "", "mse": "", "imaging_time": ""}
     recon_path = cell_dir / f"{target}_{method}_{config_id}.fits"
-    # CASA and WSClean write logs named after the config_id.  DeepInverse's
-    # wrapper writes <target>_deepinverse.log inside the cell directory.
-    # R2D2's wrapper writes <target>_r2d2.log; the sweep renames it to the
-    # config_id log, but early completed cells only have the wrapper log.
+    # CASA/WSClean name logs after config_id; deepinv and r2d2 wrappers use their
+    # own log names (early r2d2 cells only have the wrapper log).
     if method == "deepinv":
         log_path = cell_dir / f"{target}_deepinverse.log"
     elif method == "r2d2":
@@ -653,8 +608,7 @@ def evaluate_job(target, method, config_id):
         print(f"[warn] Could not compute metrics for {target} {method} {config_id}: {e}")
         metrics = {"psnr": "", "ssim": "", "mse": ""}
 
-    # Runtime extraction mirrors compute_metrics.extract_runtime but the sweep
-    # uses the method tag "deepinv" instead of "deepinverse".
+    # extract_runtime expects the method tag "deepinverse", not "deepinv".
     runtime_method = "deepinverse" if method == "deepinv" else method
     t = extract_runtime(str(log_path), runtime_method)
     if np.isnan(t):
@@ -668,9 +622,8 @@ def evaluate_job(target, method, config_id):
 def backfill_completed_metrics(state_rows):
     """Compute metrics for completed rows that don't have them yet.
 
-    The wall-clock 'time' column is left untouched: it is measured by the
-    runner (subprocess elapsed time) and must not be overwritten by the
-    imaging time 't' extracted from the method log.
+    The wall-clock 'time' column is left untouched: it must not be overwritten
+    by the imaging time 't' extracted from the method log.
     """
     for (target, method, config_id), row in state_rows.items():
         if row.get("status") != "completed":
@@ -709,15 +662,11 @@ def read_or_create_gt_index(index_csv, target):
     return total
 
 
-# -----------------------------------------------------------------------------
-# Preparation step (once per target)
-# -----------------------------------------------------------------------------
 def prepare_target(target):
     """Ensure GT index entry and DeepInverse weights exist for a target.
 
-    Weights are stored directly inside the target's .mat file in data/simulated/
-    (or data/archival/). The old experiments/<target>/<target>_weights/ directory,
-    if present, is removed because it only contained temporary WSClean outputs.
+    Weights live inside the target's .mat file; the old
+    experiments/<target>/<target>_weights/ dir is removed if present.
     """
     index_csv = sweep_dir(BASE_DIR) / "gt_flux_index.csv"
     gt_total = read_or_create_gt_index(index_csv, target)
@@ -732,7 +681,6 @@ def prepare_target(target):
         except Exception:
             weights_ok = False
 
-    # Remove obsolete temporary weights directory from the old layout.
     old_weights_dir = exp_target_dir(BASE_DIR, target) / f"{target}_weights"
     if old_weights_dir.exists():
         try:
@@ -754,24 +702,14 @@ def prepare_target(target):
 
 
 
-# -----------------------------------------------------------------------------
-# Formatting helpers for config IDs
-# -----------------------------------------------------------------------------
 def _fmt(v):
-    """Format a value for use in file/folder names. Replaces '.' with 'p'.
-
-    Auto thresholds like 'auto:3' or 'auto:1.5' are shortened to the numeric
-    part so that config_ids remain filesystem-safe (no colons) and short.
-    """
+    """Format a value for file/folder names: 'auto:X' -> 'X', '.' -> 'p'."""
     s = f"{v}"
     if isinstance(v, str) and s.startswith("auto:"):
         s = s.split(":", 1)[1]
     return s.replace(".", "p")
 
 
-# -----------------------------------------------------------------------------
-# Individual job runners
-# -----------------------------------------------------------------------------
 def is_done(target, method, config_id):
     """Return True if a valid, non-empty FITS output already exists."""
     cell_dir = exp_target_dir(BASE_DIR, target) / f"{target}_{method}" / f"{target}_{method}_{config_id}"
@@ -809,7 +747,6 @@ def run_casa(target, config_id, config, dry_run=False):
     imagename = cell_dir / f"{target}_casa_{config_id}"
     final_path = cell_dir / f"{target}_casa_{config_id}.fits"
 
-    # Pass the imagename override so the wrapper writes all files inside the cell dir.
     cfg = dict(config)
     cfg["imagename"] = str(imagename)
 
@@ -870,7 +807,6 @@ def run_wsclean(target, pixel_size, config_id, params, dry_run=False):
 
     t0 = time.perf_counter()
     with open(log_path, "w") as logf:
-        # Helper logs and manual noise details all go through this function.
         def _log(msg, *args):
             logf.write((msg % args) + "\n")
             logf.flush()
@@ -878,8 +814,7 @@ def run_wsclean(target, pixel_size, config_id, params, dry_run=False):
         if _is_auto_threshold(params.get("threshold")) or (
             "threshold" in params and str(params["threshold"]).startswith("AUTO")
         ):
-            # Real run: the placeholder was replaced above only in dry-run mode,
-            # so this block executes only for actual auto thresholds.
+            # Only real auto thresholds reach here (dry-run uses the "AUTO" placeholder).
             noise_result = get_wsclean_sigma_noise(
                 ms_path=ms,
                 size=64,
@@ -919,7 +854,6 @@ def run_wsclean(target, pixel_size, config_id, params, dry_run=False):
             )
             _log("[noise] multiplier=%.2f -> threshold=%.6e", multiplier, computed_threshold)
 
-            # Rebuild command with the computed threshold.
             cmd = build_wsclean_args(target, pixel_size, str(prefix), params)
 
         result = subprocess.run(cmd, cwd=out, stdout=logf, stderr=subprocess.STDOUT)
@@ -929,7 +863,7 @@ def run_wsclean(target, pixel_size, config_id, params, dry_run=False):
         print(f"[error] WSClean {target} {config_id} failed (exit {result.returncode})")
         return elapsed, False
 
-    # Convert Jy/beam -> Jy/pixel in place, then copy to final name without the -image suffix.
+    # Convert Jy/beam -> Jy/pixel, then copy to the final name.
     from src.utils.transforms import convert_jybeam_to_jypixel
     convert_jybeam_to_jypixel(str(source_path))
     shutil.copy2(source_path, final_path)
@@ -975,17 +909,13 @@ def run_deepinverse(target, config_id, config, dry_run=False):
 
 
 def run_r2d2(target, config_id, config, dry_run=False):
-    """Run the R2D2 imager via scripts/run_r2d2.sh with a fixed configuration.
-
-    The wrapper writes its outputs to the requested cell directory; we then
-    rename the generic <target>_r2d2.* files to the sweep's <target>_r2d2_<config_id>.*
-    naming convention so that evaluate_job can locate them.
-    """
+    """Run R2D2 via scripts/run_r2d2.sh, then rename the generic <target>_r2d2.*
+    outputs to the sweep's <target>_r2d2_<config_id>.* naming so evaluate_job
+    can locate them."""
     out = exp_target_dir(BASE_DIR, target)
     cell_dir = out / f"{target}_r2d2" / f"{target}_r2d2_{config_id}"
     cell_dir.mkdir(parents=True, exist_ok=True)
 
-    # Generic names produced by the wrapper inside the cell directory.
     source_fits = cell_dir / f"{target}_r2d2.fits"
     source_log = cell_dir / f"{target}_r2d2.log"
     final_fits = cell_dir / f"{target}_r2d2_{config_id}.fits"
@@ -1013,7 +943,6 @@ def run_r2d2(target, config_id, config, dry_run=False):
     result = subprocess.run(cmd, cwd=out, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     elapsed = time.perf_counter() - t0
 
-    # Persist the captured log with the sweep naming convention.
     with open(final_log, "w") as logf:
         logf.write(result.stdout)
 
@@ -1026,11 +955,10 @@ def run_r2d2(target, config_id, config, dry_run=False):
 
 
 def run_deepinv_warmup(target, state_csv, state_lock, state_rows):
-    """Run a single DeepInverse warm-up job to compute and cache the operator norm.
+    """Run one DeepInverse warm-up job to compute/cache the operator norm.
 
-    This job also serves as the global CUDA/kernel warm-up for the target. Its
-    elapsed wall-clock time is recorded in sweep_state.csv with config_id='warmup'
-    and empty metric columns.
+    Also serves as the global CUDA warm-up; recorded in sweep_state.csv as
+    config_id='warmup' with empty metric columns.
     """
     out = exp_target_dir(BASE_DIR, target)
     cell_dir = out / f"{target}_deepinv" / f"{target}_deepinv_warmup"
@@ -1039,7 +967,6 @@ def run_deepinv_warmup(target, state_csv, state_lock, state_rows):
     source_path = cell_dir / f"{target}_deepinverse.fits"
     final_path = cell_dir / f"{target}_deepinv_warmup.fits"
 
-    # Base config without opnorm and without skipping warm-up.
     cfg = build_deepinv_config({}, cell_dir, opnorm=None, skip_warmup=False)
 
     cmd = [
@@ -1093,9 +1020,6 @@ def run_deepinv_warmup(target, state_csv, state_lock, state_rows):
     return opnorm
 
 
-# -----------------------------------------------------------------------------
-# Target-level work dispatchers
-# -----------------------------------------------------------------------------
 def run_cpu_jobs_for_target(target, pixel_size, state_csv, state_lock, state_rows, dry_run):
     """Run all CASA and WSClean configurations for a single target."""
     jobs = []
@@ -1146,11 +1070,9 @@ def run_cpu_jobs_for_target(target, pixel_size, state_csv, state_lock, state_row
 def run_gpu_jobs_for_target(target, state_csv, state_lock, state_rows, dry_run):
     """Run GPU-bound configurations for a single target (R2D2 + DeepInverse).
 
-    The operator norm for DeepInverse is computed via a warm-up run immediately
-    before the first DeepInverse config of the target if it is not already cached.
-    The cache file is kept on disk so a resumed sweep can reuse it.
+    The DeepInverse operator norm comes from a warm-up run right before the
+    target's configs if not already cached (cache kept on disk for resumed sweeps).
     """
-    # R2D2: single fixed configuration dispatched to the GPU worker.
     if "r2d2" in SWEEP_GRIDS:
         for cid, params in SWEEP_GRIDS["r2d2"]:
             if is_done(target, "r2d2", cid):
@@ -1186,7 +1108,6 @@ def run_gpu_jobs_for_target(target, state_csv, state_lock, state_rows, dry_run):
     if "deepinv" not in SWEEP_GRIDS:
         return
 
-    # Warm-up / opnorm cache is computed here, right before the target's configs.
     opnorm = load_cached_opnorm(target)
     if opnorm is None and not dry_run:
         opnorm = run_deepinv_warmup(target, state_csv, state_lock, state_rows)
@@ -1226,9 +1147,6 @@ def run_gpu_jobs_for_target(target, state_csv, state_lock, state_rows, dry_run):
 
 
 
-# -----------------------------------------------------------------------------
-# Workers
-# -----------------------------------------------------------------------------
 def cpu_worker(target_queue_cpu, cpu_target_locks, state_csv, state_lock, state_rows, dry_run):
     while True:
         target = target_queue_cpu.get()
@@ -1260,9 +1178,6 @@ def gpu_worker(target_queue_gpu, gpu_target_locks, state_csv, state_lock, state_
             target_queue_gpu.task_done()
 
 
-# -----------------------------------------------------------------------------
-# Main
-# -----------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser(description="Hyper-parameter sweep for RI reconstruction methods.")
     parser.add_argument("--targets", default=None,
@@ -1304,7 +1219,7 @@ def main():
         print(f"Sweep config file not found: {sweep_config_file}")
         sys.exit(1)
 
-    # Load sweep grids into the global read-only structure used by workers and reports.
+    # Load sweep grids into the global read-only structure.
     global SWEEP_GRIDS
     SWEEP_GRIDS = build_sweep_grids(sweep_config_file)
     print("Loaded sweep methods:", list(SWEEP_GRIDS.keys()))
@@ -1343,20 +1258,16 @@ def main():
         backfill_completed_metrics(state_rows)
         save_state(state_csv, state_lock, state_rows)  # persist cleaning of stale 'running' rows + metrics backfill
 
-    # Per-target locks prevent two workers from colliding on the same target.
-    # With the two-phase scheduler CPU jobs and GPU jobs never overlap, but
-    # multiple CPU (or GPU) workers may still pick the same target, so we keep
-    # the locks for safety.
+    # Per-target locks: CPU and GPU phases never overlap, but two workers of
+    # the same pool may still pick the same target.
     cpu_target_locks = {t: threading.Lock() for t in targets}
     gpu_target_locks = {t: threading.Lock() for t in targets}
 
-    # Preparation step: GT flux index and DeepInverse weights.
-    # Skip during dry-run to avoid generating any data.
+    # GT flux index and DeepInverse weights (skipped on dry-run).
     if not args.dry_run and not args.no_prepare:
         for target in targets:
             prepare_target(target)
 
-    # Count the actual number of jobs that would run (accounting for resumption).
     total_cpu_jobs = 0
     total_gpu_jobs = 0
     for target in targets:
@@ -1392,7 +1303,6 @@ def main():
         print("=== END DRY RUN ===\n")
         return
 
-    # Queues: one for CPU targets, one for GPU targets.
     from queue import Queue
     cpu_queue = Queue()
     gpu_queue = Queue()
@@ -1400,7 +1310,6 @@ def main():
         cpu_queue.put(target)
         gpu_queue.put(target)
 
-    # Sentinel values to stop workers.
     for _ in range(args.cpu_workers):
         cpu_queue.put(None)
     for _ in range(args.gpu_workers):
@@ -1408,7 +1317,7 @@ def main():
 
     t_start = time.perf_counter()
 
-    # Progress reporter: prints to terminal every 60s without polluting stdout log.
+    # Progress reporter: prints to /dev/tty every 60s to keep the stdout log clean.
     total_jobs = total_cpu_jobs + total_gpu_jobs
     progress_stop = threading.Event()
     progress_thread = None
@@ -1420,8 +1329,8 @@ def main():
         )
         progress_thread.start()
 
-    # Phase 1: CPU-bound jobs (CASA + WSClean). Run these first so that GPU-
-    # bound DeepInverse jobs do not contend for CPU/memory/NUFFT resources.
+    # Phase 1: CPU-bound jobs (CASA + WSClean) first, so GPU-bound DeepInverse
+    # jobs do not contend for CPU/memory/NUFFT resources.
     if total_cpu_jobs > 0 and args.cpu_workers > 0:
         print(f"Phase 1/2: {total_cpu_jobs} CPU jobs with {args.cpu_workers} worker(s) ...")
         with ThreadPoolExecutor(max_workers=args.cpu_workers) as executor:
@@ -1436,7 +1345,6 @@ def main():
                     print(f"[error] CPU worker failed: {e}")
         print("Phase 1/2: CPU jobs finished.")
 
-    # Phase 2: GPU-bound jobs (DeepInverse). Start only after CPU phase is done.
     if total_gpu_jobs > 0 and args.gpu_workers > 0:
         print(f"Phase 2/2: {total_gpu_jobs} GPU jobs with {args.gpu_workers} worker(s) ...")
         with ThreadPoolExecutor(max_workers=args.gpu_workers) as executor:
