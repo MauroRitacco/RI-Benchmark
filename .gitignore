@@ -6,6 +6,8 @@ env/
 __pycache__/
 *.pyc
 sweep*.log
+src/compute_metrics_normalize_to_beam_copy.py
+
 
 # IDEs
 .idea/
@@ -24,5 +26,8 @@ training_logs/
 *.pt
 *.pth
 experiments/
-results/
+results/*
+!results/test/
+results/test/*
+!results/test/test_results.txt
 external/

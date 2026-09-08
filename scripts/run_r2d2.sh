@@ -21,7 +21,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$TARGET" ]; then
-  TARGET="${TARGET:-disk_1111}"
+  echo "Usage: $0 --target <target> [--dry-run] [--output-dir DIR] [--config JSON]"
+  exit 1
 fi
 
 BASE_DIR=$(cd "$(dirname "$0")/.." && pwd)
@@ -114,7 +115,7 @@ yaml_get() {
 }
 
 # Build imager.py arguments
-IMAGER_CONFIG=$(yaml_get "imager_config" "config/imaging/R2D2_small.yaml")
+IMAGER_CONFIG=$(yaml_get "imager_config" "$BASE_DIR/config/imaging/R2D2_small.yaml")
 ARCHITECTURE=$(yaml_get "architecture" "unet")
 PRUNE=$(yaml_get "prune" "true")
 SIGMA_RES_TOL=$(yaml_get "sigma_res_tol" "1e-4")
@@ -131,9 +132,9 @@ CKPT_PATH=$(yaml_get "ckpt_path" "ckpt/R2D2_small_ALMA2")
 CKPT_REALISATIONS=$(yaml_get "ckpt_realisations" "1")
 NUM_CHANS=$(yaml_get "num_chans" "32")
 
-# Prepend R2D2_REPO to relative paths
+# Resolve relative paths: configs live in this repo, checkpoints in external/R2D2-RI
 if [[ "$IMAGER_CONFIG" != /* ]]; then
-    IMAGER_CONFIG="$R2D2_REPO/$IMAGER_CONFIG"
+    IMAGER_CONFIG="$BASE_DIR/$IMAGER_CONFIG"
 fi
 if [[ "$CKPT_PATH" != /* ]]; then
     CKPT_PATH="$R2D2_REPO/$CKPT_PATH"

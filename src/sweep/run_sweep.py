@@ -157,10 +157,14 @@ def _config_id_from_params(params):
     """Build a short config id from a {param: value} dict.
 
     Params are processed in insertion order (Python 3.7+ dicts preserve order).
+    Sigma-multiplier (auto) thresholds use a 'ts' tag so they never collide
+    with legacy absolute-threshold ids ('t<value>').
     """
     parts = []
     for param, value in params.items():
         tag = PARAM_TAGS.get(param, param[0])
+        if param == "threshold" and isinstance(value, str) and value.startswith("auto:"):
+            tag = "ts"
         parts.append(f"{tag}{_fmt(value)}")
     return "_".join(parts)
 

@@ -2,18 +2,18 @@
 # Format: method,param,value1,value2,...
 # The order of params for a given method determines the config_id.
 #
-# casa config_id:  g<gain>_t<threshold>
-# wsclean config_id: g<gain>_t<threshold>
+# casa config_id:  g<gain>_ts<multiplier> for auto thresholds
+# wsclean config_id: g<gain>_ts<multiplier> for auto thresholds
 # deepinv config_id: l<lambda_factor>_i<max_iter>
 
 # Thresholds are now multipliers of the dirty-image sigma: auto:<multiplier>.
 # casa.py and run_wsclean.sh compute sigma_noise per target from their own
 # dirty image and set threshold = multiplier * sigma_noise.
-casa,gain,0.1,0.05,0.01
-casa,threshold,auto:1.0,auto:2.0,auto:3.0
+casa,gain,0.1
+casa,threshold,auto:0.5,auto:0.1,auto:0.01,auto:0.001
 
-wsclean,gain,0.1,0.05,0.01
-wsclean,threshold,auto:1.0,auto:2.0,auto:3.0
+wsclean,gain,0.1
+wsclean,threshold,auto:0.5,auto:0.1,auto:0.01
 
 deepinv,lambda_factor,3e-2, 1e-1, 3e-1
 deepinv,max_iter,50
