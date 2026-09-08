@@ -83,7 +83,6 @@ yaml_get() {
   fi
 }
 
-# Build wsclean config
 SIZE=$(yaml_get "size" "64")
 PADDING=$(yaml_get "padding" "2")
 J=$(yaml_get "j" "1")
@@ -98,7 +97,6 @@ AUTO_MASK=$(yaml_get "auto_mask" "")
 NITER=$(yaml_get "niter" "200000")
 DATA_COLUMN=$(yaml_get "data_column" "DATA")
 
-# Load pixel size from .mat file
 MAT_FILE="${DATA_FILE%.MS}.mat"
 PIXEL_SIZE=$($BENCH_PYTHON -c "
 from scipy.io import loadmat
@@ -121,7 +119,6 @@ fi
 echo "Starting WSClean for $TARGET..."
 echo "Log saved in: $LOG_FILE"
 
-# Build dynamic multiscale and auto-mask flags
 MULTISCALE_FLAGS=""
 if [ "$MULTISCALE" = "true" ]; then
     MULTISCALE_FLAGS="-multiscale -multiscale-scales $MULTISCALE_SCALES"
@@ -165,8 +162,7 @@ if [ -n "$AUTO_MULTIPLIER" ]; then
             gt_arg="--gt-path $GT_PATH"
         fi
 
-        # Use the same target-level cache as the sweep driver so standalone and
-        # sweep runs reuse each other's dirty noise estimates when parameters match.
+        # Same cache as the sweep driver so standalone and sweep runs reuse noise estimates.
         WSCLEAN_DIRTY_PREFIX="$BASE_DIR/experiments/simulated/$TARGET/${TARGET}_wsclean_dirty_pass"
         WSCLEAN_DIRTY_CACHE="$BASE_DIR/experiments/simulated/$TARGET/.wsclean_dirty_noise.json"
 

@@ -21,7 +21,6 @@ from src.utils.transforms import calculate_pixel_size
 
 
 def main(target, config_json=None, n=1):  
-    # Default configuration
     cfg = {
         "img_size": [64, 64],
         "real_projection": True,
@@ -36,17 +35,16 @@ def main(target, config_json=None, n=1):
         "max_iter": 50,
         "early_stop": True,
         "thres_conv": 1e-5,
-        # Optional cached operator norm (avoids recomputing it for every config).
+        # Optional cached operator norm (avoids recomputing per config).
         "opnorm": None,
-        # Skip the FISTA warm-up run. Useful when a global warm-up has already been done.
+        # Skip FISTA warm-up (e.g. after a global warm-up run).
         "skip_warmup": False,
     }
     if config_json:
         user_cfg = json.loads(config_json)
         cfg.update(user_cfg)
 
-    # Optional per-cell output directory override (used by the sweep driver).
-    # Keep default behaviour when it is not supplied.
+    # Optional out_dir override (used by the sweep driver).
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')) # Project root
     if os.environ.get("RI_BENCH_TEST") == "1":
         sim_dir = os.path.join(base_dir, 'data', 'simulated', 'test')
@@ -94,7 +92,6 @@ def main(target, config_json=None, n=1):
         filepath = os.path.join(out_dir, filename)
         hdu = fits.PrimaryHDU(tensor)
         
-        # Add basic WCS and beam headers
         try:
             mat_data = scipy.io.loadmat(vis_path)
             pixel_size = float(mat_data.get('nominal_pixelsize').flatten()[0])
@@ -117,18 +114,15 @@ def main(target, config_json=None, n=1):
         print(f"Saved: {filepath}")
         
 
-    # Clear previous results
     import glob
     for f in glob.glob(os.path.join(out_dir, '*')):
         os.remove(f)
 
-    # Load device
     device = dinv.utils.get_device()
 
-    # Convert mat to npy
     mattonpy(vis_path, n=n)
     
-    # Load npy. Important to specify dtype, otherwise it loads as float32
+    # dtype must be given explicitly, otherwise load_np defaults to float32
     data = dinv.utils.load_np(vis_path.replace('.mat', '.npy'), dtype=np.complex64, device=device)
     uv = dinv.utils.load_np(vis_path.replace('.mat', '_uv.npy'), dtype=np.float32, device=device)
     briggs = dinv.utils.load_np(vis_path.replace('.mat', '_briggs.npy'), dtype=np.float32, device=device)
@@ -139,41 +133,37 @@ def main(target, config_json=None, n=1):
     print(f"Briggs weights: {briggs.dtype} {briggs.shape}")
     print(f"nW (1/tau): {nW.dtype} {nW.shape}")
 
-    # Combine Briggs weighting and natural weighting (nWimag / tau in the tutorial)
+    # Combined weighting: briggs * nW (nW = 1/tau, cf. DeepInv tutorial)
     briggs = briggs.view(1, 1, -1).to(device)
     nW = nW.view(1, 1, -1).to(device)
     nWimag = briggs * nW
     
-    # Apply natural + Briggs weighting to measurements
     y_raw = data.view(1, 1, -1).to(device)
     y = y_raw * nWimag
     
-    # Setup the RadioInterferometry forward operator
     physics = RadioInterferometry(
         img_size=img_size,
         samples_loc=uv.permute((1, 0)),
         real_projection=real_projection,
         device=device,
     )
-    # Add image weighting to the sensing operator
     physics.setWeight(nWimag)
     
-    # Central Dirac pulse for PSF
+    # Dirac pulse for PSF
     mock = torch.randint(5, (1, 1, img_size[0], img_size[1]))
     dirac = dirac_like(mock).to(device)
     
-    # Compute PSF
     PSF = physics.A_adjoint(physics.A(dirac))
     savefits(PSF, 'psf')
    
-    # Compute dirty image (single W via operator adjoint: Φᴴ · W · y_raw)
+    # Dirty image (single W via operator adjoint: Φᴴ · W · y_raw)
     x_hat = physics.A_adjoint(y.view(1, 1, -1).to(device))
     savefits(x_hat, 'dirty')
         
-    # Initialization for FISTA: use pseudo-inverse (A_dagger) for better starting point
+    # FISTA init: pseudo-inverse for a better starting point
     x_init_fista = physics.A_dagger(y).to(device)
         
-    # Operator norm cache path lives next to the input .mat file.
+    # Operator norm cache lives next to the input .mat file.
     opnorm_cache_path = vis_path.replace('.mat', '_opnorm.json')
     cached_opnorm = cfg.get("opnorm")
 
@@ -189,7 +179,6 @@ def main(target, config_json=None, n=1):
             verbose=False,
         ).item()
         print(f"Operator norm (raw): {opnorm}")
-        # Save it next to the .mat so later configs can reuse it.
         try:
             with open(opnorm_cache_path, 'w') as f:
                 json.dump({"opnorm": opnorm}, f)
@@ -211,21 +200,17 @@ def main(target, config_json=None, n=1):
     from deepinv.optim.prior import WaveletPrior
     from deepinv.optim import FISTA
 
-    # Select the data fidelity term
     data_fidelity = L2()
-    # Specify the prior (we redefine it with a smaller number of iteration for faster computation)
     wv_list = prior_wavelets
     prior = WaveletPrior(level=prior_level, wv=wv_list, p=prior_p, device=device, clamp_min=prior_clamp_min)
 
-    # Logging parameters
     verbose = True
-    plot_convergence_metrics = False # Log performance metrics
+    plot_convergence_metrics = False
 
     # Algo parameters (aligned with demo_ri_basic.py)
     stepsize = 1.0 / (stepsize_factor * opnorm)
-    lambda_reg = lambda_factor * opnorm  # Regularization parameter
+    lambda_reg = lambda_factor * opnorm
 
-    # Increase max_iter to allow FISTA to fully converge on the sharp edges
     max_iter = max_iter
     early_stop = early_stop
 
@@ -245,18 +230,16 @@ def main(target, config_json=None, n=1):
         custom_init=custom_init,
     )
 
-    init = torch.clamp(x_init_fista, 0), torch.clamp(x_init_fista, 0) # FISTA initialization (reuse dirty image)
+    init = torch.clamp(x_init_fista, 0), torch.clamp(x_init_fista, 0) # FISTA init
 
-    # Optional warm-up run. Skipped when a global warm-up has already been performed.
+    # Optional warm-up run (skipped when a global warm-up has already been done).
     if not cfg.get("skip_warmup", False):
         _ = model(y, physics, init=init)
     
-    # Runtime measurement
     if device.type == 'cuda':
         torch.cuda.synchronize()
     start_time = time.perf_counter()
 
-    # FISTA reconstruction (timed)
     x_model = model(y, physics, init=init)
     
     if device.type == 'cuda':
@@ -287,7 +270,6 @@ def main(target, config_json=None, n=1):
 
     savefits(x_model, '')
 
-    # Log configuration and execution time
     log_filepath = os.path.join(out_dir, f"{target}_deepinverse.log")
     with open(log_filepath, "w") as f:
         f.write("DeepInv Configuration:\n")
@@ -319,7 +301,6 @@ def main(target, config_json=None, n=1):
     print(f"Imaging time: {imaging_time:.2f} seconds")
     print(f"Execution time: {runtime:.2f} seconds")
 
-    # Cleanup
     npy_file = vis_path.replace('.mat', '.npy')
     uv_npy_file = vis_path.replace('.mat', '_uv.npy')
     briggs_npy_file = vis_path.replace('.mat', '_briggs.npy')
@@ -353,11 +334,10 @@ def mattonpy(mat, n=3):
     uv = np.concatenate((-v, u), axis=1)
     # uv = normalize_uv(uv)
     
-    # Save arrays
     np.save(mat.replace('.mat', '.npy'), y)
     np.save(mat.replace('.mat', '_uv.npy'), uv)
     
-    # Save Briggs weights (from wsclean imaging weights)
+    # Briggs weights from wsclean imaging weights
     briggs = mat_data.get('weight')
     if briggs is None:
         briggs = np.ones((y.shape[0], 1), dtype=np.float32)

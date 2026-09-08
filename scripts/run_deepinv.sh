@@ -56,7 +56,7 @@ if [ -z "$METHOD_CONFIG" ] || [ "$METHOD_CONFIG" = "null" ]; then
   USE_DEFAULTS=1
 fi
 
-# Read nval from top-level YAML or default to 1
+# nval from top-level YAML, default 1
 NVAL="1"
 if [ -f "$YAML_PATH" ]; then
   NVAL=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
@@ -66,7 +66,7 @@ if [ -z "$NVAL" ]; then
   NVAL="1"
 fi
 
-# Build DEEPINV_CONFIG JSON
+# DEEPINV_CONFIG JSON
 if [ "$USE_DEFAULTS" -eq 1 ]; then
   DEEPINV_CONFIG='{
     "img_size": [64, 64],
@@ -89,7 +89,7 @@ fi
 
 echo "Starting DeepInv for $TARGET..."
 
-# Read weight robustness for DeepInverse weight generation (default 2)
+# weight robustness for weight generation, default 2
 WEIGHT_ROBUST="2"
 if [ -f "$YAML_PATH" ]; then
   WEIGHT_ROBUST=$("$BENCH_PYTHON" "$BASE_DIR/scripts/parse_target_yaml.py" \
@@ -99,7 +99,6 @@ if [ -z "$WEIGHT_ROBUST" ]; then
   WEIGHT_ROBUST="2"
 fi
 
-# Generate Briggs weights
 if [ "$DRY_RUN" -eq 1 ]; then
     echo "[DRY-RUN] ./scripts/generate_weights.sh $TARGET $NVAL $WEIGHT_ROBUST"
 else
@@ -112,7 +111,7 @@ else
     "$VENV_PYTHON" src/algorithms/deepinverse.py --target "$TARGET" --config "$DEEPINV_CONFIG" --nval "$NVAL" | tee "$LOG_FILE"
 fi
 
-# Calculate beam parameters from the PSF, then format all output FITS
+# Beam params from PSF, then format output FITS
 PSF_FILE="$OUTPUT_DIR/${TARGET}_deepinverse_psf.fits"
 if [ -f "$PSF_FILE" ]; then
     if [ "$DRY_RUN" -eq 1 ]; then

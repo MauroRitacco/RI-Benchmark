@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Standalone validation / characterization of dirty-image noise estimation.
 
-Default mode: validate dirty-image noise estimation on 4 selected targets.
-Characterization mode: collect per-patch statistics over 12 targets spanning
-all size classes, and produce a sigma_noise vs tau scatter plot.
+Default: 4 targets. --characterize: 12-target study with CSV + sigma vs tau plot.
 """
 
 from __future__ import annotations
@@ -184,7 +182,6 @@ def characterize_targets(args: argparse.Namespace) -> None:
         rows.append(row)
         per_target_details.append((target, yes_stats, yes_valid))
 
-    # Write CSV
     csv_path = args.out_dir / "characterization.csv"
     if rows:
         fieldnames = list(rows[0].keys())
@@ -194,7 +191,6 @@ def characterize_targets(args: argparse.Namespace) -> None:
             writer.writerows(rows)
         print(f"CSV saved: {csv_path}")
 
-    # Print table
     print("\n" + "=" * 120)
     print("Characterization table (new criterion: std <= 2 * median std)")
     print("=" * 120)
@@ -219,7 +215,6 @@ def characterize_targets(args: argparse.Namespace) -> None:
         )
     print("\n(*) asterisk: parche descartado por std > 2 * mediana")
 
-    # Per-patch detailed table
     print("\n" + "=" * 120)
     print("Per-patch details")
     print("=" * 120)
@@ -236,10 +231,8 @@ def characterize_targets(args: argparse.Namespace) -> None:
                 f"{s.rms:>12.4e} {mark:>8}"
             )
 
-    # Scatter plot
     _plot_sigma_vs_tau(rows, args.out_dir / "sigma_vs_tau.png")
 
-    # Analysis
     _print_analysis(rows)
 
 

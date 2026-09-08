@@ -1,11 +1,9 @@
 """Estimate noise in a dirty image from four corner patches.
 
-The geometry and source filtering are driven by the synthetic-disk generator
-(DiskGenerator/src/disk_generator.py).  For a 64x64 image the emission is
-confined to the central ~32 px, so 9x9 corner patches are outside the disk and
-star.  Patches that overlap a known random point source (read from the ground
-truth FITS header) are discarded, and the remaining patches must pass a
-purity test (rms ≈ std).
+For a 64x64 image the emission is confined to the central ~32 px (see
+DiskGenerator/src/disk_generator.py), so 9x9 corner patches are outside the
+disk and star.  Patches overlapping a known point source (from the ground
+truth FITS header) or failing a purity test (rms ~ std) are discarded.
 """
 
 from __future__ import annotations
@@ -58,20 +56,10 @@ class NoiseResult:
 
 
 def read_source_info(gt_path: str | Path) -> tuple[bool, float, float]:
-    """Read whether a random point source exists and its pixel offsets.
+    """Read HAS_EXT and the source pixel offsets EXT_X/EXT_Y from the header.
 
-    Returns
-    -------
-    has_source : bool
-        Value of the HAS_EXT header (True/False).
-    ext_x, ext_y : float
-        Source offset from the image centre, in pixels, along axis 1 and 2.
-        These are zero when no source is present.
-
-    Raises
-    ------
-    RuntimeError
-        If HAS_EXT is True but EXT_X/EXT_Y are missing from the header.
+    Returns (has_source, ext_x, ext_y); offsets are 0 when no source is present.
+    Raises RuntimeError if HAS_EXT is True but EXT_X/EXT_Y are missing.
     """
     gt_path = Path(gt_path)
     hdr = fits.getheader(str(gt_path))
@@ -107,14 +95,10 @@ def source_pixel_in_dirty(
 ) -> tuple[float, float]:
     """Map the source offset (EXT_X, EXT_Y) to pixel coordinates in the dirty image.
 
-    EXT_X/EXT_Y are offsets from the image centre in pixels, as written by the
-    disk generator.  The ground-truth and dirty images in this benchmark are on
-    the same pixel grid, so the source lands at the same offset from each
-    image's CRPIX.  We therefore transfer the pixel offset directly rather
-    than going through sky coordinates, because the synthetic ground-truth FITS
-    has CRVAL=(0,0) while CASA/WSClean dirty images inherit the observation
-    phase centre as CRVAL; a WCS transfer would mix two different reference
-    points and produce incorrect (often NaN) positions.
+    The pixel offset is transferred directly via CRPIX instead of going through
+    sky coordinates: the synthetic ground truth has CRVAL=(0,0) while dirty
+    images inherit the observation phase centre as CRVAL, so a WCS transfer
+    would mix two different reference points and give wrong (often NaN) positions.
     """
     gt_path = Path(gt_path)
     dirty_path = Path(dirty_path)
@@ -123,12 +107,9 @@ def source_pixel_in_dirty(
     crpix1 = float(dirty_hdr.get("CRPIX1", (dirty_hdr["NAXIS1"] + 1) / 2.0))
     crpix2 = float(dirty_hdr.get("CRPIX2", (dirty_hdr["NAXIS2"] + 1) / 2.0))
 
-    # Source position in dirty-image FITS 1-based pixels.
+    # FITS 1-based pixels (axis 1 = col, axis 2 = row), then 0-based numpy indices.
     src_col_1based = crpix1 + ext_x
     src_row_1based = crpix2 + ext_y
-
-    # Convert to 0-based numpy indices: (row, col).
-    # FITS axis 1 ↔ array columns, axis 2 ↔ array rows.
     row = src_row_1based - 1.0
     col = src_col_1based - 1.0
     return row, col
@@ -197,10 +178,9 @@ def compute_patch_stats(
 ) -> PatchStats:
     """Classical mean, std and RMS of a patch.
 
-    By default a 2D plane (z = a*x + b*y + c) is fit by least squares and the
-    std/rms are computed from the residuals.  This removes a local sidelobe
-    pedestal gradient from the noise estimate while keeping the original mean
-    for diagnostic purposes.
+    With detrend=True a 2D plane (z = a*x + b*y + c) is fit by least squares
+    and std/rms are computed from the residuals, removing the local sidelobe
+    pedestal gradient from the noise estimate.
     """
     values_2d = data[patch.row_slice, patch.col_slice]
     ny, nx = values_2d.shape
@@ -226,13 +206,7 @@ def filter_patches_by_std_consistency(
     patch_stats: Iterable[PatchStats],
     factor: float = DEFAULT_STD_CONSISTENCY_FACTOR,
 ) -> tuple[list[PatchStats], list[dict]]:
-    """Discard patches whose std deviates strongly from the median std.
-
-    The corners of a dirty image can share a common sidelobe pedestal (captured
-    in the patch mean) while still having the same noise std.  This filter keeps
-    only patches whose std is within `factor` of the median std across all
-    supplied patches.
-    """
+    """Discard patches whose std exceeds `factor` times the median std."""
     patch_stats = list(patch_stats)
     if not patch_stats:
         return [], []
@@ -275,24 +249,9 @@ def estimate_noise(
 ) -> NoiseResult:
     """Estimate sigma_noise from corner patches of a dirty image.
 
-    Parameters
-    ----------
-    dirty_path
-        Path to the dirty FITS image (in native units, e.g. Jy/beam).
-    gt_path
-        Path to the ground-truth FITS containing HAS_EXT/EXT_X/EXT_Y.  If None,
-        no point-source filtering is performed.
-    multiplier
-        Factor by which sigma_noise is multiplied to build the threshold.
-    std_consistency_factor
-        Patches whose std is larger than this factor times the median std are
-        discarded as contaminated.
-    detrend
-        If True, fit and remove a 2D plane from each patch before computing std.
-
-    Returns
-    -------
-    NoiseResult with sigma_noise, threshold and per-patch details.
+    gt_path: ground-truth FITS with HAS_EXT/EXT_X/EXT_Y; if None, no
+    point-source filtering.  multiplier scales sigma_noise into the threshold.
+    detrend: fit and remove a 2D plane from each patch before computing std.
     """
     dirty_path = Path(dirty_path)
     data = fits.getdata(str(dirty_path)).squeeze().astype(np.float64)

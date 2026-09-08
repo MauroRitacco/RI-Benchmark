@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 """Validate the corner-patch noise estimator against pure-noise visibilities.
 
-For a chosen target:
-1. Read the original .mat, extract tau (=1/nW[0]) and M (#unflagged visibilities).
-2. Build a pure-noise visibility vector y_noise = (randn + 1j*randn)/sqrt(2) * tau.
-3. Save a noise-only .mat and create a noise-only MS by copying the original MS
-   and replacing the DATA column with y_noise.
-4. Generate CASA dirty images (tclean niter=0, briggs robust=2, imsize=64) for
-   both the noise-only MS and the original MS.
-5. Estimate sigma_noise from corner patches using the same estimator used in the
-   sweep, with and without detrending on the noise image, and with detrending on
-   the real target.
-6. Report sigma_noise values and compare with the theoretical tau/sqrt(M).
+Builds a noise-only .mat/MS (y = (randn + 1j*randn)/sqrt(2) * tau, with
+tau = 1/nW and M = #unflagged visibilities), generates tclean niter=0 dirty
+images for both the noise-only and original MS, and compares the corner-patch
+sigma_noise estimates against the theoretical tau/sqrt(M).
 
 Run with the CASA Python environment:
     cd RI-Benchmark
@@ -151,9 +144,7 @@ def main() -> None:
     print(f"Original MS:   {orig_ms_path}")
     print(f"Output dir:    {out_dir}")
 
-    # ------------------------------------------------------------------
     # 1. Load original .mat
-    # ------------------------------------------------------------------
     mat = loadmat(str(orig_mat_path))
     y_orig = mat["y"].flatten()
     nW = mat["nW"].flatten()
@@ -174,9 +165,7 @@ def main() -> None:
     print(f"tau = 1/nW = {tau:.6e}")
     print(f"Theoretical image noise (tau/sqrt(M)) = {sigma_theory:.6e} Jy/beam")
 
-    # ------------------------------------------------------------------
     # 2. Build pure-noise .mat
-    # ------------------------------------------------------------------
     rng = np.random.default_rng(RANDOM_SEED)
     y_noise = (rng.standard_normal(M) + 1j * rng.standard_normal(M)) / np.sqrt(2.0)
     y_noise = y_noise.astype(np.complex64) * tau
@@ -187,16 +176,12 @@ def main() -> None:
     savemat(str(noise_mat_path), noise_mat)
     print(f"\nSaved noise .mat: {noise_mat_path}")
 
-    # ------------------------------------------------------------------
     # 3. Create noise-only MS
-    # ------------------------------------------------------------------
     noise_ms_path = out_dir / f"{target}_noise.MS"
     print(f"Creating noise MS: {noise_ms_path}")
     copy_ms_replace_data(orig_ms_path, noise_ms_path, y_noise)
 
-    # ------------------------------------------------------------------
     # 4. Generate CASA dirty images
-    # ------------------------------------------------------------------
     print("\n--- Generating dirty images ---")
     noise_dirty_fits = generate_casa_dirty(
         noise_ms_path, out_dir / f"{target}_noise_casa", pixel_size
@@ -208,9 +193,7 @@ def main() -> None:
     )
     print(f"Real dirty FITS: {real_dirty_fits}")
 
-    # ------------------------------------------------------------------
     # 5. Estimate sigma_noise
-    # ------------------------------------------------------------------
     print("\n--- Noise estimates ---")
     results = {}
 
@@ -235,9 +218,7 @@ def main() -> None:
     results["real_with_detrend"] = sigma_real
     print(f"σ_real  (target real, con detrend)  = {sigma_real:.6e} Jy/beam")
 
-    # ------------------------------------------------------------------
     # 6. Diagnostics and summary
-    # ------------------------------------------------------------------
     print("\n--- Summary table ---")
     print(f"{'Case':<35} {'σ (Jy/beam)':>14} {'σ / σ_theory':>14}")
     print("-" * 65)

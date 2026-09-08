@@ -38,9 +38,8 @@ from matplotlib.patches import Ellipse
 from skimage.metrics import peak_signal_noise_ratio as compute_psnr
 from skimage.metrics import structural_similarity as compute_ssim
 
-# Use the bundled Computer Modern Roman font (cmr10) shipped with matplotlib.
-# The generic "Computer Modern" name is not installed system-wide, but cmr10 is
-# the same design and is available as a bundled TTF.
+# cmr10: bundled Computer Modern Roman TTF (the generic "Computer Modern"
+# name is not installed system-wide, but cmr10 is the same design).
 plt.rcParams["font.family"] = "cmr10"
 plt.rcParams["axes.unicode_minus"] = False
 plt.rcParams["axes.formatter.use_mathtext"] = True
@@ -106,10 +105,9 @@ def compute_image_ssim(reconstruction, ground_truth):
 
 
 def draw_synthesized_beam(ax, fits_path):
-    """Draw the synthesized beam from the FITS header in the bottom-left corner.
+    """Draw the restoring beam ellipse from the FITS header.
 
-    Reads BMAJ/BMIN/BPA (degrees) and CDELT1/CDELT2 (degrees/pixel) and draws
-    a white ellipse representing the restoring beam.
+    Uses BMAJ/BMIN/BPA (degrees) and CDELT1/CDELT2 (degrees/pixel).
     """
     hdr = fits.getheader(fits_path)
     if "BMAJ" not in hdr or "BMIN" not in hdr or "BPA" not in hdr:
@@ -133,7 +131,7 @@ def draw_synthesized_beam(ax, fits_path):
     pixel_y = np.sign(cdelt2) * np.cos(rad)
     angle_deg = np.degrees(np.arctan2(pixel_y, pixel_x))
 
-    # Place ellipse in the bottom-right corner, with some padding from the edge
+    # Bottom-right corner, padded from the edge
     ny, nx = ax.get_images()[0].get_array().shape[:2]
     center_x = 0.94 * nx
     center_y = 0.04 * ny
@@ -201,7 +199,6 @@ def plot_comparison(target, output_path=None):
     """Generate and save the comparison figure."""
     paths = get_image_paths(target)
 
-    # Load images
     images = {}
     for name, path in paths.items():
         if not path.exists():
@@ -239,14 +236,10 @@ def plot_comparison(target, output_path=None):
         )
         images["dirty"] = images["dirty"] / beam_area_pix
 
-    # Shared color scale for the 5 comparable panels (exclude dirty image)
+    # Shared color scale for the 5 comparable panels (excludes dirty)
     comparable_keys = ["groundtruth", "casa", "wsclean", "deepinv", "r2d2"]
     shared_vmax = max(images[k].max() for k in comparable_keys)
 
-    # Layout: 3 rows x 2 columns
-    # Top row: groundtruth, dirty image
-    # Middle row: casa, wsclean
-    # Bottom row: deepinv, r2d2
     layout = [
         ["groundtruth", "dirty"],
         ["casa", "wsclean"],
@@ -266,7 +259,6 @@ def plot_comparison(target, output_path=None):
             ax = axes[row_idx, col_idx]
             img = images[key]
 
-            # Shared scale for comparable panels; dirty image keeps its own scale
             if key in comparable_keys:
                 vmax = shared_vmax
             else:
@@ -281,7 +273,6 @@ def plot_comparison(target, output_path=None):
                 interpolation="nearest",
             )
 
-            # Panel title / labels at the top-left
             display_name = DISPLAY_NAMES[key]
             ax.text(
                 0.03,
@@ -295,8 +286,6 @@ def plot_comparison(target, output_path=None):
                 ha="left",
             )
 
-            # Metrics for the four method panels:
-            #   title at upper-left, all metrics (T, PSNR, SSIM) at bottom-left
             if key in ["casa", "wsclean", "deepinv", "r2d2"]:
                 t_value = times[key]
                 t_str = f"T: {t_value:.2f} s" if t_value is not None else "T: —"
@@ -329,9 +318,8 @@ def plot_comparison(target, output_path=None):
                 label.set_rotation(90)
                 label.set_va("center")
 
-            # Draw the real synthesized beam (from FITS header) only for
-            # CLEAN (CASA) and WSClean, which are the methods that produce
-            # a meaningful restoring beam in their FITS outputs.
+            # Restoring beam only for casa/wsclean (only they produce a
+            # meaningful beam in their FITS outputs)
             if key in ["casa", "wsclean"]:
                 draw_synthesized_beam(ax, paths[key])
 

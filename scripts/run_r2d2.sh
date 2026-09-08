@@ -52,7 +52,7 @@ else
     UV_CUTOFF_FLAG="--uv_cutoff=2000000"
 fi
 
-# Default output dir follows the standard benchmark layout; --output-dir overrides it.
+# Default: standard benchmark layout; --output-dir overrides.
 if [ -z "$OUTPUT_DIR" ]; then
     OUTPUT_DIR="$BASE_DIR/experiments/$CATEGORY/$TARGET/${TARGET}_r2d2"
 fi
@@ -80,7 +80,7 @@ fi
 USE_DEFAULTS=0
 if [ -z "$METHOD_CONFIG" ] || [ "$METHOD_CONFIG" = "null" ]; then
   if [ -n "$CONFIG_JSON" ]; then
-    # A JSON config was supplied explicitly; use it even if the target YAML has no method section.
+    # Explicit JSON config: use it even if target YAML has no method section.
     METHOD_CONFIG=$("$BENCH_PYTHON" -c "import json,sys; print(json.dumps(json.loads(sys.argv[1])))" "$CONFIG_JSON" 2>/dev/null) || true
   fi
   if [ -z "$METHOD_CONFIG" ] || [ "$METHOD_CONFIG" = "null" ]; then
@@ -91,7 +91,7 @@ if [ -z "$METHOD_CONFIG" ] || [ "$METHOD_CONFIG" = "null" ]; then
   fi
 fi
 
-# Helper to extract a single key from YAML or fallback to default
+# Get a YAML key (yaml_get key default), falling back to the default value
 yaml_get() {
   local key="$1"
   local default_val="$2"
@@ -114,7 +114,6 @@ yaml_get() {
   fi
 }
 
-# Build imager.py arguments
 IMAGER_CONFIG=$(yaml_get "imager_config" "$BASE_DIR/config/imaging/R2D2_small.yaml")
 ARCHITECTURE=$(yaml_get "architecture" "unet")
 PRUNE=$(yaml_get "prune" "true")
@@ -140,7 +139,6 @@ if [[ "$CKPT_PATH" != /* ]]; then
     CKPT_PATH="$R2D2_REPO/$CKPT_PATH"
 fi
 
-# Build boolean flags
 PRUNE_FLAG=""
 if [ "$PRUNE" = "true" ]; then
     PRUNE_FLAG="--prune"
@@ -151,7 +149,6 @@ if [ "$MEAS_OP_ON_GPU" = "true" ]; then
     MEAS_OP_FLAG="--meas_op_on_gpu"
 fi
 
-# Clean up previous run outputs to ensure a fresh start
 if [ -d "$OUTPUT_DIR" ]; then
     if [ "$DRY_RUN" -eq 1 ]; then
         echo "[DRY-RUN] rm -rf $OUTPUT_DIR"
@@ -223,7 +220,6 @@ fi
 
 popd > /dev/null
 
-# Rename the output FITS files and move other outputs one directory up
 if [ "$DRY_RUN" -eq 1 ]; then
     echo "[DRY-RUN] mv $OUTPUT_DIR/$TARGET/R2D2_model_image.fits $OUTPUT_DIR/${TARGET}_r2d2.fits (if exists)"
     echo "[DRY-RUN] mv $OUTPUT_DIR/$TARGET/PSF.fits $OUTPUT_DIR/${TARGET}_r2d2_psf.fits (if exists)"
@@ -242,7 +238,6 @@ else
     fi
 fi
 
-# Calculate beam parameters from the PSF, then format all output FITS
 PSF_FILE="$OUTPUT_DIR/${TARGET}_r2d2_psf.fits"
 if [ -f "$PSF_FILE" ]; then
     if [ "$DRY_RUN" -eq 1 ]; then
