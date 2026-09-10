@@ -5,8 +5,8 @@ Reads results/noise_validation/pure_noise_val360.csv and writes a single
 2x2 figure to results/noise_snr/pure_noise_val360_plots.png:
 
   1. Histogram of sigma_measured (corner estimator, plane detrend) per class.
-  2. sigma_measured vs sigma_theory per class, with the per-class linear
-     fit (calibration factor) annotated in the legend.
+  2. sigma_measured (corners) vs sigma_whole (whole image) per class, with
+     the y=x reference line.
   3. Histogram of sigma_measured / sigma_corners_nodetrend per class
      (detrending bias).
   4. Histogram of rms_corners_nodetrend / sigma_corners_nodetrend per class
@@ -59,25 +59,22 @@ def main():
     ax.set_title("σ medido en esquinas (con detrend), por clase")
     ax.legend()
 
-    # Panel 2: sigma_measured vs sigma_theory con ajuste lineal por clase.
+    # Panel 2: sigma_measured (esquinas) vs sigma_whole (imagen completa).
     ax = axes[0, 1]
     for c in CLASSES:
-        sth = np.array(
-            [float(r["sigma_theory_jy_per_beam"]) for r in by_class[c]]
+        sigw = np.array(
+            [float(r["sigma_whole_jy_per_beam"]) for r in by_class[c]]
         ) * UJY
         sig = np.array(
             [float(r["sigma_measured_jy_per_beam"]) for r in by_class[c]]
         ) * UJY
-        fit = np.polyfit(sth, sig, 1)
-        ax.scatter(sth, sig, s=14, alpha=0.6, color=COLORS[c],
-                   label=f"{c}: ajuste y={fit[0]:.3f}x{'+' if fit[1]>=0 else ''}{fit[1]:.1f}")
-        xs = np.linspace(sth.min(), sth.max(), 100)
-        ax.plot(xs, np.polyval(fit, xs), color=COLORS[c], lw=1.5)
+        ax.scatter(sigw, sig, s=14, alpha=0.6, color=COLORS[c],
+                   label=f"{c} (n={len(sig)})")
     lim = max(ax.get_xlim()[1], ax.get_ylim()[1])
     ax.plot([0, lim], [0, lim], "k--", lw=0.8, label="y=x")
-    ax.set_xlabel(r"$\sigma_{teórico}$ (µJy/beam)")
-    ax.set_ylabel(r"$\sigma_{medido}$ (µJy/beam)")
-    ax.set_title("Calibración: σ medido vs teórico")
+    ax.set_xlabel(r"$\sigma_{imagen\,completa}$ (µJy/beam)")
+    ax.set_ylabel(r"$\sigma_{esquinas}$ (µJy/beam)")
+    ax.set_title("σ en esquinas vs imagen completa")
     ax.legend(fontsize=8)
 
     # Panel 3: ratio detrend/nodetrend por clase.

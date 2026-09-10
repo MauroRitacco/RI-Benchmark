@@ -99,7 +99,6 @@ FIELDS = [
     "class",
     "target",
     "M",
-    "sigma_theory_jy_per_beam",
     "sigma_measured_jy_per_beam",
     "sigma_corners_nodetrend_jy_per_beam",
     "sigma_whole_jy_per_beam",
@@ -213,7 +212,6 @@ def process_target(task):
             "class": cls,
             "target": target,
             "M": M,
-            "sigma_theory_jy_per_beam": f"{1.0 / np.sqrt(M):.6e}",
             "sigma_measured_jy_per_beam": f"{sigma:.6e}",
             "sigma_corners_nodetrend_jy_per_beam": f"{sigma_nd:.6e}",
             "sigma_whole_jy_per_beam": f"{sigma_whole:.6e}",
@@ -295,13 +293,11 @@ def write_summary(rows, summary_path, csv_path):
         rmsc = [float(r["rms_corners_jy_per_beam"]) for r in sub]
         rmsnd = [float(r["rms_corners_nodetrend_jy_per_beam"]) for r in sub]
         rmsw = [float(r["rms_whole_jy_per_beam"]) for r in sub]
-        sigth = [float(r["sigma_theory_jy_per_beam"]) for r in sub]
         m_sig, s_sig = mean_std(sig)
         ratio_dt_nd = [a / b for a, b in zip(sig, signd)]
         ratio_cw = [a / b for a, b in zip(signd, sigw)]
         ratio_rms_std_patch = [a / b for a, b in zip(rmsnd, signd)]
         ratio_rms_std_whole = [a / b for a, b in zip(rmsw, sigw)]
-        calib = [a / b for a, b in zip(sig, sigth)]
 
         def fmt(vals):
             return f"{np.mean(vals):.4f} +/- {np.std(vals):.4f}"
@@ -313,7 +309,6 @@ def write_summary(rows, summary_path, csv_path):
             f"  corners/whole (nodetrend):   {fmt(ratio_cw)}",
             f"  rms/std patch (nodetrend):   {fmt(ratio_rms_std_patch)}",
             f"  rms/std whole image:         {fmt(ratio_rms_std_whole)}",
-            f"  calibration meas/theory:     {fmt(calib)}",
             "",
         ]
     text = "\n".join(lines)
