@@ -274,18 +274,32 @@ def mean_std(values):
     return float(np.mean(a)), float(np.std(a))
 
 
-def class_stats(sub):
-    """Per-target statistics for a group of CSV rows."""
+def value_stats(sub):
+    """Average measured values (Jy/beam and uJy/beam) for a group of rows."""
+    cols = [
+        ("sigma_measured (detrend)", "sigma_measured_jy_per_beam"),
+        ("sigma_corners_nodetrend", "sigma_corners_nodetrend_jy_per_beam"),
+        ("sigma_whole", "sigma_whole_jy_per_beam"),
+        ("rms_corners (detrend)", "rms_corners_jy_per_beam"),
+        ("rms_corners_nodetrend", "rms_corners_nodetrend_jy_per_beam"),
+        ("rms_whole", "rms_whole_jy_per_beam"),
+    ]
+    stats = {}
+    for label, col in cols:
+        vals = [float(r[col]) for r in sub]
+        stats[f"{label} Jy/beam"] = mean_std(vals)
+        stats[f"{label} uJy/beam"] = mean_std([v * 1e6 for v in vals])
+    return stats
+
+
+def ratio_stats(sub):
+    """Per-target ratio statistics for a group of CSV rows."""
     sig = [float(r["sigma_measured_jy_per_beam"]) for r in sub]
     signd = [float(r["sigma_corners_nodetrend_jy_per_beam"]) for r in sub]
     sigw = [float(r["sigma_whole_jy_per_beam"]) for r in sub]
     rmsnd = [float(r["rms_corners_nodetrend_jy_per_beam"]) for r in sub]
     rmsw = [float(r["rms_whole_jy_per_beam"]) for r in sub]
     return {
-        "sigma_measured (detrend) Jy/beam": mean_std(sig),
-        "sigma_measured (detrend) uJy/beam": (
-            mean_std([s * 1e6 for s in sig])
-        ),
         "detrend/nodetrend": mean_std(
             [a / b for a, b in zip(sig, signd)]
         ),
@@ -308,27 +322,30 @@ def write_summary(rows, summary_path, csv_path):
     lines = [
         "Pure-noise validation over 360 validation targets",
         f"CSV: {csv_path}",
-        "sigmas in Jy/beam; ratios are per-target means.",
+        "Values in Jy/beam and uJy/beam; ratios are per-target means.",
         "",
     ]
     for name, sub in groups:
         if not sub:
             continue
-        stats = class_stats(sub)
-        lines += [
-            f"[{name}] n={len(sub)}",
-            "",
-            "| estadistica | promedio +/- std |",
-            "|-------------|------------------|",
-        ]
-        for label, (m, s) in stats.items():
-            if "uJy/beam" in label:
-                lines.append(f"| {label} | {m:.1f} +/- {s:.1f} |")
-            elif "Jy/beam" in label:
-                lines.append(f"| {label} | {m:.4e} +/- {s:.4e} |")
-            else:
-                lines.append(f"| {label} | {m:.4f} +/- {s:.4f} |")
-        lines.append("")
+        for table_name, stats in (
+            ("valores", value_stats(sub)),
+            ("cocientes", ratio_stats(sub)),
+        ):
+            lines += [
+                f"[{name} - {table_name}] n={len(sub)}",
+                "",
+                "| estadistica | promedio +/- std |",
+                "|-------------|------------------|",
+            ]
+            for label, (m, s) in stats.items():
+                if "uJy/beam" in label:
+                    lines.append(f"| {label} | {m:.1f} +/- {s:.1f} |")
+                elif "Jy/beam" in label:
+                    lines.append(f"| {label} | {m:.4e} +/- {s:.4e} |")
+                else:
+                    lines.append(f"| {label} | {m:.4f} +/- {s:.4f} |")
+            lines.append("")
     text = "\n".join(lines)
     summary_path.write_text(text)
     print(text)
