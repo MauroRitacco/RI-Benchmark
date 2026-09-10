@@ -274,43 +274,61 @@ def mean_std(values):
     return float(np.mean(a)), float(np.std(a))
 
 
-def write_summary(rows, summary_path, csv_path):
-    import numpy as np
+def class_stats(sub):
+    """Per-target statistics for a group of CSV rows."""
+    sig = [float(r["sigma_measured_jy_per_beam"]) for r in sub]
+    signd = [float(r["sigma_corners_nodetrend_jy_per_beam"]) for r in sub]
+    sigw = [float(r["sigma_whole_jy_per_beam"]) for r in sub]
+    rmsnd = [float(r["rms_corners_nodetrend_jy_per_beam"]) for r in sub]
+    rmsw = [float(r["rms_whole_jy_per_beam"]) for r in sub]
+    return {
+        "sigma_measured (detrend) Jy/beam": mean_std(sig),
+        "sigma_measured (detrend) uJy/beam": (
+            mean_std([s * 1e6 for s in sig])
+        ),
+        "detrend/nodetrend": mean_std(
+            [a / b for a, b in zip(sig, signd)]
+        ),
+        "corners/whole (nodetrend)": mean_std(
+            [a / b for a, b in zip(signd, sigw)]
+        ),
+        "rms/std patch (nodetrend)": mean_std(
+            [a / b for a, b in zip(rmsnd, signd)]
+        ),
+        "rms/std whole image": mean_std(
+            [a / b for a, b in zip(rmsw, sigw)]
+        ),
+    }
 
+
+def write_summary(rows, summary_path, csv_path):
+    groups = [("TODO", list(rows))] + [
+        (cls, [r for r in rows if r["class"] == cls]) for cls in CLASSES
+    ]
     lines = [
         "Pure-noise validation over 360 validation targets",
         f"CSV: {csv_path}",
         "sigmas in Jy/beam; ratios are per-target means.",
         "",
     ]
-    for cls in CLASSES:
-        sub = [r for r in rows if r["class"] == cls]
+    for name, sub in groups:
         if not sub:
             continue
-        sig = [float(r["sigma_measured_jy_per_beam"]) for r in sub]
-        signd = [float(r["sigma_corners_nodetrend_jy_per_beam"]) for r in sub]
-        sigw = [float(r["sigma_whole_jy_per_beam"]) for r in sub]
-        rmsc = [float(r["rms_corners_jy_per_beam"]) for r in sub]
-        rmsnd = [float(r["rms_corners_nodetrend_jy_per_beam"]) for r in sub]
-        rmsw = [float(r["rms_whole_jy_per_beam"]) for r in sub]
-        m_sig, s_sig = mean_std(sig)
-        ratio_dt_nd = [a / b for a, b in zip(sig, signd)]
-        ratio_cw = [a / b for a, b in zip(signd, sigw)]
-        ratio_rms_std_patch = [a / b for a, b in zip(rmsnd, signd)]
-        ratio_rms_std_whole = [a / b for a, b in zip(rmsw, sigw)]
-
-        def fmt(vals):
-            return f"{np.mean(vals):.4f} +/- {np.std(vals):.4f}"
-
+        stats = class_stats(sub)
         lines += [
-            f"[{cls}] n={len(sub)}",
-            f"  sigma_measured (detrend):    {m_sig:.4e} +/- {s_sig:.4e} Jy/beam",
-            f"  sigma detrend/nodetrend:     {fmt(ratio_dt_nd)}",
-            f"  corners/whole (nodetrend):   {fmt(ratio_cw)}",
-            f"  rms/std patch (nodetrend):   {fmt(ratio_rms_std_patch)}",
-            f"  rms/std whole image:         {fmt(ratio_rms_std_whole)}",
+            f"[{name}] n={len(sub)}",
             "",
+            "| estadistica | promedio +/- std |",
+            "|-------------|------------------|",
         ]
+        for label, (m, s) in stats.items():
+            if "uJy/beam" in label:
+                lines.append(f"| {label} | {m:.1f} +/- {s:.1f} |")
+            elif "Jy/beam" in label:
+                lines.append(f"| {label} | {m:.4e} +/- {s:.4e} |")
+            else:
+                lines.append(f"| {label} | {m:.4f} +/- {s:.4f} |")
+        lines.append("")
     text = "\n".join(lines)
     summary_path.write_text(text)
     print(text)
