@@ -34,3 +34,6 @@ external/
 
 # Pure-noise SNR study outputs
 results/noise_snr/
+
+# Experimental / study scripts (not part of sweep or test pipeline)
+src/utils/studies/
