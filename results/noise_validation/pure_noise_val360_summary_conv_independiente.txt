@@ -1,0 +1,177 @@
+Pure-noise validation over 360 validation targets
+CSV: /home/mauro/projects/Thesis/RI-Benchmark/results/noise_validation/pure_noise_val360.csv
+TODAS las estadisticas se calculan sobre la dirty de RUIDO PURO (y = n; DATA reemplazado por ruido gaussiano), salvo las tablas 'valores dirty real' (dirty REAL con la fuente, y = Ax + n).
+Valores en uJy/arcsec2: brillo de superficie, independientes del beam y del tamaño de píxel: comparables entre clases.
+Values in Jy/beam and uJy/beam; ratios are per-target means.
+
+[TODO - valores] n=360
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_measured (detrend) [ruido puro, esquinas] Jy/beam | 6.9968e-04 +/- 3.0023e-04 |
+| sigma_measured (detrend) [ruido puro, esquinas] uJy/beam | 699.7 +/- 300.2 |
+| sigma_corners_nodetrend [ruido puro, esquinas] Jy/beam | 8.0464e-04 +/- 2.7075e-04 |
+| sigma_corners_nodetrend [ruido puro, esquinas] uJy/beam | 804.6 +/- 270.8 |
+| sigma_whole [ruido puro, imagen completa] Jy/beam | 9.4932e-04 +/- 2.2980e-04 |
+| sigma_whole [ruido puro, imagen completa] uJy/beam | 949.3 +/- 229.8 |
+| rms_corners (detrend) [ruido puro, esquinas] Jy/beam | 6.9968e-04 +/- 3.0023e-04 |
+| rms_corners (detrend) [ruido puro, esquinas] uJy/beam | 699.7 +/- 300.2 |
+| rms_corners_nodetrend [ruido puro, esquinas] Jy/beam | 9.2979e-04 +/- 2.3852e-04 |
+| rms_corners_nodetrend [ruido puro, esquinas] uJy/beam | 929.8 +/- 238.5 |
+| rms_whole [ruido puro, imagen completa] Jy/beam | 9.6020e-04 +/- 2.3448e-04 |
+| rms_whole [ruido puro, imagen completa] uJy/beam | 960.2 +/- 234.5 |
+| sigma_measured (detrend) [ruido puro, esquinas, brillo de superficie] uJy/arcsec2 | 72049.4 +/- 29141.6 |
+| sigma_whole [ruido puro, imagen completa, brillo de superficie] uJy/arcsec2 | 102276.7 +/- 33601.8 |
+
+[TODO - valores dirty real] n=360
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_real (detrend) [dirty real, esquinas] Jy/beam | 1.5551e-01 +/- 1.0260e-01 |
+| sigma_real (detrend) [dirty real, esquinas] mJy/beam | 155.5 +/- 102.6 |
+| sigma_real_nodetrend [dirty real, esquinas] Jy/beam | 3.6780e-01 +/- 4.6864e-01 |
+| sigma_real_nodetrend [dirty real, esquinas] mJy/beam | 367.8 +/- 468.6 |
+| rms_real (detrend) [dirty real, esquinas] Jy/beam | 1.5551e-01 +/- 1.0260e-01 |
+| rms_real (detrend) [dirty real, esquinas] mJy/beam | 155.5 +/- 102.6 |
+| rms_real_nodetrend [dirty real, esquinas] Jy/beam | 8.0107e-01 +/- 1.3466e+00 |
+| rms_real_nodetrend [dirty real, esquinas] mJy/beam | 801.1 +/- 1346.6 |
+| dirty_peak [dirty real] Jy/beam | 2.2584e+01 +/- 2.6230e+01 |
+| snr_peak [dirty real] | 5.829e+04 +/- 8.764e+04 |
+
+[TODO - cocientes] n=360
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| detrend/nodetrend [ruido puro, esquinas] | 0.8430 +/- 0.1379 |
+| corners/whole (nodetrend) [ruido puro] | 0.8418 +/- 0.1697 |
+| rms/std patch (nodetrend) [ruido puro, esquinas] | 1.2155 +/- 0.3048 |
+| rms/std whole image [ruido puro] | 1.0115 +/- 0.0314 |
+
+[s0p5 - valores] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_measured (detrend) [ruido puro, esquinas] Jy/beam | 3.5430e-04 +/- 8.2452e-05 |
+| sigma_measured (detrend) [ruido puro, esquinas] uJy/beam | 354.3 +/- 82.5 |
+| sigma_corners_nodetrend [ruido puro, esquinas] Jy/beam | 5.3290e-04 +/- 1.2145e-04 |
+| sigma_corners_nodetrend [ruido puro, esquinas] uJy/beam | 532.9 +/- 121.4 |
+| sigma_whole [ruido puro, imagen completa] Jy/beam | 8.5500e-04 +/- 2.0899e-04 |
+| sigma_whole [ruido puro, imagen completa] uJy/beam | 855.0 +/- 209.0 |
+| rms_corners (detrend) [ruido puro, esquinas] Jy/beam | 3.5430e-04 +/- 8.2452e-05 |
+| rms_corners (detrend) [ruido puro, esquinas] uJy/beam | 354.3 +/- 82.5 |
+| rms_corners_nodetrend [ruido puro, esquinas] Jy/beam | 8.0881e-04 +/- 2.1421e-04 |
+| rms_corners_nodetrend [ruido puro, esquinas] uJy/beam | 808.8 +/- 214.2 |
+| rms_whole [ruido puro, imagen completa] Jy/beam | 8.8323e-04 +/- 2.3135e-04 |
+| rms_whole [ruido puro, imagen completa] uJy/beam | 883.2 +/- 231.3 |
+| sigma_measured (detrend) [ruido puro, esquinas, brillo de superficie] uJy/arcsec2 | 50156.5 +/- 16765.7 |
+| sigma_whole [ruido puro, imagen completa, brillo de superficie] uJy/arcsec2 | 117303.9 +/- 32717.7 |
+
+[s0p5 - valores dirty real] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_real (detrend) [dirty real, esquinas] Jy/beam | 1.9184e-01 +/- 1.3480e-01 |
+| sigma_real (detrend) [dirty real, esquinas] mJy/beam | 191.8 +/- 134.8 |
+| sigma_real_nodetrend [dirty real, esquinas] Jy/beam | 7.0331e-01 +/- 6.8351e-01 |
+| sigma_real_nodetrend [dirty real, esquinas] mJy/beam | 703.3 +/- 683.5 |
+| rms_real (detrend) [dirty real, esquinas] Jy/beam | 1.9184e-01 +/- 1.3480e-01 |
+| rms_real (detrend) [dirty real, esquinas] mJy/beam | 191.8 +/- 134.8 |
+| rms_real_nodetrend [dirty real, esquinas] Jy/beam | 1.6885e+00 +/- 1.9965e+00 |
+| rms_real_nodetrend [dirty real, esquinas] mJy/beam | 1688.5 +/- 1996.5 |
+| dirty_peak [dirty real] Jy/beam | 5.2274e+01 +/- 2.6411e+01 |
+| snr_peak [dirty real] | 1.56e+05 +/- 9.304e+04 |
+
+[s0p5 - cocientes] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| detrend/nodetrend [ruido puro, esquinas] | 0.6737 +/- 0.1017 |
+| corners/whole (nodetrend) [ruido puro] | 0.6353 +/- 0.1166 |
+| rms/std patch (nodetrend) [ruido puro, esquinas] | 1.5373 +/- 0.3425 |
+| rms/std whole image [ruido puro] | 1.0303 +/- 0.0489 |
+
+[s2 - valores] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_measured (detrend) [ruido puro, esquinas] Jy/beam | 7.5988e-04 +/- 1.4996e-04 |
+| sigma_measured (detrend) [ruido puro, esquinas] uJy/beam | 759.9 +/- 150.0 |
+| sigma_corners_nodetrend [ruido puro, esquinas] Jy/beam | 8.3738e-04 +/- 1.7107e-04 |
+| sigma_corners_nodetrend [ruido puro, esquinas] uJy/beam | 837.4 +/- 171.1 |
+| sigma_whole [ruido puro, imagen completa] Jy/beam | 9.1775e-04 +/- 2.0278e-04 |
+| sigma_whole [ruido puro, imagen completa] uJy/beam | 917.8 +/- 202.8 |
+| rms_corners (detrend) [ruido puro, esquinas] Jy/beam | 7.5988e-04 +/- 1.4996e-04 |
+| rms_corners (detrend) [ruido puro, esquinas] uJy/beam | 759.9 +/- 150.0 |
+| rms_corners_nodetrend [ruido puro, esquinas] Jy/beam | 9.0577e-04 +/- 1.9810e-04 |
+| rms_corners_nodetrend [ruido puro, esquinas] uJy/beam | 905.8 +/- 198.1 |
+| rms_whole [ruido puro, imagen completa] Jy/beam | 9.2074e-04 +/- 2.0549e-04 |
+| rms_whole [ruido puro, imagen completa] uJy/beam | 920.7 +/- 205.5 |
+| sigma_measured (detrend) [ruido puro, esquinas, brillo de superficie] uJy/arcsec2 | 95382.1 +/- 27589.7 |
+| sigma_whole [ruido puro, imagen completa, brillo de superficie] uJy/arcsec2 | 113202.8 +/- 28509.1 |
+
+[s2 - valores dirty real] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_real (detrend) [dirty real, esquinas] Jy/beam | 1.5575e-01 +/- 7.9392e-02 |
+| sigma_real (detrend) [dirty real, esquinas] mJy/beam | 155.8 +/- 79.4 |
+| sigma_real_nodetrend [dirty real, esquinas] Jy/beam | 2.4221e-01 +/- 1.1304e-01 |
+| sigma_real_nodetrend [dirty real, esquinas] mJy/beam | 242.2 +/- 113.0 |
+| rms_real (detrend) [dirty real, esquinas] Jy/beam | 1.5575e-01 +/- 7.9392e-02 |
+| rms_real (detrend) [dirty real, esquinas] mJy/beam | 155.8 +/- 79.4 |
+| rms_real_nodetrend [dirty real, esquinas] Jy/beam | 5.0305e-01 +/- 4.6616e-01 |
+| rms_real_nodetrend [dirty real, esquinas] mJy/beam | 503.0 +/- 466.2 |
+| dirty_peak [dirty real] Jy/beam | 1.0347e+01 +/- 5.0586e+00 |
+| snr_peak [dirty real] | 1.367e+04 +/- 6087 |
+
+[s2 - cocientes] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| detrend/nodetrend [ruido puro, esquinas] | 0.9101 +/- 0.0451 |
+| corners/whole (nodetrend) [ruido puro] | 0.9175 +/- 0.0689 |
+| rms/std patch (nodetrend) [ruido puro, esquinas] | 1.0804 +/- 0.0639 |
+| rms/std whole image [ruido puro] | 1.0029 +/- 0.0051 |
+
+[s4 - valores] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_measured (detrend) [ruido puro, esquinas] Jy/beam | 9.8488e-04 +/- 1.9204e-04 |
+| sigma_measured (detrend) [ruido puro, esquinas] uJy/beam | 984.9 +/- 192.0 |
+| sigma_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.0436e-03 +/- 2.0946e-04 |
+| sigma_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1043.6 +/- 209.5 |
+| sigma_whole [ruido puro, imagen completa] Jy/beam | 1.0752e-03 +/- 2.1882e-04 |
+| sigma_whole [ruido puro, imagen completa] uJy/beam | 1075.2 +/- 218.8 |
+| rms_corners (detrend) [ruido puro, esquinas] Jy/beam | 9.8488e-04 +/- 1.9204e-04 |
+| rms_corners (detrend) [ruido puro, esquinas] uJy/beam | 984.9 +/- 192.0 |
+| rms_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.0748e-03 +/- 2.2205e-04 |
+| rms_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1074.8 +/- 222.1 |
+| rms_whole [ruido puro, imagen completa] Jy/beam | 1.0766e-03 +/- 2.1944e-04 |
+| rms_whole [ruido puro, imagen completa] uJy/beam | 1076.6 +/- 219.4 |
+| sigma_measured (detrend) [ruido puro, esquinas, brillo de superficie] uJy/arcsec2 | 70609.6 +/- 21900.6 |
+| sigma_whole [ruido puro, imagen completa, brillo de superficie] uJy/arcsec2 | 76323.2 +/- 22028.5 |
+
+[s4 - valores dirty real] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_real (detrend) [dirty real, esquinas] Jy/beam | 1.1892e-01 +/- 6.6714e-02 |
+| sigma_real (detrend) [dirty real, esquinas] mJy/beam | 118.9 +/- 66.7 |
+| sigma_real_nodetrend [dirty real, esquinas] Jy/beam | 1.5787e-01 +/- 8.0515e-02 |
+| sigma_real_nodetrend [dirty real, esquinas] mJy/beam | 157.9 +/- 80.5 |
+| rms_real (detrend) [dirty real, esquinas] Jy/beam | 1.1892e-01 +/- 6.6714e-02 |
+| rms_real (detrend) [dirty real, esquinas] mJy/beam | 118.9 +/- 66.7 |
+| rms_real_nodetrend [dirty real, esquinas] Jy/beam | 2.1167e-01 +/- 1.1387e-01 |
+| rms_real_nodetrend [dirty real, esquinas] mJy/beam | 211.7 +/- 113.9 |
+| dirty_peak [dirty real] Jy/beam | 5.1306e+00 +/- 2.2349e+00 |
+| snr_peak [dirty real] | 5241 +/- 2060 |
+
+[s4 - cocientes] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| detrend/nodetrend [ruido puro, esquinas] | 0.9453 +/- 0.0319 |
+| corners/whole (nodetrend) [ruido puro] | 0.9727 +/- 0.0508 |
+| rms/std patch (nodetrend) [ruido puro, esquinas] | 1.0288 +/- 0.0243 |
+| rms/std whole image [ruido puro] | 1.0013 +/- 0.0023 |

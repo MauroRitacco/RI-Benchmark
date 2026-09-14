@@ -1,0 +1,570 @@
+Targets to process: 360 with 6 workers
+[s0p5] disk_s0p5_r1_c0_x0_001: sigma=8.1223e-04/1.0668e-03 (corners detrend/no), sigma_whole=2.3158e-03, rms=8.1223e-04/1.4963e-03/2.3419e-03, real: sigma=2.8689e-01/6.3870e-01 rms=2.8689e-01/7.6675e-01, peak=55.17 Jy/beam, SNR=67925
+[s0p5] disk_s0p5_r1_c0_x0_003: sigma=6.0973e-04/8.5931e-04 (corners detrend/no), sigma_whole=1.2499e-03, rms=6.0973e-04/1.0539e-03/1.2665e-03, real: sigma=2.0675e-01/9.3171e-01 rms=2.0675e-01/1.5336e+00, peak=58.57 Jy/beam, SNR=96066
+[s0p5] disk_s0p5_r1_c0_x0_004: sigma=3.8284e-04/6.9631e-04 (corners detrend/no), sigma_whole=8.9123e-04, rms=3.8284e-04/1.0692e-03/9.3225e-04, real: sigma=1.5837e-01/5.0930e-01 rms=1.5837e-01/5.3751e-01, peak=52.11 Jy/beam, SNR=136127
+[s0p5] disk_s0p5_r1_c0_x0_000: sigma=5.6765e-04/7.8016e-04 (corners detrend/no), sigma_whole=9.6362e-04, rms=5.6765e-04/1.1913e-03/9.8035e-04, real: sigma=1.0796e-01/1.7891e-01 rms=1.0796e-01/1.1313e+00, peak=39.22 Jy/beam, SNR=69083
+[s0p5] disk_s0p5_r1_c0_x0_005: sigma=4.9710e-04/7.6187e-04 (corners detrend/no), sigma_whole=9.2043e-04, rms=4.9710e-04/1.0937e-03/9.2140e-04, real: sigma=5.5592e-02/8.3036e-02 rms=5.5592e-02/5.0016e-01, peak=27.88 Jy/beam, SNR=56079
+[s0p5] disk_s0p5_r1_c0_x0_002: sigma=4.0109e-04/6.1206e-04 (corners detrend/no), sigma_whole=8.7202e-04, rms=4.0109e-04/1.1298e-03/8.8182e-04, real: sigma=3.3131e-01/4.7866e-01 rms=3.3131e-01/1.3913e+00, peak=50.66 Jy/beam, SNR=126314
+[s0p5] disk_s0p5_r1_c0_x0_006: sigma=4.1184e-04/8.3589e-04 (corners detrend/no), sigma_whole=1.1656e-03, rms=4.1184e-04/1.0141e-03/1.2144e-03, real: sigma=6.3579e-02/1.5682e-01 rms=6.3579e-02/2.3580e-01, peak=21.33 Jy/beam, SNR=51800
+[s0p5] disk_s0p5_r1_c0_x0_007: sigma=6.8319e-04/7.7345e-04 (corners detrend/no), sigma_whole=1.4052e-03, rms=6.8319e-04/1.5528e-03/1.4875e-03, real: sigma=4.1029e-01/7.3788e-01 rms=4.1029e-01/1.4365e+00, peak=44.94 Jy/beam, SNR=65781
+[s0p5] disk_s0p5_r1_c0_x1_001: sigma=6.6799e-04/1.0035e-03 (corners detrend/no), sigma_whole=1.6674e-03, rms=6.6799e-04/1.3454e-03/1.7393e-03, real: sigma=1.8057e-01/1.0619e+00 rms=1.8057e-01/3.5980e+00, peak=38.41 Jy/beam, SNR=57495
+[s0p5] disk_s0p5_r1_c0_x0_008: sigma=5.4169e-04/6.7864e-04 (corners detrend/no), sigma_whole=1.0335e-03, rms=5.4169e-04/8.4225e-04/1.0349e-03, real: sigma=3.1777e-01/8.9022e-01 rms=3.1777e-01/1.0334e+00, peak=50.49 Jy/beam, SNR=93210
+[progress] 10/360 targets done, 0 errors
+[s0p5] disk_s0p5_r1_c0_x0_009: sigma=5.2507e-04/8.6960e-04 (corners detrend/no), sigma_whole=1.0646e-03, rms=5.2507e-04/1.1631e-03/1.0931e-03, real: sigma=4.7657e-01/1.3193e+00 rms=4.7657e-01/3.3840e+00, peak=63.51 Jy/beam, SNR=120963
+[s0p5] disk_s0p5_r1_c0_x1_000: sigma=5.0353e-04/7.6046e-04 (corners detrend/no), sigma_whole=1.1128e-03, rms=5.0353e-04/9.7980e-04/1.1210e-03, real: sigma=2.3102e-01/5.8207e-01 rms=2.3102e-01/6.3503e-01, peak=50.33 Jy/beam, SNR=99959
+[s0p5] disk_s0p5_r1_c0_x1_004: sigma=5.0067e-04/8.1886e-04 (corners detrend/no), sigma_whole=1.2503e-03, rms=5.0067e-04/2.0031e-03/1.2568e-03, real: sigma=2.0785e-01/1.0598e+00 rms=2.0785e-01/1.5578e+00, peak=78.79 Jy/beam, SNR=157369
+[s0p5] disk_s0p5_r1_c0_x1_003: sigma=4.2553e-04/6.9611e-04 (corners detrend/no), sigma_whole=1.0830e-03, rms=4.2553e-04/1.0634e-03/1.1667e-03, real: sigma=1.5344e-01/5.1506e-01 rms=1.5344e-01/6.4023e-01, peak=61.73 Jy/beam, SNR=145069
+[s0p5] disk_s0p5_r1_c0_x1_002: sigma=4.5245e-04/7.3205e-04 (corners detrend/no), sigma_whole=1.1593e-03, rms=4.5245e-04/1.6993e-03/1.1658e-03, real: sigma=1.3201e-01/4.1009e-01 rms=1.3201e-01/4.6146e-01, peak=45.21 Jy/beam, SNR=99930
+[s0p5] disk_s0p5_r1_c0_x1_007: sigma=5.9167e-04/8.6648e-04 (corners detrend/no), sigma_whole=1.4229e-03, rms=5.9167e-04/1.1820e-03/1.4359e-03, real: sigma=1.8934e-01/8.2174e-01 rms=1.8934e-01/1.1186e+00, peak=51.01 Jy/beam, SNR=86211
+[s0p5] disk_s0p5_r1_c1_x0_000: sigma=7.9544e-04/1.1666e-03 (corners detrend/no), sigma_whole=2.0626e-03, rms=7.9544e-04/1.3799e-03/2.1305e-03, real: sigma=1.6618e-01/2.9575e-01 rms=1.6618e-01/5.1051e-01, peak=38.19 Jy/beam, SNR=48006
+[s0p5] disk_s0p5_r1_c0_x1_005: sigma=4.2882e-04/6.3074e-04 (corners detrend/no), sigma_whole=1.0992e-03, rms=4.2882e-04/8.5033e-04/1.1435e-03, real: sigma=1.0945e-01/1.5197e-01 rms=1.0945e-01/3.6228e-01, peak=23.18 Jy/beam, SNR=54061
+[s0p5] disk_s0p5_r1_c0_x1_009: sigma=4.9398e-04/7.2078e-04 (corners detrend/no), sigma_whole=1.8879e-03, rms=4.9398e-04/1.0975e-03/1.8880e-03, real: sigma=2.9895e-01/1.1565e+00 rms=2.9895e-01/3.0477e+00, peak=85.34 Jy/beam, SNR=172757
+[s0p5] disk_s0p5_r1_c1_x0_001: sigma=4.9267e-04/8.1315e-04 (corners detrend/no), sigma_whole=1.5896e-03, rms=4.9267e-04/2.0521e-03/1.6602e-03, real: sigma=4.3275e-01/2.0977e+00 rms=4.3275e-01/5.4853e+00, peak=95.04 Jy/beam, SNR=192903
+[progress] 20/360 targets done, 0 errors
+[s0p5] disk_s0p5_r1_c0_x1_006: sigma=4.2240e-04/5.3767e-04 (corners detrend/no), sigma_whole=9.2204e-04, rms=4.2240e-04/6.4794e-04/9.7826e-04, real: sigma=2.8109e-01/8.3329e-01 rms=2.8109e-01/1.7515e+00, peak=50.60 Jy/beam, SNR=119789
+[s0p5] disk_s0p5_r1_c0_x1_008: sigma=4.6737e-04/7.6620e-04 (corners detrend/no), sigma_whole=9.1601e-04, rms=4.6737e-04/8.5285e-04/9.2455e-04, real: sigma=1.4366e-01/1.3551e-01 rms=1.4366e-01/3.9694e-01, peak=23.37 Jy/beam, SNR=50007
+[s0p5] disk_s0p5_r1_c1_x0_002: sigma=3.5020e-04/6.7496e-04 (corners detrend/no), sigma_whole=9.2084e-04, rms=3.5020e-04/7.3271e-04/9.3314e-04, real: sigma=2.1399e-01/4.6615e-01 rms=2.1399e-01/2.0953e+00, peak=27.64 Jy/beam, SNR=78920
+[s0p5] disk_s0p5_r1_c1_x0_006: sigma=4.7473e-04/6.5312e-04 (corners detrend/no), sigma_whole=1.2699e-03, rms=4.7473e-04/1.2313e-03/1.2711e-03, real: sigma=4.1789e-01/2.1128e+00 rms=4.1789e-01/5.9632e+00, peak=77.52 Jy/beam, SNR=163298
+[s0p5] disk_s0p5_r1_c1_x0_003: sigma=4.4976e-04/5.7138e-04 (corners detrend/no), sigma_whole=9.1497e-04, rms=4.4976e-04/7.9291e-04/9.1688e-04, real: sigma=2.5180e-01/8.2609e-01 rms=2.5180e-01/1.7589e+00, peak=44.17 Jy/beam, SNR=98199
+[s0p5] disk_s0p5_r1_c1_x0_004: sigma=3.6282e-04/5.5033e-04 (corners detrend/no), sigma_whole=7.9613e-04, rms=3.6282e-04/9.4964e-04/8.2245e-04, real: sigma=1.0152e-01/2.4782e-01 rms=1.0152e-01/2.7815e-01, peak=34.33 Jy/beam, SNR=94617
+[s0p5] disk_s0p5_r1_c1_x0_005: sigma=4.9326e-04/7.6487e-04 (corners detrend/no), sigma_whole=9.6780e-04, rms=4.9326e-04/1.1578e-03/1.0100e-03, real: sigma=1.9604e-01/5.8967e-01 rms=1.9604e-01/8.7822e-01, peak=35.79 Jy/beam, SNR=72550
+[s0p5] disk_s0p5_r1_c1_x0_007: sigma=4.3401e-04/6.9830e-04 (corners detrend/no), sigma_whole=9.7136e-04, rms=4.3401e-04/9.9072e-04/9.8465e-04, real: sigma=1.2142e-01/2.7239e-01 rms=1.2142e-01/4.7388e-01, peak=37.86 Jy/beam, SNR=87232
+[s0p5] disk_s0p5_r1_c1_x1_000: sigma=4.7653e-04/7.4993e-04 (corners detrend/no), sigma_whole=1.4649e-03, rms=4.7653e-04/1.1021e-03/1.5603e-03, real: sigma=2.7264e-01/1.2054e+00 rms=2.7264e-01/3.2355e+00, peak=60.56 Jy/beam, SNR=127080
+[s0p5] disk_s0p5_r1_c1_x0_008: sigma=4.1084e-04/7.6011e-04 (corners detrend/no), sigma_whole=1.1371e-03, rms=4.1084e-04/1.0175e-03/1.1394e-03, real: sigma=4.0213e-01/1.9821e+00 rms=4.0213e-01/5.2704e+00, peak=53.82 Jy/beam, SNR=131001
+[progress] 30/360 targets done, 0 errors
+[s0p5] disk_s0p5_r1_c1_x1_002: sigma=6.8914e-04/9.3920e-04 (corners detrend/no), sigma_whole=1.1468e-03, rms=6.8914e-04/1.2863e-03/1.1506e-03, real: sigma=1.9920e-01/6.2199e-01 rms=1.9920e-01/1.3001e+00, peak=30.48 Jy/beam, SNR=44226
+[s0p5] disk_s0p5_r1_c1_x0_009: sigma=3.9604e-04/5.8742e-04 (corners detrend/no), sigma_whole=1.0450e-03, rms=3.9604e-04/1.2770e-03/1.0454e-03, real: sigma=8.9046e-02/1.9441e-01 rms=8.9046e-02/4.3879e-01, peak=31.92 Jy/beam, SNR=80589
+[s0p5] disk_s0p5_r1_c1_x1_001: sigma=4.5827e-04/6.6021e-04 (corners detrend/no), sigma_whole=1.0328e-03, rms=4.5827e-04/8.0059e-04/1.0338e-03, real: sigma=4.0640e-01/9.4565e-01 rms=4.0640e-01/1.9479e+00, peak=48.71 Jy/beam, SNR=106283
+[s0p5] disk_s0p5_r1_c1_x1_003: sigma=4.7903e-04/7.9560e-04 (corners detrend/no), sigma_whole=1.1143e-03, rms=4.7903e-04/1.1169e-03/1.1301e-03, real: sigma=1.0375e-01/1.5695e-01 rms=1.0375e-01/7.7392e-01, peak=37.40 Jy/beam, SNR=78082
+[s0p5] disk_s0p5_r1_c1_x1_006: sigma=6.2106e-04/1.0237e-03 (corners detrend/no), sigma_whole=1.6352e-03, rms=6.2106e-04/1.4195e-03/1.7997e-03, real: sigma=6.6454e-02/3.6434e-01 rms=6.6454e-02/1.0208e+00, peak=30.07 Jy/beam, SNR=48413
+[s0p5] disk_s0p5_r1_c1_x1_004: sigma=3.5395e-04/9.1249e-04 (corners detrend/no), sigma_whole=1.0522e-03, rms=3.5395e-04/1.0865e-03/1.0526e-03, real: sigma=7.7347e-02/1.1854e-01 rms=7.7347e-02/4.8666e-01, peak=19.84 Jy/beam, SNR=56052
+[s0p5] disk_s0p5_r1_c1_x1_007: sigma=4.1499e-04/5.5218e-04 (corners detrend/no), sigma_whole=1.1129e-03, rms=4.1499e-04/6.4159e-04/1.1181e-03, real: sigma=1.1971e-01/4.6948e-01 rms=1.1971e-01/1.1633e+00, peak=27.92 Jy/beam, SNR=67288
+[s0p5] disk_s0p5_r1_c1_x1_008: sigma=5.0803e-04/7.9635e-04 (corners detrend/no), sigma_whole=1.2166e-03, rms=5.0803e-04/1.2327e-03/1.3384e-03, real: sigma=1.4114e-01/6.3631e-01 rms=1.4114e-01/1.7150e+00, peak=27.17 Jy/beam, SNR=53474
+[s0p5] disk_s0p5_r1_c1_x1_005: sigma=4.8750e-04/7.1000e-04 (corners detrend/no), sigma_whole=1.0586e-03, rms=4.8750e-04/7.7712e-04/1.0732e-03, real: sigma=1.0681e-01/2.1459e-01 rms=1.0681e-01/5.9167e-01, peak=35.74 Jy/beam, SNR=73320
+[s0p5] disk_s0p5_r2_c0_x0_000: sigma=6.2543e-04/7.6241e-04 (corners detrend/no), sigma_whole=1.7906e-03, rms=6.2543e-04/1.8719e-03/1.8356e-03, real: sigma=2.1176e-01/7.0761e-01 rms=2.1176e-01/1.3588e+00, peak=61.76 Jy/beam, SNR=98740
+[progress] 40/360 targets done, 0 errors
+[s0p5] disk_s0p5_r1_c1_x1_009: sigma=5.1418e-04/8.0656e-04 (corners detrend/no), sigma_whole=1.2682e-03, rms=5.1418e-04/1.8463e-03/1.4775e-03, real: sigma=1.1107e-01/5.5253e-01 rms=1.1107e-01/1.6411e+00, peak=33.79 Jy/beam, SNR=65719
+[s0p5] disk_s0p5_r2_c0_x0_002: sigma=6.2587e-04/1.0944e-03 (corners detrend/no), sigma_whole=1.5567e-03, rms=6.2587e-04/1.5707e-03/1.5596e-03, real: sigma=2.3896e-01/1.0242e+00 rms=2.3896e-01/2.1840e+00, peak=52.87 Jy/beam, SNR=84482
+[s0p5] disk_s0p5_r2_c0_x0_001: sigma=5.2883e-04/8.8438e-04 (corners detrend/no), sigma_whole=1.4326e-03, rms=5.2883e-04/1.5219e-03/1.4911e-03, real: sigma=2.6395e-01/1.4906e+00 rms=2.6395e-01/2.8479e+00, peak=79.38 Jy/beam, SNR=150115
+[s0p5] disk_s0p5_r2_c0_x0_003: sigma=4.4422e-04/7.8195e-04 (corners detrend/no), sigma_whole=1.1468e-03, rms=4.4422e-04/9.3929e-04/1.1472e-03, real: sigma=1.1979e-01/2.5632e-01 rms=1.1979e-01/5.8614e-01, peak=27.65 Jy/beam, SNR=62242
+[s0p5] disk_s0p5_r2_c0_x0_004: sigma=6.7703e-04/1.0103e-03 (corners detrend/no), sigma_whole=1.2569e-03, rms=6.7703e-04/1.1840e-03/1.2597e-03, real: sigma=4.1519e-01/1.2231e+00 rms=4.1519e-01/3.4520e+00, peak=76.93 Jy/beam, SNR=113625
+[s0p5] disk_s0p5_r2_c0_x0_005: sigma=6.6590e-04/8.5416e-04 (corners detrend/no), sigma_whole=1.5394e-03, rms=6.6590e-04/1.4406e-03/1.5396e-03, real: sigma=1.0271e-01/3.3147e-01 rms=1.0271e-01/1.7448e+00, peak=62.04 Jy/beam, SNR=93167
+[s0p5] disk_s0p5_r2_c0_x0_008: sigma=4.4461e-04/5.5993e-04 (corners detrend/no), sigma_whole=2.1242e-03, rms=4.4461e-04/1.5499e-03/2.1328e-03, real: sigma=7.7248e-01/3.8962e+00 rms=7.7248e-01/1.4328e+01, peak=152.43 Jy/beam, SNR=342830
+[s0p5] disk_s0p5_r2_c0_x0_009: sigma=5.4453e-04/9.1904e-04 (corners detrend/no), sigma_whole=1.4549e-03, rms=5.4453e-04/1.5157e-03/1.4562e-03, real: sigma=1.4323e-01/6.2870e-01 rms=1.4323e-01/7.5856e-01, peak=66.25 Jy/beam, SNR=121673
+[s0p5] disk_s0p5_r2_c0_x1_000: sigma=6.5542e-04/8.3732e-04 (corners detrend/no), sigma_whole=1.4536e-03, rms=6.5542e-04/1.4296e-03/1.5285e-03, real: sigma=1.0226e-01/3.5155e-01 rms=1.0226e-01/4.5463e-01, peak=32.65 Jy/beam, SNR=49815
+[s0p5] disk_s0p5_r2_c0_x0_006: sigma=4.7681e-04/5.8815e-04 (corners detrend/no), sigma_whole=9.8545e-04, rms=4.7681e-04/1.1799e-03/1.0161e-03, real: sigma=4.5616e-01/1.3256e+00 rms=4.5616e-01/1.8292e+00, peak=82.22 Jy/beam, SNR=172428
+[progress] 50/360 targets done, 0 errors
+[s0p5] disk_s0p5_r2_c0_x0_007: sigma=5.5560e-04/1.0140e-03 (corners detrend/no), sigma_whole=9.8013e-04, rms=5.5560e-04/1.2994e-03/9.8065e-04, real: sigma=1.3158e-01/4.1620e-01 rms=1.3158e-01/1.2918e+00, peak=46.57 Jy/beam, SNR=83826
+[s0p5] disk_s0p5_r2_c0_x1_003: sigma=6.5474e-04/8.8596e-04 (corners detrend/no), sigma_whole=1.5297e-03, rms=6.5474e-04/1.6507e-03/1.5849e-03, real: sigma=1.7528e-01/5.9301e-01 rms=1.7528e-01/1.8556e+00, peak=48.64 Jy/beam, SNR=74282
+[s0p5] disk_s0p5_r2_c0_x1_001: sigma=6.6957e-04/8.3759e-04 (corners detrend/no), sigma_whole=1.0327e-03, rms=6.6957e-04/1.3683e-03/1.1151e-03, real: sigma=1.7012e-01/3.6665e-01 rms=1.7012e-01/8.8487e-01, peak=51.67 Jy/beam, SNR=77168
+[s0p5] disk_s0p5_r2_c0_x1_006: sigma=8.1124e-04/1.2248e-03 (corners detrend/no), sigma_whole=2.0223e-03, rms=8.1124e-04/1.8356e-03/2.1479e-03, real: sigma=3.6196e-01/1.2592e+00 rms=3.6196e-01/2.5490e+00, peak=108.79 Jy/beam, SNR=134097
+[s0p5] disk_s0p5_r2_c0_x1_004: sigma=5.5022e-04/9.0198e-04 (corners detrend/no), sigma_whole=1.2743e-03, rms=5.5022e-04/1.5719e-03/1.2882e-03, real: sigma=1.0091e-01/3.3408e-01 rms=1.0091e-01/4.0563e-01, peak=26.11 Jy/beam, SNR=47446
+[s0p5] disk_s0p5_r2_c0_x1_002: sigma=4.3804e-04/6.0753e-04 (corners detrend/no), sigma_whole=9.4792e-04, rms=4.3804e-04/9.8272e-04/9.5756e-04, real: sigma=1.1176e-01/2.7503e-01 rms=1.1176e-01/1.6028e+00, peak=61.77 Jy/beam, SNR=141015
+[s0p5] disk_s0p5_r2_c0_x1_005: sigma=5.0014e-04/8.3654e-04 (corners detrend/no), sigma_whole=1.1046e-03, rms=5.0014e-04/1.0202e-03/1.1281e-03, real: sigma=9.9540e-02/4.7722e-01 rms=9.9540e-02/1.0342e+00, peak=41.42 Jy/beam, SNR=82807
+[s0p5] disk_s0p5_r2_c0_x1_008: sigma=5.5359e-04/1.0319e-03 (corners detrend/no), sigma_whole=1.3486e-03, rms=5.5359e-04/1.9517e-03/1.7906e-03, real: sigma=5.7529e-01/2.9618e+00 rms=5.7529e-01/7.8590e+00, peak=125.76 Jy/beam, SNR=227171
+[s0p5] disk_s0p5_r2_c1_x0_001: sigma=8.2539e-04/1.1316e-03 (corners detrend/no), sigma_whole=1.8308e-03, rms=8.2539e-04/1.8880e-03/1.8320e-03, real: sigma=4.0043e-02/1.2449e-01 rms=4.0043e-02/2.5350e-01, peak=16.08 Jy/beam, SNR=19483
+[s0p5] disk_s0p5_r2_c0_x1_009: sigma=4.6816e-04/5.7701e-04 (corners detrend/no), sigma_whole=1.0272e-03, rms=4.6816e-04/7.7142e-04/1.0280e-03, real: sigma=1.3029e-01/2.7436e-01 rms=1.3029e-01/7.4398e-01, peak=55.74 Jy/beam, SNR=119055
+[progress] 60/360 targets done, 0 errors
+[s0p5] disk_s0p5_r2_c1_x0_000: sigma=5.0971e-04/6.8450e-04 (corners detrend/no), sigma_whole=1.0476e-03, rms=5.0971e-04/1.1057e-03/1.1625e-03, real: sigma=2.8986e-01/1.0644e+00 rms=2.8986e-01/1.5866e+00, peak=61.10 Jy/beam, SNR=119871
+[s0p5] disk_s0p5_r2_c0_x1_007: sigma=4.6938e-04/6.9853e-04 (corners detrend/no), sigma_whole=9.5592e-04, rms=4.6938e-04/8.3698e-04/9.7029e-04, real: sigma=1.1533e-01/1.9106e-01 rms=1.1533e-01/4.7866e-01, peak=30.21 Jy/beam, SNR=64372
+[s0p5] disk_s0p5_r2_c1_x0_002: sigma=5.1076e-04/6.5239e-04 (corners detrend/no), sigma_whole=1.1383e-03, rms=5.1076e-04/1.1400e-03/1.1515e-03, real: sigma=1.1457e-01/2.7901e-01 rms=1.1457e-01/1.1399e+00, peak=41.94 Jy/beam, SNR=82122
+[s0p5] disk_s0p5_r2_c1_x0_004: sigma=4.7591e-04/6.3053e-04 (corners detrend/no), sigma_whole=1.1492e-03, rms=4.7591e-04/1.2312e-03/1.1638e-03, real: sigma=2.0498e-01/9.6710e-01 rms=2.0498e-01/2.3702e+00, peak=59.00 Jy/beam, SNR=123963
+[s0p5] disk_s0p5_r2_c1_x0_007: sigma=7.8494e-04/1.1828e-03 (corners detrend/no), sigma_whole=1.5639e-03, rms=7.8494e-04/1.2356e-03/1.5650e-03, real: sigma=1.3940e-01/4.7920e-01 rms=1.3940e-01/1.2686e+00, peak=37.69 Jy/beam, SNR=48017
+[s0p5] disk_s0p5_r2_c1_x0_003: sigma=4.8329e-04/7.7447e-04 (corners detrend/no), sigma_whole=9.4714e-04, rms=4.8329e-04/9.5091e-04/9.4730e-04, real: sigma=9.4197e-02/1.3994e-01 rms=9.4197e-02/5.8265e-01, peak=35.98 Jy/beam, SNR=74444
+[s0p5] disk_s0p5_r2_c1_x0_006: sigma=3.9840e-04/6.6724e-04 (corners detrend/no), sigma_whole=1.0537e-03, rms=3.9840e-04/8.4638e-04/1.0610e-03, real: sigma=2.8777e-01/5.5716e-01 rms=2.8777e-01/1.3203e+00, peak=44.51 Jy/beam, SNR=111719
+[s0p5] disk_s0p5_r2_c1_x0_008: sigma=6.0226e-04/9.1807e-04 (corners detrend/no), sigma_whole=1.4394e-03, rms=6.0226e-04/1.0866e-03/1.4916e-03, real: sigma=5.3243e-02/1.0222e-01 rms=5.3243e-02/5.5221e-01, peak=30.80 Jy/beam, SNR=51143
+[s0p5] disk_s0p5_r2_c1_x0_005: sigma=3.5607e-04/5.9068e-04 (corners detrend/no), sigma_whole=9.3216e-04, rms=3.5607e-04/8.1197e-04/9.8148e-04, real: sigma=3.1237e-01/1.3582e+00 rms=3.1237e-01/2.3323e+00, peak=83.36 Jy/beam, SNR=234107
+[s0p5] disk_s0p5_r2_c1_x1_001: sigma=4.9464e-04/5.0327e-04 (corners detrend/no), sigma_whole=1.3023e-03, rms=4.9464e-04/8.4652e-04/1.3062e-03, real: sigma=9.9805e-02/3.4833e-01 rms=9.9805e-02/8.2162e-01, peak=55.16 Jy/beam, SNR=111522
+[progress] 70/360 targets done, 0 errors
+[s0p5] disk_s0p5_r2_c1_x1_000: sigma=3.1481e-04/4.9596e-04 (corners detrend/no), sigma_whole=1.0933e-03, rms=3.1481e-04/9.6498e-04/1.1065e-03, real: sigma=1.1904e-01/2.4522e-01 rms=1.1904e-01/6.7627e-01, peak=35.63 Jy/beam, SNR=113184
+[s0p5] disk_s0p5_r2_c1_x1_002: sigma=3.6702e-04/4.0735e-04 (corners detrend/no), sigma_whole=1.4717e-03, rms=3.6702e-04/2.5152e-03/1.7026e-03, real: sigma=4.2031e-01/2.2697e+00 rms=4.2031e-01/7.4808e+00, peak=104.15 Jy/beam, SNR=283760
+[s0p5] disk_s0p5_r2_c1_x0_009: sigma=3.6291e-04/5.5685e-04 (corners detrend/no), sigma_whole=8.6327e-04, rms=3.6291e-04/9.8936e-04/8.7828e-04, real: sigma=6.3035e-02/1.4041e-01 rms=6.3035e-02/3.0754e-01, peak=34.84 Jy/beam, SNR=96013
+[s0p5] disk_s0p5_r2_c1_x1_004: sigma=3.2341e-04/8.4013e-04 (corners detrend/no), sigma_whole=1.0902e-03, rms=3.2341e-04/1.4177e-03/1.1572e-03, real: sigma=9.9135e-02/2.6879e-01 rms=9.9135e-02/5.8742e-01, peak=28.29 Jy/beam, SNR=87466
+[s0p5] disk_s0p5_r2_c1_x1_003: sigma=4.4182e-04/8.5766e-04 (corners detrend/no), sigma_whole=9.6807e-04, rms=4.4182e-04/8.6130e-04/9.6830e-04, real: sigma=8.5621e-02/4.0234e-01 rms=8.5621e-02/6.5967e-01, peak=40.09 Jy/beam, SNR=90739
+[s0p5] disk_s0p5_r2_c1_x1_007: sigma=4.1706e-04/7.2258e-04 (corners detrend/no), sigma_whole=1.1415e-03, rms=4.1706e-04/1.4244e-03/1.1613e-03, real: sigma=1.1583e-01/3.8160e-01 rms=1.1583e-01/8.4672e-01, peak=32.54 Jy/beam, SNR=78019
+[s0p5] disk_s0p5_r2_c1_x1_008: sigma=3.4738e-04/8.1856e-04 (corners detrend/no), sigma_whole=1.2727e-03, rms=3.4738e-04/1.4169e-03/1.3303e-03, real: sigma=1.1492e-01/3.8034e-01 rms=1.1492e-01/7.6416e-01, peak=49.96 Jy/beam, SNR=143820
+[s0p5] disk_s0p5_r2_c1_x1_006: sigma=3.9047e-04/5.4333e-04 (corners detrend/no), sigma_whole=9.6990e-04, rms=3.9047e-04/8.7638e-04/1.0345e-03, real: sigma=6.9797e-02/3.3782e-01 rms=6.9797e-02/7.9858e-01, peak=28.62 Jy/beam, SNR=73304
+[s0p5] disk_s0p5_r2_c1_x1_005: sigma=5.0524e-04/7.5524e-04 (corners detrend/no), sigma_whole=9.4485e-04, rms=5.0524e-04/8.8288e-04/9.5341e-04, real: sigma=6.3656e-02/1.6482e-01 rms=6.3656e-02/4.6625e-01, peak=41.63 Jy/beam, SNR=82403
+[s0p5] disk_s0p5_r4_c0_x0_000: sigma=5.1123e-04/8.5692e-04 (corners detrend/no), sigma_whole=1.2255e-03, rms=5.1123e-04/1.1466e-03/1.2383e-03, real: sigma=2.2056e-01/5.9138e-01 rms=2.2056e-01/1.2402e+00, peak=80.84 Jy/beam, SNR=158125
+[progress] 80/360 targets done, 0 errors
+[s0p5] disk_s0p5_r2_c1_x1_009: sigma=6.8347e-04/7.7258e-04 (corners detrend/no), sigma_whole=1.2523e-03, rms=6.8347e-04/1.3720e-03/1.2864e-03, real: sigma=2.1004e-01/4.4742e-01 rms=2.1004e-01/8.3379e-01, peak=54.66 Jy/beam, SNR=79982
+[s0p5] disk_s0p5_r4_c0_x0_002: sigma=3.9227e-04/5.6632e-04 (corners detrend/no), sigma_whole=1.1327e-03, rms=3.9227e-04/1.1749e-03/1.3961e-03, real: sigma=6.9999e-01/3.4996e+00 rms=6.9999e-01/8.1411e+00, peak=168.56 Jy/beam, SNR=429693
+[s0p5] disk_s0p5_r4_c0_x0_004: sigma=4.9416e-04/8.5971e-04 (corners detrend/no), sigma_whole=1.1144e-03, rms=4.9416e-04/1.0182e-03/1.1222e-03, real: sigma=1.2982e-01/5.4243e-01 rms=1.2982e-01/1.2358e+00, peak=65.72 Jy/beam, SNR=132997
+[s0p5] disk_s0p5_r4_c0_x0_001: sigma=3.9143e-04/4.9338e-04 (corners detrend/no), sigma_whole=9.6538e-04, rms=3.9143e-04/6.8326e-04/9.6538e-04, real: sigma=1.4548e-01/8.1921e-01 rms=1.4548e-01/9.8139e-01, peak=78.01 Jy/beam, SNR=199288
+[s0p5] disk_s0p5_r4_c0_x0_006: sigma=3.4526e-04/6.9678e-04 (corners detrend/no), sigma_whole=1.2054e-03, rms=3.4526e-04/9.7195e-04/1.2881e-03, real: sigma=1.2775e-01/4.4094e-01 rms=1.2775e-01/8.3043e-01, peak=47.51 Jy/beam, SNR=137596
+[s0p5] disk_s0p5_r4_c0_x0_003: sigma=3.9178e-04/6.5464e-04 (corners detrend/no), sigma_whole=8.2529e-04, rms=3.9178e-04/8.3508e-04/8.4127e-04, real: sigma=1.5409e-01/3.9815e-01 rms=1.5409e-01/1.0545e+00, peak=54.77 Jy/beam, SNR=139789
+[s0p5] disk_s0p5_r4_c0_x0_005: sigma=3.9554e-04/7.3059e-04 (corners detrend/no), sigma_whole=9.2664e-04, rms=3.9554e-04/9.2566e-04/9.4331e-04, real: sigma=9.7968e-02/2.0333e-01 rms=9.7968e-02/3.6484e-01, peak=26.10 Jy/beam, SNR=65993
+[s0p5] disk_s0p5_r4_c0_x0_007: sigma=4.3067e-04/6.7538e-04 (corners detrend/no), sigma_whole=1.2725e-03, rms=4.3067e-04/1.7302e-03/1.3427e-03, real: sigma=4.3557e-01/2.4831e+00 rms=4.3557e-01/7.5860e+00, peak=115.02 Jy/beam, SNR=267079
+[s0p5] disk_s0p5_r4_c0_x0_008: sigma=3.4113e-04/5.2283e-04 (corners detrend/no), sigma_whole=9.4143e-04, rms=3.4113e-04/8.9533e-04/9.7518e-04, real: sigma=1.4788e-01/6.8344e-01 rms=1.4788e-01/7.8979e-01, peak=61.44 Jy/beam, SNR=180115
+[s0p5] disk_s0p5_r4_c0_x0_009: sigma=4.7112e-04/8.1704e-04 (corners detrend/no), sigma_whole=1.0451e-03, rms=4.7112e-04/1.3096e-03/1.0543e-03, real: sigma=3.4175e-01/1.8832e+00 rms=3.4175e-01/3.5410e+00, peak=105.07 Jy/beam, SNR=223023
+[progress] 90/360 targets done, 0 errors
+[s0p5] disk_s0p5_r4_c0_x1_002: sigma=4.7026e-04/8.9069e-04 (corners detrend/no), sigma_whole=1.2309e-03, rms=4.7026e-04/1.4908e-03/1.2337e-03, real: sigma=4.7152e-02/2.4220e-01 rms=4.7152e-02/4.0491e-01, peak=25.80 Jy/beam, SNR=54859
+[s0p5] disk_s0p5_r4_c0_x1_000: sigma=3.8355e-04/4.9509e-04 (corners detrend/no), sigma_whole=9.2265e-04, rms=3.8355e-04/6.8746e-04/9.2615e-04, real: sigma=6.0509e-02/1.0364e-01 rms=6.0509e-02/1.1903e+00, peak=33.37 Jy/beam, SNR=87013
+[s0p5] disk_s0p5_r4_c0_x1_001: sigma=3.7941e-04/5.6246e-04 (corners detrend/no), sigma_whole=9.3003e-04, rms=3.7941e-04/8.8620e-04/9.3650e-04, real: sigma=1.8240e-01/3.8817e-01 rms=1.8240e-01/1.0313e+00, peak=61.69 Jy/beam, SNR=162604
+[s0p5] disk_s0p5_r4_c0_x1_003: sigma=4.4348e-04/6.3766e-04 (corners detrend/no), sigma_whole=8.6238e-04, rms=4.4348e-04/9.2719e-04/8.9375e-04, real: sigma=2.6870e-01/8.1758e-01 rms=2.6870e-01/2.0011e+00, peak=64.08 Jy/beam, SNR=144498
+[s0p5] disk_s0p5_r4_c0_x1_008: sigma=7.5636e-04/1.3026e-03 (corners detrend/no), sigma_whole=1.6223e-03, rms=7.5636e-04/1.7748e-03/1.6272e-03, real: sigma=2.1441e-01/1.1210e+00 rms=2.1441e-01/3.1975e+00, peak=62.61 Jy/beam, SNR=82773
+[s0p5] disk_s0p5_r4_c0_x1_004: sigma=4.1297e-04/5.5075e-04 (corners detrend/no), sigma_whole=9.4473e-04, rms=4.1297e-04/1.0451e-03/9.6268e-04, real: sigma=8.6543e-02/1.7962e-01 rms=8.6543e-02/6.7125e-01, peak=39.62 Jy/beam, SNR=95938
+[s0p5] disk_s0p5_r4_c0_x1_006: sigma=3.9412e-04/5.0029e-04 (corners detrend/no), sigma_whole=1.0877e-03, rms=3.9412e-04/6.2468e-04/1.0919e-03, real: sigma=4.1561e-01/1.9408e+00 rms=4.1561e-01/4.0356e+00, peak=102.15 Jy/beam, SNR=259178
+[s0p5] disk_s0p5_r4_c0_x1_005: sigma=3.3344e-04/6.5275e-04 (corners detrend/no), sigma_whole=8.7735e-04, rms=3.3344e-04/9.9207e-04/9.2494e-04, real: sigma=7.1221e-02/2.2864e-01 rms=7.1221e-02/6.4556e-01, peak=39.69 Jy/beam, SNR=119023
+[s0p5] disk_s0p5_r4_c0_x1_007: sigma=3.3686e-04/4.5676e-04 (corners detrend/no), sigma_whole=9.2378e-04, rms=3.3686e-04/4.9322e-04/9.3661e-04, real: sigma=1.1450e-01/5.0709e-01 rms=1.1450e-01/6.5014e-01, peak=61.26 Jy/beam, SNR=181849
+[s0p5] disk_s0p5_r4_c1_x0_001: sigma=4.7441e-04/8.3922e-04 (corners detrend/no), sigma_whole=1.5121e-03, rms=4.7441e-04/1.2118e-03/1.5535e-03, real: sigma=1.2743e-01/2.9825e-01 rms=1.2743e-01/3.4013e-01, peak=33.40 Jy/beam, SNR=70397
+[progress] 100/360 targets done, 0 errors
+[s0p5] disk_s0p5_r4_c0_x1_009: sigma=4.1667e-04/6.0010e-04 (corners detrend/no), sigma_whole=9.2864e-04, rms=4.1667e-04/7.1565e-04/9.4396e-04, real: sigma=1.4631e-01/2.3910e-01 rms=1.4631e-01/2.0644e+00, peak=67.44 Jy/beam, SNR=161859
+[s0p5] disk_s0p5_r4_c1_x0_000: sigma=4.2113e-04/5.4548e-04 (corners detrend/no), sigma_whole=9.7476e-04, rms=4.2113e-04/1.2840e-03/1.1049e-03, real: sigma=2.1155e-01/1.0295e+00 rms=2.1155e-01/1.8421e+00, peak=59.38 Jy/beam, SNR=141000
+[s0p5] disk_s0p5_r4_c1_x0_005: sigma=7.4650e-04/1.1508e-03 (corners detrend/no), sigma_whole=1.3425e-03, rms=7.4650e-04/1.2980e-03/1.4541e-03, real: sigma=5.2142e-02/2.0921e-01 rms=5.2142e-02/5.1970e-01, peak=29.22 Jy/beam, SNR=39145
+[s0p5] disk_s0p5_r4_c1_x0_002: sigma=4.2094e-04/7.0571e-04 (corners detrend/no), sigma_whole=8.5665e-04, rms=4.2094e-04/9.5037e-04/8.8634e-04, real: sigma=9.9947e-02/3.4612e-01 rms=9.9947e-02/3.9789e-01, peak=44.23 Jy/beam, SNR=105073
+[s0p5] disk_s0p5_r4_c1_x0_003: sigma=2.8406e-04/3.6774e-04 (corners detrend/no), sigma_whole=9.2905e-04, rms=2.8406e-04/5.5281e-04/9.9800e-04, real: sigma=9.7185e-02/2.2101e-01 rms=9.7185e-02/2.9252e-01, peak=25.42 Jy/beam, SNR=89474
+[s0p5] disk_s0p5_r4_c1_x0_004: sigma=3.3492e-04/6.3619e-04 (corners detrend/no), sigma_whole=9.5739e-04, rms=3.3492e-04/1.0310e-03/9.6772e-04, real: sigma=8.8664e-02/1.4821e-01 rms=8.8664e-02/3.5043e-01, peak=26.74 Jy/beam, SNR=79828
+[s0p5] disk_s0p5_r4_c1_x0_006: sigma=4.4667e-04/6.4249e-04 (corners detrend/no), sigma_whole=1.1153e-03, rms=4.4667e-04/8.3862e-04/1.1976e-03, real: sigma=8.5593e-02/2.9610e-01 rms=8.5593e-02/3.0860e-01, peak=33.46 Jy/beam, SNR=74919
+[s0p5] disk_s0p5_r4_c1_x0_009: sigma=7.6720e-04/1.1351e-03 (corners detrend/no), sigma_whole=1.9181e-03, rms=7.6720e-04/1.7581e-03/1.9182e-03, real: sigma=9.4698e-02/4.3726e-01 rms=9.4698e-02/5.6107e-01, peak=36.82 Jy/beam, SNR=47989
+[s0p5] disk_s0p5_r4_c1_x0_007: sigma=4.4522e-04/7.0602e-04 (corners detrend/no), sigma_whole=1.0088e-03, rms=4.4522e-04/9.2340e-04/1.0089e-03, real: sigma=9.6514e-02/3.4721e-01 rms=9.6514e-02/7.6090e-01, peak=33.48 Jy/beam, SNR=75191
+[s0p5] disk_s0p5_r4_c1_x0_008: sigma=5.1339e-04/9.4901e-04 (corners detrend/no), sigma_whole=1.2071e-03, rms=5.1339e-04/1.4291e-03/1.2159e-03, real: sigma=3.6915e-01/1.5239e+00 rms=3.6915e-01/4.2538e+00, peak=87.13 Jy/beam, SNR=169713
+[progress] 110/360 targets done, 0 errors
+[s0p5] disk_s0p5_r4_c1_x1_000: sigma=6.4531e-04/8.9844e-04 (corners detrend/no), sigma_whole=1.7760e-03, rms=6.4531e-04/1.1462e-03/1.7868e-03, real: sigma=1.0513e-01/4.7525e-01 rms=1.0513e-01/8.6928e-01, peak=36.33 Jy/beam, SNR=56295
+[s0p5] disk_s0p5_r4_c1_x1_004: sigma=5.6417e-04/9.0529e-04 (corners detrend/no), sigma_whole=1.0899e-03, rms=5.6417e-04/1.0507e-03/1.0935e-03, real: sigma=3.0327e-01/1.6305e+00 rms=3.0327e-01/4.3722e+00, peak=94.69 Jy/beam, SNR=167834
+[s0p5] disk_s0p5_r4_c1_x1_003: sigma=6.1342e-04/9.2903e-04 (corners detrend/no), sigma_whole=1.2671e-03, rms=6.1342e-04/1.0087e-03/1.2795e-03, real: sigma=6.7022e-02/9.5519e-02 rms=6.7022e-02/2.4508e-01, peak=22.33 Jy/beam, SNR=36410
+[s0p5] disk_s0p5_r4_c1_x1_002: sigma=4.1138e-04/6.1994e-04 (corners detrend/no), sigma_whole=1.0317e-03, rms=4.1138e-04/9.8430e-04/1.0344e-03, real: sigma=4.7409e-02/1.0579e-01 rms=4.7409e-02/5.7177e-01, peak=26.23 Jy/beam, SNR=63763
+[s0p5] disk_s0p5_r4_c1_x1_001: sigma=4.5323e-04/7.0982e-04 (corners detrend/no), sigma_whole=9.3681e-04, rms=4.5323e-04/7.1957e-04/9.3743e-04, real: sigma=1.7080e-01/4.0282e-01 rms=1.7080e-01/1.4979e+00, peak=61.15 Jy/beam, SNR=134931
+[s0p5] disk_s0p5_r4_c1_x1_005: sigma=4.0210e-04/5.8859e-04 (corners detrend/no), sigma_whole=1.0172e-03, rms=4.0210e-04/1.1357e-03/1.0237e-03, real: sigma=7.2354e-02/3.0881e-01 rms=7.2354e-02/6.0668e-01, peak=35.62 Jy/beam, SNR=88592
+[s0p5] disk_s0p5_r4_c1_x1_009: sigma=5.7241e-04/7.4360e-04 (corners detrend/no), sigma_whole=1.5081e-03, rms=5.7241e-04/1.8198e-03/1.5512e-03, real: sigma=1.0077e-01/5.3582e-01 rms=1.0077e-01/1.0829e+00, peak=37.82 Jy/beam, SNR=66080
+[s0p5] disk_s0p5_r4_c1_x1_006: sigma=4.7595e-04/6.1573e-04 (corners detrend/no), sigma_whole=1.0106e-03, rms=4.7595e-04/7.4948e-04/1.0358e-03, real: sigma=2.7795e-01/1.6121e+00 rms=2.7795e-01/3.4538e+00, peak=83.75 Jy/beam, SNR=175969
+[s2] disk_s2_r1_c0_x0_000: sigma=1.3283e-03/1.4156e-03 (corners detrend/no), sigma_whole=1.4102e-03, rms=1.3283e-03/1.4322e-03/1.4107e-03, real: sigma=2.1127e-01/2.8279e-01 rms=2.1127e-01/3.5697e-01, peak=7.15 Jy/beam, SNR=5385
+[s0p5] disk_s0p5_r4_c1_x1_008: sigma=6.0805e-04/8.3016e-04 (corners detrend/no), sigma_whole=1.1083e-03, rms=6.0805e-04/1.1402e-03/1.1234e-03, real: sigma=1.5346e-01/5.4203e-01 rms=1.5346e-01/1.1322e+00, peak=47.55 Jy/beam, SNR=78193
+[progress] 120/360 targets done, 0 errors
+[s0p5] disk_s0p5_r4_c1_x1_007: sigma=4.6726e-04/6.7613e-04 (corners detrend/no), sigma_whole=1.2167e-03, rms=4.6726e-04/8.6950e-04/1.2789e-03, real: sigma=1.5563e-01/6.5411e-01 rms=1.5563e-01/1.0562e+00, peak=50.71 Jy/beam, SNR=108529
+[s2] disk_s2_r1_c0_x0_001: sigma=1.3897e-03/1.6964e-03 (corners detrend/no), sigma_whole=1.8224e-03, rms=1.3897e-03/1.7422e-03/1.8233e-03, real: sigma=1.8759e-01/2.6953e-01 rms=1.8759e-01/3.6927e-01, peak=13.72 Jy/beam, SNR=9876
+[s2] disk_s2_r1_c0_x0_002: sigma=8.9619e-04/9.7255e-04 (corners detrend/no), sigma_whole=1.3042e-03, rms=8.9619e-04/1.0542e-03/1.3550e-03, real: sigma=1.4485e-01/3.4390e-01 rms=1.4485e-01/6.7282e-01, peak=15.54 Jy/beam, SNR=17340
+[s2] disk_s2_r1_c0_x0_003: sigma=9.5722e-04/1.0353e-03 (corners detrend/no), sigma_whole=1.0911e-03, rms=9.5722e-04/1.1506e-03/1.0923e-03, real: sigma=1.3843e-01/1.6233e-01 rms=1.3843e-01/1.7011e-01, peak=5.40 Jy/beam, SNR=5646
+[s2] disk_s2_r1_c0_x0_005: sigma=1.0663e-03/1.2211e-03 (corners detrend/no), sigma_whole=1.3529e-03, rms=1.0663e-03/1.3444e-03/1.3529e-03, real: sigma=9.0464e-02/1.1065e-01 rms=9.0464e-02/2.1189e-01, peak=6.71 Jy/beam, SNR=6291
+[s2] disk_s2_r1_c0_x0_007: sigma=1.4751e-03/1.6237e-03 (corners detrend/no), sigma_whole=1.6940e-03, rms=1.4751e-03/1.7399e-03/1.6943e-03, real: sigma=4.3644e-01/5.0740e-01 rms=4.3644e-01/5.4759e-01, peak=9.09 Jy/beam, SNR=6163
+[s2] disk_s2_r1_c0_x0_006: sigma=1.0716e-03/1.1193e-03 (corners detrend/no), sigma_whole=1.3197e-03, rms=1.0716e-03/1.1299e-03/1.3208e-03, real: sigma=2.1260e-01/3.9709e-01 rms=2.1260e-01/5.9944e-01, peak=10.73 Jy/beam, SNR=10015
+[s2] disk_s2_r1_c0_x0_004: sigma=8.5831e-04/9.4919e-04 (corners detrend/no), sigma_whole=9.7540e-04, rms=8.5831e-04/1.0484e-03/9.7543e-04, real: sigma=2.4906e-01/3.3760e-01 rms=2.4906e-01/4.5275e-01, peak=11.20 Jy/beam, SNR=13048
+[s2] disk_s2_r1_c0_x0_009: sigma=1.1923e-03/1.2311e-03 (corners detrend/no), sigma_whole=1.3992e-03, rms=1.1923e-03/1.2779e-03/1.4020e-03, real: sigma=3.1915e-01/3.4179e-01 rms=3.1915e-01/3.9598e-01, peak=8.74 Jy/beam, SNR=7330
+[s2] disk_s2_r1_c0_x0_008: sigma=9.1923e-04/1.0224e-03 (corners detrend/no), sigma_whole=1.0527e-03, rms=9.1923e-04/1.1019e-03/1.0527e-03, real: sigma=1.5819e-01/1.8494e-01 rms=1.5819e-01/1.9085e-01, peak=5.90 Jy/beam, SNR=6421
+[progress] 130/360 targets done, 0 errors
+[s2] disk_s2_r1_c0_x1_004: sigma=1.4341e-03/1.4772e-03 (corners detrend/no), sigma_whole=1.6103e-03, rms=1.4341e-03/1.5418e-03/1.6110e-03, real: sigma=2.3391e-01/3.2905e-01 rms=2.3391e-01/6.3836e-01, peak=12.10 Jy/beam, SNR=8435
+[s2] disk_s2_r1_c0_x1_001: sigma=8.7775e-04/9.0125e-04 (corners detrend/no), sigma_whole=1.0309e-03, rms=8.7775e-04/9.2977e-04/1.0310e-03, real: sigma=1.1295e-01/1.3733e-01 rms=1.1295e-01/1.4024e-01, peak=5.57 Jy/beam, SNR=6350
+[s2] disk_s2_r1_c0_x1_002: sigma=8.4577e-04/8.8808e-04 (corners detrend/no), sigma_whole=1.0057e-03, rms=8.4577e-04/9.0991e-04/1.0059e-03, real: sigma=2.4176e-01/4.0181e-01 rms=2.4176e-01/4.3682e-01, peak=11.41 Jy/beam, SNR=13494
+[s2] disk_s2_r1_c0_x1_000: sigma=8.9785e-04/9.5347e-04 (corners detrend/no), sigma_whole=9.4831e-04, rms=8.9785e-04/9.7568e-04/9.4949e-04, real: sigma=2.8397e-01/3.0979e-01 rms=2.8397e-01/8.0602e-01, peak=9.02 Jy/beam, SNR=10048
+[s2] disk_s2_r1_c0_x1_003: sigma=8.6354e-04/9.4414e-04 (corners detrend/no), sigma_whole=1.0129e-03, rms=8.6354e-04/9.7020e-04/1.0129e-03, real: sigma=1.7846e-01/2.2164e-01 rms=1.7846e-01/2.7122e-01, peak=5.70 Jy/beam, SNR=6597
+[s2] disk_s2_r1_c0_x1_009: sigma=1.2234e-03/1.2907e-03 (corners detrend/no), sigma_whole=1.7028e-03, rms=1.2234e-03/1.3879e-03/1.7046e-03, real: sigma=4.3408e-01/5.1543e-01 rms=4.3408e-01/7.2519e-01, peak=13.84 Jy/beam, SNR=11310
+[s2] disk_s2_r1_c0_x1_008: sigma=1.0223e-03/1.5080e-03 (corners detrend/no), sigma_whole=1.6472e-03, rms=1.0223e-03/1.9091e-03/1.7555e-03, real: sigma=2.1982e-01/4.3170e-01 rms=2.1982e-01/1.3266e+00, peak=21.48 Jy/beam, SNR=21011
+[s2] disk_s2_r1_c0_x1_005: sigma=8.2057e-04/9.8453e-04 (corners detrend/no), sigma_whole=1.0503e-03, rms=8.2057e-04/1.0436e-03/1.0533e-03, real: sigma=1.2940e-01/1.6562e-01 rms=1.2940e-01/1.9234e-01, peak=6.79 Jy/beam, SNR=8279
+[s2] disk_s2_r1_c0_x1_007: sigma=1.2440e-03/1.3833e-03 (corners detrend/no), sigma_whole=1.4327e-03, rms=1.2440e-03/1.4422e-03/1.4347e-03, real: sigma=2.0483e-01/5.4636e-01 rms=2.0483e-01/1.1399e+00, peak=14.97 Jy/beam, SNR=12030
+[s2] disk_s2_r1_c0_x1_006: sigma=9.1376e-04/1.0213e-03 (corners detrend/no), sigma_whole=1.0459e-03, rms=9.1376e-04/1.0416e-03/1.0476e-03, real: sigma=2.8674e-01/3.2476e-01 rms=2.8674e-01/4.4499e-01, peak=9.22 Jy/beam, SNR=10085
+[progress] 140/360 targets done, 0 errors
+[s2] disk_s2_r1_c1_x0_000: sigma=8.4086e-04/9.3430e-04 (corners detrend/no), sigma_whole=1.0977e-03, rms=8.4086e-04/9.6584e-04/1.1062e-03, real: sigma=2.5639e-01/4.1082e-01 rms=2.5639e-01/5.4744e-01, peak=14.95 Jy/beam, SNR=17781
+[s2] disk_s2_r1_c1_x0_004: sigma=1.3106e-03/1.5286e-03 (corners detrend/no), sigma_whole=1.6505e-03, rms=1.3106e-03/1.7264e-03/1.6520e-03, real: sigma=1.0151e-01/2.2333e-01 rms=1.0151e-01/4.0744e-01, peak=14.91 Jy/beam, SNR=11374
+[s2] disk_s2_r1_c1_x0_003: sigma=1.0515e-03/1.1519e-03 (corners detrend/no), sigma_whole=1.1478e-03, rms=1.0515e-03/1.1694e-03/1.1480e-03, real: sigma=2.4043e-01/2.4624e-01 rms=2.4043e-01/4.1616e-01, peak=6.95 Jy/beam, SNR=6605
+[s2] disk_s2_r1_c1_x0_002: sigma=9.6550e-04/1.0595e-03 (corners detrend/no), sigma_whole=1.0929e-03, rms=9.6550e-04/1.0700e-03/1.0946e-03, real: sigma=7.9533e-02/1.4327e-01 rms=7.9533e-02/2.2269e-01, peak=7.25 Jy/beam, SNR=7514
+[s2] disk_s2_r1_c1_x0_001: sigma=7.7235e-04/8.4528e-04 (corners detrend/no), sigma_whole=9.1251e-04, rms=7.7235e-04/8.8724e-04/9.1441e-04, real: sigma=1.7826e-01/1.8619e-01 rms=1.7826e-01/3.5853e-01, peak=7.45 Jy/beam, SNR=9652
+[s2] disk_s2_r1_c1_x0_005: sigma=9.6368e-04/1.0114e-03 (corners detrend/no), sigma_whole=1.0219e-03, rms=9.6368e-04/1.0250e-03/1.0223e-03, real: sigma=1.1867e-01/1.6090e-01 rms=1.1867e-01/1.7769e-01, peak=3.34 Jy/beam, SNR=3464
+[s2] disk_s2_r1_c1_x0_006: sigma=9.2587e-04/9.9273e-04 (corners detrend/no), sigma_whole=1.1565e-03, rms=9.2587e-04/1.0707e-03/1.1571e-03, real: sigma=1.9739e-01/2.1475e-01 rms=1.9739e-01/2.8427e-01, peak=6.12 Jy/beam, SNR=6606
+[s2] disk_s2_r1_c1_x0_007: sigma=9.8468e-04/1.0039e-03 (corners detrend/no), sigma_whole=1.1966e-03, rms=9.8468e-04/1.1489e-03/1.1975e-03, real: sigma=2.5372e-01/4.2339e-01 rms=2.5372e-01/7.1484e-01, peak=6.09 Jy/beam, SNR=6185
+[s2] disk_s2_r1_c1_x1_000: sigma=9.9402e-04/1.0932e-03 (corners detrend/no), sigma_whole=1.1920e-03, rms=9.9402e-04/1.2424e-03/1.1973e-03, real: sigma=1.6470e-01/2.0421e-01 rms=1.6470e-01/6.4538e-01, peak=8.61 Jy/beam, SNR=8658
+[s2] disk_s2_r1_c1_x0_009: sigma=9.2946e-04/9.8569e-04 (corners detrend/no), sigma_whole=1.0054e-03, rms=9.2946e-04/1.0420e-03/1.0067e-03, real: sigma=3.2760e-01/3.7755e-01 rms=3.2760e-01/4.6649e-01, peak=8.00 Jy/beam, SNR=8610
+[progress] 150/360 targets done, 0 errors
+[s2] disk_s2_r1_c1_x0_008: sigma=8.6989e-04/9.5247e-04 (corners detrend/no), sigma_whole=9.5679e-04, rms=8.6989e-04/1.0549e-03/9.6212e-04, real: sigma=1.8410e-01/2.8644e-01 rms=1.8410e-01/3.0890e-01, peak=9.34 Jy/beam, SNR=10739
+[s2] disk_s2_r1_c1_x1_003: sigma=1.3636e-03/1.4429e-03 (corners detrend/no), sigma_whole=1.7081e-03, rms=1.3636e-03/1.5214e-03/1.7103e-03, real: sigma=1.0212e-01/1.5565e-01 rms=1.0212e-01/1.9267e-01, peak=4.75 Jy/beam, SNR=3486
+[s2] disk_s2_r1_c1_x1_001: sigma=8.3608e-04/8.9030e-04 (corners detrend/no), sigma_whole=1.0244e-03, rms=8.3608e-04/9.8747e-04/1.0296e-03, real: sigma=1.4692e-01/2.1864e-01 rms=1.4692e-01/2.4408e-01, peak=6.12 Jy/beam, SNR=7323
+[s2] disk_s2_r1_c1_x1_002: sigma=9.2012e-04/9.5842e-04 (corners detrend/no), sigma_whole=1.0603e-03, rms=9.2012e-04/9.7022e-04/1.0603e-03, real: sigma=1.9981e-01/2.7641e-01 rms=1.9981e-01/3.6092e-01, peak=3.67 Jy/beam, SNR=3988
+[s2] disk_s2_r1_c1_x1_005: sigma=1.0579e-03/1.1731e-03 (corners detrend/no), sigma_whole=1.3135e-03, rms=1.0579e-03/1.2340e-03/1.3137e-03, real: sigma=1.4810e-01/1.7853e-01 rms=1.4810e-01/3.1656e-01, peak=8.44 Jy/beam, SNR=7976
+[s2] disk_s2_r1_c1_x1_007: sigma=1.1625e-03/1.3095e-03 (corners detrend/no), sigma_whole=1.3286e-03, rms=1.1625e-03/1.3555e-03/1.3295e-03, real: sigma=1.5522e-01/2.3798e-01 rms=1.5522e-01/9.1403e-01, peak=11.78 Jy/beam, SNR=10132
+[s2] disk_s2_r1_c1_x1_006: sigma=9.8021e-04/1.0571e-03 (corners detrend/no), sigma_whole=1.2981e-03, rms=9.8021e-04/1.2655e-03/1.2982e-03, real: sigma=1.7189e-01/2.5261e-01 rms=1.7189e-01/4.8778e-01, peak=9.01 Jy/beam, SNR=9187
+[s2] disk_s2_r1_c1_x1_004: sigma=9.1615e-04/9.9178e-04 (corners detrend/no), sigma_whole=1.0490e-03, rms=9.1615e-04/1.0622e-03/1.0495e-03, real: sigma=1.2574e-01/1.9352e-01 rms=1.2574e-01/2.9073e-01, peak=4.36 Jy/beam, SNR=4761
+[s2] disk_s2_r1_c1_x1_008: sigma=8.9592e-04/1.0198e-03 (corners detrend/no), sigma_whole=1.1779e-03, rms=8.9592e-04/1.0413e-03/1.1780e-03, real: sigma=1.7267e-01/3.0935e-01 rms=1.7267e-01/3.8858e-01, peak=6.32 Jy/beam, SNR=7054
+[s2] disk_s2_r2_c0_x0_000: sigma=1.7990e-03/2.0696e-03 (corners detrend/no), sigma_whole=2.3085e-03, rms=1.7990e-03/2.5949e-03/2.3682e-03, real: sigma=2.6886e-01/3.8432e-01 rms=2.6886e-01/2.0110e+00, peak=23.03 Jy/beam, SNR=12800
+[progress] 160/360 targets done, 0 errors
+[s2] disk_s2_r2_c0_x0_003: sigma=1.5454e-03/1.6194e-03 (corners detrend/no), sigma_whole=1.6110e-03, rms=1.5454e-03/1.7030e-03/1.6205e-03, real: sigma=2.2341e-01/4.5269e-01 rms=2.2341e-01/1.1340e+00, peak=18.80 Jy/beam, SNR=12166
+[s2] disk_s2_r1_c1_x1_009: sigma=8.8937e-04/9.9918e-04 (corners detrend/no), sigma_whole=1.0541e-03, rms=8.8937e-04/1.1262e-03/1.0567e-03, real: sigma=1.1051e-01/1.2154e-01 rms=1.1051e-01/1.7772e-01, peak=8.00 Jy/beam, SNR=8991
+[s2] disk_s2_r2_c0_x0_001: sigma=1.0284e-03/1.1133e-03 (corners detrend/no), sigma_whole=1.1177e-03, rms=1.0284e-03/1.2670e-03/1.1235e-03, real: sigma=1.6087e-01/2.3589e-01 rms=1.6087e-01/6.0225e-01, peak=9.94 Jy/beam, SNR=9670
+[s2] disk_s2_r2_c0_x0_002: sigma=1.0029e-03/1.0564e-03 (corners detrend/no), sigma_whole=1.0558e-03, rms=1.0029e-03/1.0721e-03/1.0558e-03, real: sigma=1.8747e-01/2.1402e-01 rms=1.8747e-01/2.6680e-01, peak=8.01 Jy/beam, SNR=7984
+[s2] disk_s2_r2_c0_x0_004: sigma=1.1084e-03/1.1358e-03 (corners detrend/no), sigma_whole=1.2412e-03, rms=1.1084e-03/1.2180e-03/1.2432e-03, real: sigma=1.9614e-01/2.2385e-01 rms=1.9614e-01/4.2294e-01, peak=6.52 Jy/beam, SNR=5881
+[s2] disk_s2_r2_c0_x0_005: sigma=8.4973e-04/9.0971e-04 (corners detrend/no), sigma_whole=1.0061e-03, rms=8.4973e-04/9.3106e-04/1.0062e-03, real: sigma=2.2766e-01/3.6195e-01 rms=2.2766e-01/5.9076e-01, peak=9.40 Jy/beam, SNR=11059
+[s2] disk_s2_r2_c0_x0_009: sigma=1.2199e-03/1.2718e-03 (corners detrend/no), sigma_whole=1.5613e-03, rms=1.2199e-03/1.4075e-03/1.5629e-03, real: sigma=2.9065e-01/2.9061e-01 rms=2.9065e-01/1.6799e+00, peak=22.41 Jy/beam, SNR=18367
+[s2] disk_s2_r2_c0_x0_006: sigma=9.5345e-04/1.0282e-03 (corners detrend/no), sigma_whole=1.1436e-03, rms=9.5345e-04/1.1840e-03/1.1445e-03, real: sigma=1.6045e-01/2.4556e-01 rms=1.6045e-01/7.1995e-01, peak=12.68 Jy/beam, SNR=13301
+[s2] disk_s2_r2_c0_x1_000: sigma=1.1556e-03/1.3094e-03 (corners detrend/no), sigma_whole=1.3494e-03, rms=1.1556e-03/1.3494e-03/1.3498e-03, real: sigma=2.0587e-01/3.3445e-01 rms=2.0587e-01/3.4437e-01, peak=7.34 Jy/beam, SNR=6348
+[s2] disk_s2_r2_c0_x0_008: sigma=9.8026e-04/1.0738e-03 (corners detrend/no), sigma_whole=1.1400e-03, rms=9.8026e-04/1.1453e-03/1.1401e-03, real: sigma=1.5848e-01/2.2885e-01 rms=1.5848e-01/3.1107e-01, peak=9.51 Jy/beam, SNR=9700
+[progress] 170/360 targets done, 0 errors
+[s2] disk_s2_r2_c0_x1_001: sigma=1.2370e-03/1.4309e-03 (corners detrend/no), sigma_whole=1.7424e-03, rms=1.2370e-03/1.6380e-03/1.7425e-03, real: sigma=1.4009e-01/2.2318e-01 rms=1.4009e-01/4.5886e-01, peak=17.37 Jy/beam, SNR=14039
+[s2] disk_s2_r2_c0_x0_007: sigma=8.2170e-04/8.4950e-04 (corners detrend/no), sigma_whole=9.5858e-04, rms=8.2170e-04/8.6534e-04/9.5867e-04, real: sigma=1.5344e-01/2.1412e-01 rms=1.5344e-01/4.2666e-01, peak=9.46 Jy/beam, SNR=11513
+[s2] disk_s2_r2_c0_x1_003: sigma=1.7140e-03/1.7583e-03 (corners detrend/no), sigma_whole=2.2179e-03, rms=1.7140e-03/1.8242e-03/2.2179e-03, real: sigma=2.7949e-01/5.9845e-01 rms=2.7949e-01/8.0370e-01, peak=13.06 Jy/beam, SNR=7617
+[s2] disk_s2_r2_c0_x1_004: sigma=1.4130e-03/1.4952e-03 (corners detrend/no), sigma_whole=1.7506e-03, rms=1.4130e-03/1.8085e-03/1.7543e-03, real: sigma=1.8005e-01/3.3951e-01 rms=1.8005e-01/4.4802e-01, peak=14.99 Jy/beam, SNR=10609
+[s2] disk_s2_r2_c0_x1_007: sigma=1.4971e-03/1.6875e-03 (corners detrend/no), sigma_whole=1.7269e-03, rms=1.4971e-03/1.7693e-03/1.7273e-03, real: sigma=4.8737e-01/6.3978e-01 rms=4.8737e-01/1.1515e+00, peak=12.78 Jy/beam, SNR=8537
+[s2] disk_s2_r2_c0_x1_005: sigma=1.1499e-03/1.2202e-03 (corners detrend/no), sigma_whole=1.2837e-03, rms=1.1499e-03/1.2909e-03/1.2847e-03, real: sigma=1.9145e-01/3.4423e-01 rms=1.9145e-01/4.7357e-01, peak=7.31 Jy/beam, SNR=6360
+[s2] disk_s2_r2_c0_x1_008: sigma=1.2522e-03/1.5582e-03 (corners detrend/no), sigma_whole=1.6086e-03, rms=1.2522e-03/1.8225e-03/1.6182e-03, real: sigma=2.4019e-01/4.6875e-01 rms=2.4019e-01/3.1923e+00, peak=30.57 Jy/beam, SNR=24415
+[s2] disk_s2_r2_c0_x1_002: sigma=1.1000e-03/1.2481e-03 (corners detrend/no), sigma_whole=1.1251e-03, rms=1.1000e-03/1.3106e-03/1.1252e-03, real: sigma=1.1482e-01/1.4249e-01 rms=1.1482e-01/3.3010e-01, peak=6.93 Jy/beam, SNR=6298
+[s2] disk_s2_r2_c0_x1_006: sigma=7.6744e-04/8.3770e-04 (corners detrend/no), sigma_whole=1.0092e-03, rms=7.6744e-04/9.7559e-04/1.0093e-03, real: sigma=1.8473e-01/3.8437e-01 rms=1.8473e-01/9.9407e-01, peak=14.62 Jy/beam, SNR=19050
+[s2] disk_s2_r2_c1_x0_002: sigma=1.6204e-03/1.7593e-03 (corners detrend/no), sigma_whole=1.8914e-03, rms=1.6204e-03/1.9001e-03/1.8947e-03, real: sigma=1.1636e-01/1.7765e-01 rms=1.1636e-01/4.7633e-01, peak=9.35 Jy/beam, SNR=5769
+[progress] 180/360 targets done, 0 errors
+[s2] disk_s2_r2_c1_x0_000: sigma=9.6984e-04/1.1064e-03 (corners detrend/no), sigma_whole=1.2025e-03, rms=9.6984e-04/1.1860e-03/1.2050e-03, real: sigma=9.0169e-02/1.9357e-01 rms=9.0169e-02/3.7945e-01, peak=14.91 Jy/beam, SNR=15375
+[s2] disk_s2_r2_c0_x1_009: sigma=1.0366e-03/1.1190e-03 (corners detrend/no), sigma_whole=1.1166e-03, rms=1.0366e-03/1.1496e-03/1.1395e-03, real: sigma=1.9538e-01/2.7297e-01 rms=1.9538e-01/2.9298e-01, peak=9.54 Jy/beam, SNR=9203
+[s2] disk_s2_r2_c1_x0_003: sigma=1.1599e-03/1.2691e-03 (corners detrend/no), sigma_whole=1.2707e-03, rms=1.1599e-03/1.2914e-03/1.2727e-03, real: sigma=1.1893e-01/1.5189e-01 rms=1.1893e-01/1.9469e-01, peak=6.11 Jy/beam, SNR=5266
+[s2] disk_s2_r2_c1_x0_001: sigma=1.0016e-03/1.0541e-03 (corners detrend/no), sigma_whole=1.1275e-03, rms=1.0016e-03/1.1100e-03/1.1275e-03, real: sigma=1.4066e-01/2.0858e-01 rms=1.4066e-01/2.4614e-01, peak=6.74 Jy/beam, SNR=6729
+[s2] disk_s2_r2_c1_x0_004: sigma=1.0938e-03/1.2273e-03 (corners detrend/no), sigma_whole=1.4716e-03, rms=1.0938e-03/1.3655e-03/1.4764e-03, real: sigma=9.5059e-02/2.2661e-01 rms=9.5059e-02/3.1553e-01, peak=15.52 Jy/beam, SNR=14185
+[s2] disk_s2_r2_c1_x0_006: sigma=1.2698e-03/1.3771e-03 (corners detrend/no), sigma_whole=1.4758e-03, rms=1.2698e-03/1.4821e-03/1.4760e-03, real: sigma=3.1494e-01/3.3543e-01 rms=3.1494e-01/4.4706e-01, peak=7.24 Jy/beam, SNR=5701
+[s2] disk_s2_r2_c1_x0_007: sigma=1.1343e-03/1.2514e-03 (corners detrend/no), sigma_whole=1.5541e-03, rms=1.1343e-03/1.5225e-03/1.5675e-03, real: sigma=1.5549e-01/2.5812e-01 rms=1.5549e-01/1.3117e+00, peak=20.91 Jy/beam, SNR=18438
+[s2] disk_s2_r2_c1_x0_005: sigma=9.9366e-04/1.0190e-03 (corners detrend/no), sigma_whole=1.1214e-03, rms=9.9366e-04/1.1325e-03/1.1337e-03, real: sigma=1.1824e-01/1.8481e-01 rms=1.1824e-01/4.6235e-01, peak=6.80 Jy/beam, SNR=6846
+[s2] disk_s2_r2_c1_x0_008: sigma=1.0496e-03/1.1260e-03 (corners detrend/no), sigma_whole=1.1135e-03, rms=1.0496e-03/1.1376e-03/1.1135e-03, real: sigma=1.5847e-01/2.2673e-01 rms=1.5847e-01/2.4699e-01, peak=5.08 Jy/beam, SNR=4843
+[s2] disk_s2_r2_c1_x0_009: sigma=9.1039e-04/9.6308e-04 (corners detrend/no), sigma_whole=1.0239e-03, rms=9.1039e-04/9.8972e-04/1.0241e-03, real: sigma=7.0443e-02/1.1365e-01 rms=7.0443e-02/1.8951e-01, peak=4.92 Jy/beam, SNR=5406
+[progress] 190/360 targets done, 0 errors
+[s2] disk_s2_r2_c1_x1_001: sigma=9.0947e-04/9.7922e-04 (corners detrend/no), sigma_whole=1.1871e-03, rms=9.0947e-04/9.9788e-04/1.1877e-03, real: sigma=1.8879e-01/2.5605e-01 rms=1.8879e-01/5.3126e-01, peak=7.83 Jy/beam, SNR=8613
+[s2] disk_s2_r2_c1_x1_000: sigma=9.4451e-04/1.0423e-03 (corners detrend/no), sigma_whole=1.0266e-03, rms=9.4451e-04/1.1134e-03/1.0268e-03, real: sigma=1.3550e-01/1.4999e-01 rms=1.3550e-01/2.6886e-01, peak=8.17 Jy/beam, SNR=8647
+[s2] disk_s2_r2_c1_x1_004: sigma=1.3337e-03/1.4427e-03 (corners detrend/no), sigma_whole=1.5533e-03, rms=1.3337e-03/1.5548e-03/1.5611e-03, real: sigma=1.1700e-01/1.9402e-01 rms=1.1700e-01/2.1916e-01, peak=8.26 Jy/beam, SNR=6196
+[s2] disk_s2_r2_c1_x1_005: sigma=1.5613e-03/1.8915e-03 (corners detrend/no), sigma_whole=1.9335e-03, rms=1.5613e-03/2.0243e-03/1.9345e-03, real: sigma=9.5433e-02/2.3391e-01 rms=9.5433e-02/7.4828e-01, peak=15.65 Jy/beam, SNR=10026
+[s2] disk_s2_r2_c1_x1_003: sigma=9.7973e-04/1.0068e-03 (corners detrend/no), sigma_whole=1.1257e-03, rms=9.7973e-04/1.0513e-03/1.1267e-03, real: sigma=1.0119e-01/2.0331e-01 rms=1.0119e-01/2.9269e-01, peak=11.30 Jy/beam, SNR=11535
+[s2] disk_s2_r2_c1_x1_002: sigma=8.3035e-04/9.2327e-04 (corners detrend/no), sigma_whole=1.0060e-03, rms=8.3035e-04/9.9725e-04/1.0064e-03, real: sigma=1.7959e-01/3.0024e-01 rms=1.7959e-01/7.4870e-01, peak=11.74 Jy/beam, SNR=14137
+[s2] disk_s2_r2_c1_x1_007: sigma=1.1769e-03/1.2501e-03 (corners detrend/no), sigma_whole=1.2537e-03, rms=1.1769e-03/1.2673e-03/1.2537e-03, real: sigma=1.4937e-01/2.4297e-01 rms=1.4937e-01/3.3515e-01, peak=6.19 Jy/beam, SNR=5262
+[s2] disk_s2_r2_c1_x1_006: sigma=1.0297e-03/1.0427e-03 (corners detrend/no), sigma_whole=1.1164e-03, rms=1.0297e-03/1.0985e-03/1.1169e-03, real: sigma=1.2856e-01/2.0334e-01 rms=1.2856e-01/2.3261e-01, peak=5.73 Jy/beam, SNR=5567
+[s2] disk_s2_r4_c0_x0_001: sigma=1.0922e-03/1.2792e-03 (corners detrend/no), sigma_whole=1.5443e-03, rms=1.0922e-03/1.4955e-03/1.5535e-03, real: sigma=1.4940e-01/3.4499e-01 rms=1.4940e-01/2.3238e+00, peak=24.81 Jy/beam, SNR=22720
+[s2] disk_s2_r2_c1_x1_008: sigma=8.0676e-04/8.6381e-04 (corners detrend/no), sigma_whole=9.5960e-04, rms=8.0676e-04/8.9094e-04/9.6121e-04, real: sigma=9.2303e-02/1.1770e-01 rms=9.2303e-02/3.6085e-01, peak=5.87 Jy/beam, SNR=7278
+[progress] 200/360 targets done, 0 errors
+[s2] disk_s2_r2_c1_x1_009: sigma=8.4544e-04/8.8228e-04 (corners detrend/no), sigma_whole=9.6163e-04, rms=8.4544e-04/9.3463e-04/9.6280e-04, real: sigma=7.3753e-02/1.5772e-01 rms=7.3753e-02/2.2357e-01, peak=6.92 Jy/beam, SNR=8188
+[s2] disk_s2_r4_c0_x0_000: sigma=9.6989e-04/1.0092e-03 (corners detrend/no), sigma_whole=1.0361e-03, rms=9.6989e-04/1.0431e-03/1.0361e-03, real: sigma=8.3300e-02/1.0399e-01 rms=8.3300e-02/2.2207e-01, peak=5.76 Jy/beam, SNR=5937
+[s2] disk_s2_r4_c0_x0_003: sigma=1.3797e-03/1.5935e-03 (corners detrend/no), sigma_whole=1.5839e-03, rms=1.3797e-03/1.6928e-03/1.5851e-03, real: sigma=9.8010e-02/1.6956e-01 rms=9.8010e-02/1.9459e-01, peak=13.20 Jy/beam, SNR=9568
+[s2] disk_s2_r4_c0_x0_004: sigma=1.1616e-03/1.2564e-03 (corners detrend/no), sigma_whole=1.2802e-03, rms=1.1616e-03/1.3069e-03/1.2852e-03, real: sigma=1.0150e-01/1.3726e-01 rms=1.0150e-01/2.0183e-01, peak=7.04 Jy/beam, SNR=6063
+[s2] disk_s2_r4_c0_x0_002: sigma=8.7014e-04/9.4908e-04 (corners detrend/no), sigma_whole=1.0779e-03, rms=8.7014e-04/9.9101e-04/1.0779e-03, real: sigma=1.2907e-01/1.9380e-01 rms=1.2907e-01/2.0843e-01, peak=9.51 Jy/beam, SNR=10926
+[s2] disk_s2_r4_c0_x0_007: sigma=1.2003e-03/1.3354e-03 (corners detrend/no), sigma_whole=1.4554e-03, rms=1.2003e-03/1.5471e-03/1.4568e-03, real: sigma=1.4952e-01/2.8729e-01 rms=1.4952e-01/8.5996e-01, peak=17.71 Jy/beam, SNR=14756
+[s2] disk_s2_r4_c0_x0_006: sigma=1.1684e-03/1.2704e-03 (corners detrend/no), sigma_whole=1.2183e-03, rms=1.1684e-03/1.3824e-03/1.2191e-03, real: sigma=1.2926e-01/1.7883e-01 rms=1.2926e-01/3.0131e-01, peak=10.05 Jy/beam, SNR=8597
+[s2] disk_s2_r4_c0_x0_005: sigma=8.3392e-04/9.2354e-04 (corners detrend/no), sigma_whole=1.0499e-03, rms=8.3392e-04/9.5674e-04/1.0520e-03, real: sigma=1.1289e-01/2.8656e-01 rms=1.1289e-01/8.4040e-01, peak=11.18 Jy/beam, SNR=13403
+[s2] disk_s2_r4_c0_x0_008: sigma=1.1303e-03/1.2348e-03 (corners detrend/no), sigma_whole=1.2708e-03, rms=1.1303e-03/1.3280e-03/1.2710e-03, real: sigma=7.4187e-02/1.4885e-01 rms=7.4187e-02/4.6247e-01, peak=8.29 Jy/beam, SNR=7332
+[s2] disk_s2_r4_c0_x1_001: sigma=1.5444e-03/1.7729e-03 (corners detrend/no), sigma_whole=1.8776e-03, rms=1.5444e-03/1.9217e-03/1.8801e-03, real: sigma=1.0022e-01/3.9348e-01 rms=1.0022e-01/1.5173e+00, peak=22.66 Jy/beam, SNR=14672
+[progress] 210/360 targets done, 0 errors
+[s2] disk_s2_r4_c0_x1_000: sigma=1.0083e-03/1.1036e-03 (corners detrend/no), sigma_whole=1.1509e-03, rms=1.0083e-03/1.1237e-03/1.1516e-03, real: sigma=1.4189e-01/1.5628e-01 rms=1.4189e-01/2.1111e-01, peak=4.27 Jy/beam, SNR=4237
+[s2] disk_s2_r4_c0_x0_009: sigma=1.0512e-03/1.1082e-03 (corners detrend/no), sigma_whole=1.0786e-03, rms=1.0512e-03/1.1951e-03/1.0793e-03, real: sigma=7.0931e-02/1.8024e-01 rms=7.0931e-02/2.4827e-01, peak=12.17 Jy/beam, SNR=11576
+[s2] disk_s2_r4_c0_x1_002: sigma=9.3139e-04/1.0111e-03 (corners detrend/no), sigma_whole=1.1076e-03, rms=9.3139e-04/1.0641e-03/1.1076e-03, real: sigma=1.2235e-01/1.8037e-01 rms=1.2235e-01/3.0063e-01, peak=9.08 Jy/beam, SNR=9752
+[s2] disk_s2_r4_c0_x1_003: sigma=7.7881e-04/8.2813e-04 (corners detrend/no), sigma_whole=9.5528e-04, rms=7.7881e-04/9.1758e-04/9.5893e-04, real: sigma=1.5334e-01/2.1187e-01 rms=1.5334e-01/4.6834e-01, peak=7.35 Jy/beam, SNR=9437
+[s2] disk_s2_r4_c0_x1_004: sigma=9.9965e-04/1.1522e-03 (corners detrend/no), sigma_whole=1.2626e-03, rms=9.9965e-04/1.2300e-03/1.2654e-03, real: sigma=1.1384e-01/1.3770e-01 rms=1.1384e-01/1.8959e-01, peak=8.81 Jy/beam, SNR=8811
+[s2] disk_s2_r4_c0_x1_007: sigma=1.0611e-03/1.1368e-03 (corners detrend/no), sigma_whole=1.3833e-03, rms=1.0611e-03/1.1857e-03/1.3853e-03, real: sigma=1.4313e-01/3.1624e-01 rms=1.4313e-01/1.2442e+00, peak=19.89 Jy/beam, SNR=18747
+[s2] disk_s2_r4_c0_x1_005: sigma=9.3324e-04/9.8777e-04 (corners detrend/no), sigma_whole=1.1108e-03, rms=9.3324e-04/1.0539e-03/1.1121e-03, real: sigma=7.4400e-02/1.0511e-01 rms=7.4400e-02/2.0260e-01, peak=7.52 Jy/beam, SNR=8061
+[s2] disk_s2_r4_c0_x1_008: sigma=1.2035e-03/1.5704e-03 (corners detrend/no), sigma_whole=1.5794e-03, rms=1.2035e-03/1.6264e-03/1.5850e-03, real: sigma=1.0762e-01/3.5455e-01 rms=1.0762e-01/1.8290e+00, peak=22.41 Jy/beam, SNR=18619
+[s2] disk_s2_r4_c0_x1_006: sigma=8.8273e-04/1.1104e-03 (corners detrend/no), sigma_whole=1.1199e-03, rms=8.8273e-04/1.1173e-03/1.1201e-03, real: sigma=8.3110e-02/1.7504e-01 rms=8.3110e-02/3.5767e-01, peak=10.59 Jy/beam, SNR=12000
+[s2] disk_s2_r4_c0_x1_009: sigma=1.2149e-03/1.3144e-03 (corners detrend/no), sigma_whole=1.4671e-03, rms=1.2149e-03/1.3740e-03/1.4679e-03, real: sigma=1.0036e-01/1.3214e-01 rms=1.0036e-01/2.8258e-01, peak=9.32 Jy/beam, SNR=7667
+[progress] 220/360 targets done, 0 errors
+[s2] disk_s2_r4_c1_x0_000: sigma=1.0187e-03/1.2028e-03 (corners detrend/no), sigma_whole=1.2164e-03, rms=1.0187e-03/1.3738e-03/1.2215e-03, real: sigma=6.7193e-02/1.3699e-01 rms=6.7193e-02/2.1097e-01, peak=9.74 Jy/beam, SNR=9561
+[s2] disk_s2_r4_c1_x0_005: sigma=1.4364e-03/1.5099e-03 (corners detrend/no), sigma_whole=1.6670e-03, rms=1.4364e-03/1.6475e-03/1.6798e-03, real: sigma=9.4400e-02/3.5088e-01 rms=9.4400e-02/7.4610e-01, peak=15.16 Jy/beam, SNR=10554
+[s2] disk_s2_r4_c1_x0_004: sigma=1.2914e-03/1.3783e-03 (corners detrend/no), sigma_whole=1.5298e-03, rms=1.2914e-03/1.4246e-03/1.5343e-03, real: sigma=8.8889e-02/1.3050e-01 rms=8.8889e-02/1.6574e-01, peak=7.96 Jy/beam, SNR=6168
+[s2] disk_s2_r4_c1_x0_002: sigma=9.3848e-04/1.0391e-03 (corners detrend/no), sigma_whole=1.2072e-03, rms=9.3848e-04/1.0528e-03/1.2077e-03, real: sigma=8.3308e-02/2.2686e-01 rms=8.3308e-02/3.9093e-01, peak=16.77 Jy/beam, SNR=17867
+[s2] disk_s2_r4_c1_x0_001: sigma=9.7548e-04/1.0715e-03 (corners detrend/no), sigma_whole=1.1639e-03, rms=9.7548e-04/1.1128e-03/1.1641e-03, real: sigma=1.0928e-01/1.8779e-01 rms=1.0928e-01/2.8658e-01, peak=8.25 Jy/beam, SNR=8462
+[s2] disk_s2_r4_c1_x0_007: sigma=1.2733e-03/1.4291e-03 (corners detrend/no), sigma_whole=1.6606e-03, rms=1.2733e-03/1.6016e-03/1.6702e-03, real: sigma=5.5912e-02/9.8388e-02 rms=5.5912e-02/1.6528e-01, peak=9.21 Jy/beam, SNR=7230
+[s2] disk_s2_r4_c1_x0_003: sigma=8.2953e-04/9.0462e-04 (corners detrend/no), sigma_whole=1.0317e-03, rms=8.2953e-04/9.2766e-04/1.0317e-03, real: sigma=6.1471e-02/9.5559e-02 rms=6.1471e-02/2.3601e-01, peak=6.34 Jy/beam, SNR=7643
+[s2] disk_s2_r4_c1_x0_006: sigma=8.4188e-04/8.7368e-04 (corners detrend/no), sigma_whole=1.0913e-03, rms=8.4188e-04/1.0022e-03/1.0913e-03, real: sigma=7.7248e-02/1.2024e-01 rms=7.7248e-02/1.4687e-01, peak=8.68 Jy/beam, SNR=10306
+[s2] disk_s2_r4_c1_x0_009: sigma=1.0704e-03/1.1401e-03 (corners detrend/no), sigma_whole=1.3911e-03, rms=1.0704e-03/1.2649e-03/1.3932e-03, real: sigma=9.2167e-02/1.4135e-01 rms=9.2167e-02/2.2339e-01, peak=8.88 Jy/beam, SNR=8297
+[s2] disk_s2_r4_c1_x0_008: sigma=8.7049e-04/9.6837e-04 (corners detrend/no), sigma_whole=1.0490e-03, rms=8.7049e-04/1.0450e-03/1.0494e-03, real: sigma=7.3751e-02/1.1873e-01 rms=7.3751e-02/2.2397e-01, peak=5.77 Jy/beam, SNR=6624
+[progress] 230/360 targets done, 0 errors
+[s2] disk_s2_r4_c1_x1_000: sigma=9.8607e-04/1.1262e-03 (corners detrend/no), sigma_whole=1.1677e-03, rms=9.8607e-04/1.2466e-03/1.1691e-03, real: sigma=5.9721e-02/9.1273e-02 rms=5.9721e-02/2.9348e-01, peak=7.28 Jy/beam, SNR=7383
+[s2] disk_s2_r4_c1_x1_002: sigma=1.4198e-03/1.5390e-03 (corners detrend/no), sigma_whole=1.7533e-03, rms=1.4198e-03/1.6659e-03/1.7533e-03, real: sigma=1.1468e-01/1.5612e-01 rms=1.1468e-01/2.1350e-01, peak=8.92 Jy/beam, SNR=6285
+[s2] disk_s2_r4_c1_x1_001: sigma=1.1754e-03/1.3828e-03 (corners detrend/no), sigma_whole=1.5204e-03, rms=1.1754e-03/1.6665e-03/1.5356e-03, real: sigma=9.6972e-02/2.2951e-01 rms=9.6972e-02/3.7784e-01, peak=21.36 Jy/beam, SNR=18174
+[s2] disk_s2_r4_c1_x1_005: sigma=1.4283e-03/1.5478e-03 (corners detrend/no), sigma_whole=1.6040e-03, rms=1.4283e-03/1.6088e-03/1.6197e-03, real: sigma=6.7362e-02/1.3748e-01 rms=6.7362e-02/1.7467e-01, peak=9.95 Jy/beam, SNR=6963
+[s2] disk_s2_r4_c1_x1_003: sigma=9.5707e-04/1.0483e-03 (corners detrend/no), sigma_whole=1.1325e-03, rms=9.5707e-04/1.0911e-03/1.1325e-03, real: sigma=8.9805e-02/1.6952e-01 rms=8.9805e-02/2.3714e-01, peak=9.39 Jy/beam, SNR=9812
+[s2] disk_s2_r4_c1_x1_006: sigma=1.3742e-03/1.4823e-03 (corners detrend/no), sigma_whole=1.4779e-03, rms=1.3742e-03/1.5362e-03/1.4780e-03, real: sigma=7.9313e-02/1.0828e-01 rms=7.9313e-02/1.6572e-01, peak=5.84 Jy/beam, SNR=4250
+[s2] disk_s2_r4_c1_x1_004: sigma=8.7221e-04/9.5443e-04 (corners detrend/no), sigma_whole=9.8003e-04, rms=8.7221e-04/9.9527e-04/9.8003e-04, real: sigma=8.3174e-02/9.8228e-02 rms=8.3174e-02/1.1854e-01, peak=4.08 Jy/beam, SNR=4678
+[s2] disk_s2_r4_c1_x1_009: sigma=1.1805e-03/1.3111e-03 (corners detrend/no), sigma_whole=1.6443e-03, rms=1.1805e-03/1.4378e-03/1.6454e-03, real: sigma=1.0623e-01/1.1549e-01 rms=1.0623e-01/1.5589e-01, peak=9.88 Jy/beam, SNR=8371
+[s2] disk_s2_r4_c1_x1_007: sigma=8.8572e-04/9.5268e-04 (corners detrend/no), sigma_whole=1.0590e-03, rms=8.8572e-04/1.0581e-03/1.0590e-03, real: sigma=1.1347e-01/1.5525e-01 rms=1.1347e-01/1.7017e-01, peak=9.06 Jy/beam, SNR=10233
+[s2] disk_s2_r4_c1_x1_008: sigma=9.6990e-04/1.0631e-03 (corners detrend/no), sigma_whole=1.1251e-03, rms=9.6990e-04/1.1520e-03/1.1251e-03, real: sigma=4.1526e-02/1.2335e-01 rms=4.1526e-02/2.9921e-01, peak=8.18 Jy/beam, SNR=8439
+[progress] 240/360 targets done, 0 errors
+[s4] disk_s4_r1_c0_x0_000: sigma=1.3087e-03/1.3932e-03 (corners detrend/no), sigma_whole=1.4465e-03, rms=1.3087e-03/1.4097e-03/1.4477e-03, real: sigma=3.3834e-01/3.6912e-01 rms=3.3834e-01/5.5722e-01, peak=4.57 Jy/beam, SNR=3494
+[s4] disk_s4_r1_c0_x0_004: sigma=1.6884e-03/1.7214e-03 (corners detrend/no), sigma_whole=1.7701e-03, rms=1.6884e-03/1.7479e-03/1.7701e-03, real: sigma=1.7800e-01/2.4266e-01 rms=1.7800e-01/3.6205e-01, peak=5.21 Jy/beam, SNR=3085
+[s4] disk_s4_r1_c0_x0_001: sigma=1.2056e-03/1.2743e-03 (corners detrend/no), sigma_whole=1.3254e-03, rms=1.2056e-03/1.3122e-03/1.3254e-03, real: sigma=1.4738e-01/1.6057e-01 rms=1.4738e-01/1.6439e-01, peak=3.03 Jy/beam, SNR=2512
+[s4] disk_s4_r1_c0_x0_002: sigma=1.1563e-03/1.1914e-03 (corners detrend/no), sigma_whole=1.2275e-03, rms=1.1563e-03/1.2379e-03/1.2277e-03, real: sigma=1.1311e-01/2.0503e-01 rms=1.1311e-01/2.8049e-01, peak=4.06 Jy/beam, SNR=3514
+[s4] disk_s4_r1_c0_x0_003: sigma=1.1153e-03/1.1362e-03 (corners detrend/no), sigma_whole=1.2456e-03, rms=1.1153e-03/1.1685e-03/1.2492e-03, real: sigma=6.8134e-02/9.5459e-02 rms=6.8134e-02/1.8999e-01, peak=5.56 Jy/beam, SNR=4982
+[s4] disk_s4_r1_c0_x0_005: sigma=1.1542e-03/1.1966e-03 (corners detrend/no), sigma_whole=1.3153e-03, rms=1.1542e-03/1.2161e-03/1.3153e-03, real: sigma=1.3125e-01/1.7411e-01 rms=1.3125e-01/2.1534e-01, peak=4.76 Jy/beam, SNR=4127
+[s4] disk_s4_r1_c0_x0_006: sigma=1.4262e-03/1.4930e-03 (corners detrend/no), sigma_whole=1.6627e-03, rms=1.4262e-03/1.5479e-03/1.6637e-03, real: sigma=2.4453e-01/3.6339e-01 rms=2.4453e-01/4.4888e-01, peak=7.84 Jy/beam, SNR=5500
+[s4] disk_s4_r1_c0_x0_008: sigma=1.6412e-03/1.6837e-03 (corners detrend/no), sigma_whole=1.7553e-03, rms=1.6412e-03/1.7038e-03/1.7567e-03, real: sigma=7.8037e-02/1.9180e-01 rms=7.8037e-02/2.6464e-01, peak=5.32 Jy/beam, SNR=3239
+[s4] disk_s4_r1_c0_x0_009: sigma=1.4014e-03/1.4432e-03 (corners detrend/no), sigma_whole=1.4930e-03, rms=1.4014e-03/1.5936e-03/1.4989e-03, real: sigma=4.3546e-01/5.7041e-01 rms=4.3546e-01/6.6516e-01, peak=11.29 Jy/beam, SNR=8057
+[s4] disk_s4_r1_c0_x1_000: sigma=1.3263e-03/1.5111e-03 (corners detrend/no), sigma_whole=1.6336e-03, rms=1.3263e-03/1.5753e-03/1.6351e-03, real: sigma=1.6060e-01/2.2400e-01 rms=1.6060e-01/3.4324e-01, peak=8.91 Jy/beam, SNR=6719
+[progress] 250/360 targets done, 0 errors
+[s4] disk_s4_r1_c0_x0_007: sigma=1.0744e-03/1.0930e-03 (corners detrend/no), sigma_whole=1.1656e-03, rms=1.0744e-03/1.1008e-03/1.1657e-03, real: sigma=2.0205e-01/2.1377e-01 rms=2.0205e-01/2.8201e-01, peak=5.52 Jy/beam, SNR=5141
+[s4] disk_s4_r1_c0_x1_001: sigma=1.3640e-03/1.4106e-03 (corners detrend/no), sigma_whole=1.4280e-03, rms=1.3640e-03/1.4161e-03/1.4291e-03, real: sigma=8.9267e-02/1.3325e-01 rms=8.9267e-02/1.6852e-01, peak=2.57 Jy/beam, SNR=1888
+[s4] disk_s4_r1_c0_x1_002: sigma=1.4457e-03/1.5049e-03 (corners detrend/no), sigma_whole=1.4129e-03, rms=1.4457e-03/1.5110e-03/1.4129e-03, real: sigma=1.1915e-01/1.5719e-01 rms=1.1915e-01/1.7484e-01, peak=2.89 Jy/beam, SNR=2001
+[s4] disk_s4_r1_c0_x1_005: sigma=1.9401e-03/2.0272e-03 (corners detrend/no), sigma_whole=2.1189e-03, rms=1.9401e-03/2.0465e-03/2.1189e-03, real: sigma=1.2734e-01/1.6037e-01 rms=1.2734e-01/1.8875e-01, peak=2.74 Jy/beam, SNR=1412
+[s4] disk_s4_r1_c0_x1_004: sigma=1.4135e-03/1.4489e-03 (corners detrend/no), sigma_whole=1.6424e-03, rms=1.4135e-03/1.5726e-03/1.6424e-03, real: sigma=1.3619e-01/2.0121e-01 rms=1.3619e-01/2.6464e-01, peak=5.90 Jy/beam, SNR=4171
+[s4] disk_s4_r1_c0_x1_003: sigma=1.0625e-03/1.1401e-03 (corners detrend/no), sigma_whole=1.2374e-03, rms=1.0625e-03/1.1415e-03/1.2378e-03, real: sigma=6.9921e-02/8.0749e-02 rms=6.9921e-02/1.6424e-01, peak=4.18 Jy/beam, SNR=3934
+[s4] disk_s4_r1_c0_x1_006: sigma=1.5347e-03/1.5694e-03 (corners detrend/no), sigma_whole=1.6176e-03, rms=1.5347e-03/1.5866e-03/1.6182e-03, real: sigma=1.4584e-01/1.4790e-01 rms=1.4584e-01/1.6697e-01, peak=3.45 Jy/beam, SNR=2247
+[s4] disk_s4_r1_c0_x1_008: sigma=1.4253e-03/1.4882e-03 (corners detrend/no), sigma_whole=1.5572e-03, rms=1.4253e-03/1.5059e-03/1.5573e-03, real: sigma=1.2086e-01/1.5956e-01 rms=1.2086e-01/1.6031e-01, peak=3.23 Jy/beam, SNR=2267
+[s4] disk_s4_r1_c0_x1_007: sigma=1.2025e-03/1.3171e-03 (corners detrend/no), sigma_whole=1.2459e-03, rms=1.2025e-03/1.3528e-03/1.2509e-03, real: sigma=2.1326e-01/2.2410e-01 rms=2.1326e-01/3.0398e-01, peak=3.78 Jy/beam, SNR=3142
+[s4] disk_s4_r1_c1_x0_001: sigma=1.3831e-03/1.6229e-03 (corners detrend/no), sigma_whole=1.6612e-03, rms=1.3831e-03/1.7053e-03/1.6707e-03, real: sigma=1.5499e-01/2.0547e-01 rms=1.5499e-01/4.1233e-01, peak=8.16 Jy/beam, SNR=5898
+[progress] 260/360 targets done, 0 errors
+[s4] disk_s4_r1_c0_x1_009: sigma=1.1875e-03/1.2433e-03 (corners detrend/no), sigma_whole=1.2336e-03, rms=1.1875e-03/1.3083e-03/1.2349e-03, real: sigma=8.7081e-02/1.1337e-01 rms=8.7081e-02/1.6593e-01, peak=4.62 Jy/beam, SNR=3887
+[s4] disk_s4_r1_c1_x0_000: sigma=1.1530e-03/1.1706e-03 (corners detrend/no), sigma_whole=1.1440e-03, rms=1.1530e-03/1.1801e-03/1.1440e-03, real: sigma=1.1740e-01/1.3562e-01 rms=1.1740e-01/1.3678e-01, peak=2.19 Jy/beam, SNR=1900
+[s4] disk_s4_r1_c1_x0_002: sigma=1.2651e-03/1.3129e-03 (corners detrend/no), sigma_whole=1.4122e-03, rms=1.2651e-03/1.3526e-03/1.4122e-03, real: sigma=2.1286e-01/3.1274e-01 rms=2.1286e-01/4.0285e-01, peak=4.87 Jy/beam, SNR=3847
+[s4] disk_s4_r1_c1_x0_003: sigma=1.3493e-03/1.3829e-03 (corners detrend/no), sigma_whole=1.5560e-03, rms=1.3493e-03/1.4517e-03/1.5566e-03, real: sigma=1.4286e-01/1.8726e-01 rms=1.4286e-01/5.2119e-01, peak=7.80 Jy/beam, SNR=5784
+[s4] disk_s4_r1_c1_x0_005: sigma=1.4098e-03/1.5890e-03 (corners detrend/no), sigma_whole=1.7782e-03, rms=1.4098e-03/1.6412e-03/1.7883e-03, real: sigma=9.9926e-02/1.3360e-01 rms=9.9926e-02/1.5500e-01, peak=6.63 Jy/beam, SNR=4705
+[s4] disk_s4_r1_c1_x0_006: sigma=1.6475e-03/1.7005e-03 (corners detrend/no), sigma_whole=1.6705e-03, rms=1.6475e-03/1.7588e-03/1.6716e-03, real: sigma=1.1036e-01/1.1700e-01 rms=1.1036e-01/1.1878e-01, peak=3.05 Jy/beam, SNR=1854
+[s4] disk_s4_r1_c1_x0_004: sigma=1.0871e-03/1.1150e-03 (corners detrend/no), sigma_whole=1.1758e-03, rms=1.0871e-03/1.1373e-03/1.1758e-03, real: sigma=7.0943e-02/7.9024e-02 rms=7.0943e-02/8.6570e-02, peak=2.86 Jy/beam, SNR=2627
+[s4] disk_s4_r1_c1_x0_007: sigma=1.3607e-03/1.4699e-03 (corners detrend/no), sigma_whole=1.4605e-03, rms=1.3607e-03/1.4810e-03/1.4607e-03, real: sigma=1.1386e-01/1.4001e-01 rms=1.1386e-01/1.5147e-01, peak=4.42 Jy/beam, SNR=3245
+[s4] disk_s4_r1_c1_x1_000: sigma=1.4667e-03/1.5160e-03 (corners detrend/no), sigma_whole=1.5240e-03, rms=1.4667e-03/1.6162e-03/1.5279e-03, real: sigma=7.4234e-02/1.2039e-01 rms=7.4234e-02/1.2807e-01, peak=8.31 Jy/beam, SNR=5663
+[s4] disk_s4_r1_c1_x0_008: sigma=1.2036e-03/1.2335e-03 (corners detrend/no), sigma_whole=1.2452e-03, rms=1.2036e-03/1.2443e-03/1.2452e-03, real: sigma=5.6881e-02/9.0438e-02 rms=5.6881e-02/1.3542e-01, peak=2.20 Jy/beam, SNR=1832
+[progress] 270/360 targets done, 0 errors
+[s4] disk_s4_r1_c1_x1_001: sigma=1.6441e-03/1.6982e-03 (corners detrend/no), sigma_whole=1.7257e-03, rms=1.6441e-03/1.7567e-03/1.7276e-03, real: sigma=1.0078e-01/1.2483e-01 rms=1.0078e-01/1.3803e-01, peak=3.65 Jy/beam, SNR=2220
+[s4] disk_s4_r1_c1_x0_009: sigma=1.0891e-03/1.1201e-03 (corners detrend/no), sigma_whole=1.1144e-03, rms=1.0891e-03/1.1496e-03/1.1157e-03, real: sigma=9.8310e-02/1.1140e-01 rms=9.8310e-02/1.1408e-01, peak=3.43 Jy/beam, SNR=3151
+[s4] disk_s4_r1_c1_x1_003: sigma=1.4801e-03/1.5310e-03 (corners detrend/no), sigma_whole=1.7369e-03, rms=1.4801e-03/1.5926e-03/1.7372e-03, real: sigma=6.3894e-02/9.2503e-02 rms=6.3894e-02/1.1552e-01, peak=4.37 Jy/beam, SNR=2950
+[s4] disk_s4_r1_c1_x1_006: sigma=1.7390e-03/1.8083e-03 (corners detrend/no), sigma_whole=1.9150e-03, rms=1.7390e-03/1.8154e-03/1.9155e-03, real: sigma=1.1864e-01/1.3238e-01 rms=1.1864e-01/1.4786e-01, peak=3.08 Jy/beam, SNR=1769
+[s4] disk_s4_r1_c1_x1_002: sigma=1.1505e-03/1.1915e-03 (corners detrend/no), sigma_whole=1.2685e-03, rms=1.1505e-03/1.1997e-03/1.2697e-03, real: sigma=1.3053e-01/1.4222e-01 rms=1.3053e-01/1.4920e-01, peak=3.50 Jy/beam, SNR=3045
+[s4] disk_s4_r1_c1_x1_005: sigma=1.4017e-03/1.4171e-03 (corners detrend/no), sigma_whole=1.4595e-03, rms=1.4017e-03/1.4660e-03/1.4612e-03, real: sigma=9.0082e-02/1.0276e-01 rms=9.0082e-02/1.0810e-01, peak=2.70 Jy/beam, SNR=1926
+[s4] disk_s4_r1_c1_x1_004: sigma=1.0561e-03/1.0777e-03 (corners detrend/no), sigma_whole=1.1307e-03, rms=1.0561e-03/1.0880e-03/1.1321e-03, real: sigma=1.4023e-01/1.5809e-01 rms=1.4023e-01/1.8193e-01, peak=2.51 Jy/beam, SNR=2381
+[s4] disk_s4_r1_c1_x1_008: sigma=1.4723e-03/1.6716e-03 (corners detrend/no), sigma_whole=1.7560e-03, rms=1.4723e-03/1.8607e-03/1.7657e-03, real: sigma=1.3027e-01/1.7080e-01 rms=1.3027e-01/2.3431e-01, peak=8.60 Jy/beam, SNR=5843
+[s4] disk_s4_r1_c1_x1_007: sigma=1.0879e-03/1.1238e-03 (corners detrend/no), sigma_whole=1.1987e-03, rms=1.0879e-03/1.1410e-03/1.2007e-03, real: sigma=1.2416e-01/1.4765e-01 rms=1.2416e-01/1.8949e-01, peak=3.89 Jy/beam, SNR=3572
+[s4] disk_s4_r2_c0_x0_001: sigma=1.5948e-03/1.6630e-03 (corners detrend/no), sigma_whole=1.7448e-03, rms=1.5948e-03/1.7183e-03/1.7457e-03, real: sigma=1.6608e-01/2.2184e-01 rms=1.6608e-01/2.8332e-01, peak=5.08 Jy/beam, SNR=3187
+[progress] 280/360 targets done, 0 errors
+[s4] disk_s4_r2_c0_x0_000: sigma=1.3120e-03/1.3451e-03 (corners detrend/no), sigma_whole=1.4004e-03, rms=1.3120e-03/1.3828e-03/1.4029e-03, real: sigma=2.7347e-01/2.8466e-01 rms=2.7347e-01/3.1293e-01, peak=4.96 Jy/beam, SNR=3777
+[s4] disk_s4_r1_c1_x1_009: sigma=1.1353e-03/1.1553e-03 (corners detrend/no), sigma_whole=1.2998e-03, rms=1.1353e-03/1.1925e-03/1.2998e-03, real: sigma=1.9467e-01/2.1307e-01 rms=1.9467e-01/2.1394e-01, peak=3.09 Jy/beam, SNR=2721
+[s4] disk_s4_r2_c0_x0_003: sigma=1.2622e-03/1.3564e-03 (corners detrend/no), sigma_whole=1.5806e-03, rms=1.2622e-03/1.3636e-03/1.5823e-03, real: sigma=3.0258e-01/3.8832e-01 rms=3.0258e-01/5.3819e-01, peak=9.53 Jy/beam, SNR=7549
+[s4] disk_s4_r2_c0_x0_002: sigma=1.2922e-03/1.3106e-03 (corners detrend/no), sigma_whole=1.3976e-03, rms=1.2922e-03/1.3215e-03/1.3984e-03, real: sigma=1.2931e-01/1.5286e-01 rms=1.2931e-01/1.6811e-01, peak=3.32 Jy/beam, SNR=2571
+[s4] disk_s4_r2_c0_x0_004: sigma=1.5910e-03/1.7663e-03 (corners detrend/no), sigma_whole=1.9952e-03, rms=1.5910e-03/1.9460e-03/1.9965e-03, real: sigma=9.7562e-02/1.8359e-01 rms=9.7562e-02/4.2004e-01, peak=11.51 Jy/beam, SNR=7233
+[s4] disk_s4_r2_c0_x0_006: sigma=1.6993e-03/1.7872e-03 (corners detrend/no), sigma_whole=1.9482e-03, rms=1.6993e-03/1.8065e-03/1.9482e-03, real: sigma=1.1266e-01/1.2834e-01 rms=1.1266e-01/2.1719e-01, peak=4.76 Jy/beam, SNR=2799
+[s4] disk_s4_r2_c0_x0_008: sigma=1.6222e-03/1.7720e-03 (corners detrend/no), sigma_whole=1.8840e-03, rms=1.6222e-03/1.7912e-03/1.8879e-03, real: sigma=2.6256e-01/3.2223e-01 rms=2.6256e-01/3.6567e-01, peak=6.95 Jy/beam, SNR=4285
+[s4] disk_s4_r2_c0_x0_007: sigma=1.0187e-03/1.1321e-03 (corners detrend/no), sigma_whole=1.2497e-03, rms=1.0187e-03/1.1451e-03/1.2506e-03, real: sigma=1.1754e-01/1.6890e-01 rms=1.1754e-01/2.1657e-01, peak=5.22 Jy/beam, SNR=5126
+[s4] disk_s4_r2_c0_x0_005: sigma=1.1463e-03/1.2275e-03 (corners detrend/no), sigma_whole=1.2555e-03, rms=1.1463e-03/1.2387e-03/1.2557e-03, real: sigma=9.4255e-02/1.1708e-01 rms=9.4255e-02/1.6029e-01, peak=3.91 Jy/beam, SNR=3409
+[s4] disk_s4_r2_c0_x0_009: sigma=1.3715e-03/1.3830e-03 (corners detrend/no), sigma_whole=1.4886e-03, rms=1.3715e-03/1.4033e-03/1.4886e-03, real: sigma=1.9380e-01/2.2246e-01 rms=1.9380e-01/2.8925e-01, peak=3.77 Jy/beam, SNR=2748
+[progress] 290/360 targets done, 0 errors
+[s4] disk_s4_r2_c0_x1_001: sigma=1.7250e-03/1.7970e-03 (corners detrend/no), sigma_whole=2.0351e-03, rms=1.7250e-03/1.8168e-03/2.0385e-03, real: sigma=1.1448e-01/1.3504e-01 rms=1.1448e-01/1.3877e-01, peak=5.33 Jy/beam, SNR=3087
+[s4] disk_s4_r2_c0_x1_000: sigma=1.2768e-03/1.3654e-03 (corners detrend/no), sigma_whole=1.3992e-03, rms=1.2768e-03/1.3893e-03/1.3995e-03, real: sigma=2.1759e-01/3.2852e-01 rms=2.1759e-01/3.8636e-01, peak=7.66 Jy/beam, SNR=5999
+[s4] disk_s4_r2_c0_x1_002: sigma=1.2100e-03/1.2373e-03 (corners detrend/no), sigma_whole=1.3685e-03, rms=1.2100e-03/1.2451e-03/1.3691e-03, real: sigma=1.7950e-01/2.1062e-01 rms=1.7950e-01/2.3212e-01, peak=3.90 Jy/beam, SNR=3222
+[s4] disk_s4_r2_c0_x1_005: sigma=1.7695e-03/1.9391e-03 (corners detrend/no), sigma_whole=1.9315e-03, rms=1.7695e-03/1.9577e-03/1.9319e-03, real: sigma=1.8695e-01/2.3864e-01 rms=1.8695e-01/2.4723e-01, peak=6.42 Jy/beam, SNR=3627
+[s4] disk_s4_r2_c0_x1_006: sigma=1.8205e-03/1.9861e-03 (corners detrend/no), sigma_whole=2.0143e-03, rms=1.8205e-03/2.0157e-03/2.0165e-03, real: sigma=2.0299e-01/2.7322e-01 rms=2.0299e-01/3.0969e-01, peak=8.09 Jy/beam, SNR=4445
+[s4] disk_s4_r2_c0_x1_008: sigma=2.3956e-03/2.5199e-03 (corners detrend/no), sigma_whole=2.5843e-03, rms=2.3956e-03/2.5988e-03/2.5847e-03, real: sigma=1.5827e-01/1.7507e-01 rms=1.5827e-01/2.1909e-01, peak=6.85 Jy/beam, SNR=2858
+[s4] disk_s4_r2_c0_x1_007: sigma=1.1873e-03/1.2630e-03 (corners detrend/no), sigma_whole=1.4091e-03, rms=1.1873e-03/1.3159e-03/1.4096e-03, real: sigma=1.5098e-01/1.7023e-01 rms=1.5098e-01/2.0327e-01, peak=4.30 Jy/beam, SNR=3618
+[s4] disk_s4_r2_c0_x1_003: sigma=1.2347e-03/1.2755e-03 (corners detrend/no), sigma_whole=1.2120e-03, rms=1.2347e-03/1.2811e-03/1.2120e-03, real: sigma=2.8214e-01/3.1586e-01 rms=2.8214e-01/3.2080e-01, peak=2.59 Jy/beam, SNR=2099
+[s4] disk_s4_r2_c1_x0_000: sigma=1.5961e-03/1.6628e-03 (corners detrend/no), sigma_whole=1.7314e-03, rms=1.5961e-03/1.6659e-03/1.7318e-03, real: sigma=7.2690e-02/8.6584e-02 rms=7.2690e-02/1.0342e-01, peak=2.84 Jy/beam, SNR=1779
+[s4] disk_s4_r2_c0_x1_004: sigma=1.0492e-03/1.0868e-03 (corners detrend/no), sigma_whole=1.1338e-03, rms=1.0492e-03/1.1132e-03/1.1338e-03, real: sigma=1.6009e-01/2.5936e-01 rms=1.6009e-01/2.7073e-01, peak=4.99 Jy/beam, SNR=4753
+[progress] 300/360 targets done, 0 errors
+[s4] disk_s4_r2_c1_x0_001: sigma=2.1381e-03/2.2220e-03 (corners detrend/no), sigma_whole=2.1231e-03, rms=2.1381e-03/2.3114e-03/2.1258e-03, real: sigma=1.6870e-01/2.0574e-01 rms=1.6870e-01/2.9036e-01, peak=4.39 Jy/beam, SNR=2054
+[s4] disk_s4_r2_c1_x0_004: sigma=2.1875e-03/2.3816e-03 (corners detrend/no), sigma_whole=2.4767e-03, rms=2.1875e-03/2.4284e-03/2.4767e-03, real: sigma=6.6881e-02/1.1198e-01 rms=6.6881e-02/1.1591e-01, peak=5.24 Jy/beam, SNR=2395
+[s4] disk_s4_r2_c0_x1_009: sigma=1.1681e-03/1.2948e-03 (corners detrend/no), sigma_whole=1.2312e-03, rms=1.1681e-03/1.3251e-03/1.2339e-03, real: sigma=1.0911e-01/1.1957e-01 rms=1.0911e-01/1.2105e-01, peak=4.86 Jy/beam, SNR=4160
+[s4] disk_s4_r2_c1_x0_005: sigma=1.7906e-03/1.9299e-03 (corners detrend/no), sigma_whole=2.1880e-03, rms=1.7906e-03/1.9577e-03/2.2056e-03, real: sigma=2.4451e-01/2.6933e-01 rms=2.4451e-01/3.7404e-01, peak=7.41 Jy/beam, SNR=4137
+[s4] disk_s4_r2_c1_x0_002: sigma=1.4009e-03/1.4202e-03 (corners detrend/no), sigma_whole=1.5236e-03, rms=1.4009e-03/1.4305e-03/1.5239e-03, real: sigma=1.7845e-01/1.8356e-01 rms=1.7845e-01/2.0077e-01, peak=2.73 Jy/beam, SNR=1947
+[s4] disk_s4_r2_c1_x0_008: sigma=1.8603e-03/2.0180e-03 (corners detrend/no), sigma_whole=2.1171e-03, rms=1.8603e-03/2.0288e-03/2.1365e-03, real: sigma=8.5552e-02/1.0259e-01 rms=8.5552e-02/1.2388e-01, peak=5.12 Jy/beam, SNR=2750
+[s4] disk_s4_r2_c1_x0_009: sigma=1.6387e-03/1.7253e-03 (corners detrend/no), sigma_whole=1.7583e-03, rms=1.6387e-03/1.7472e-03/1.7675e-03, real: sigma=9.9728e-02/1.4579e-01 rms=9.9728e-02/1.6637e-01, peak=6.61 Jy/beam, SNR=4036
+[s4] disk_s4_r2_c1_x0_003: sigma=1.0895e-03/1.1264e-03 (corners detrend/no), sigma_whole=1.1625e-03, rms=1.0895e-03/1.1341e-03/1.1647e-03, real: sigma=1.1217e-01/1.7414e-01 rms=1.1217e-01/2.5421e-01, peak=4.86 Jy/beam, SNR=4457
+[s4] disk_s4_r2_c1_x0_006: sigma=1.1185e-03/1.2078e-03 (corners detrend/no), sigma_whole=1.1676e-03, rms=1.1185e-03/1.2241e-03/1.1679e-03, real: sigma=5.3418e-02/7.1195e-02 rms=5.3418e-02/7.3804e-02, peak=3.48 Jy/beam, SNR=3112
+[s4] disk_s4_r2_c1_x0_007: sigma=1.1138e-03/1.1423e-03 (corners detrend/no), sigma_whole=1.2562e-03, rms=1.1138e-03/1.2313e-03/1.2601e-03, real: sigma=4.4325e-02/6.6233e-02 rms=4.4325e-02/1.2746e-01, peak=3.65 Jy/beam, SNR=3274
+[progress] 310/360 targets done, 0 errors
+[s4] disk_s4_r2_c1_x1_001: sigma=1.4345e-03/1.4682e-03 (corners detrend/no), sigma_whole=1.4526e-03, rms=1.4345e-03/1.5308e-03/1.4539e-03, real: sigma=6.4233e-02/9.8788e-02 rms=6.4233e-02/1.2154e-01, peak=4.42 Jy/beam, SNR=3080
+[s4] disk_s4_r2_c1_x1_004: sigma=1.3955e-03/1.6988e-03 (corners detrend/no), sigma_whole=1.8223e-03, rms=1.3955e-03/1.8617e-03/1.8333e-03, real: sigma=1.2002e-01/2.0653e-01 rms=1.2002e-01/2.1162e-01, peak=10.19 Jy/beam, SNR=7300
+[s4] disk_s4_r2_c1_x1_000: sigma=1.1201e-03/1.1372e-03 (corners detrend/no), sigma_whole=1.2655e-03, rms=1.1201e-03/1.1584e-03/1.2680e-03, real: sigma=5.9273e-02/8.2501e-02 rms=5.9273e-02/1.0189e-01, peak=3.88 Jy/beam, SNR=3462
+[s4] disk_s4_r2_c1_x1_003: sigma=1.3147e-03/1.4701e-03 (corners detrend/no), sigma_whole=1.5048e-03, rms=1.3147e-03/1.4968e-03/1.5061e-03, real: sigma=1.6505e-01/2.3580e-01 rms=1.6505e-01/2.5716e-01, peak=5.62 Jy/beam, SNR=4274
+[s4] disk_s4_r2_c1_x1_002: sigma=1.2507e-03/1.3367e-03 (corners detrend/no), sigma_whole=1.3199e-03, rms=1.2507e-03/1.3527e-03/1.3218e-03, real: sigma=7.1361e-02/9.7300e-02 rms=7.1361e-02/1.1317e-01, peak=4.22 Jy/beam, SNR=3371
+[s4] disk_s4_r2_c1_x1_006: sigma=1.5249e-03/1.6062e-03 (corners detrend/no), sigma_whole=1.7397e-03, rms=1.5249e-03/1.6112e-03/1.7397e-03, real: sigma=8.6674e-02/1.4747e-01 rms=8.6674e-02/1.4926e-01, peak=3.61 Jy/beam, SNR=2368
+[s4] disk_s4_r2_c1_x1_007: sigma=1.5202e-03/1.5752e-03 (corners detrend/no), sigma_whole=1.5876e-03, rms=1.5202e-03/1.5867e-03/1.5877e-03, real: sigma=1.2534e-01/1.6071e-01 rms=1.2534e-01/2.2218e-01, peak=4.32 Jy/beam, SNR=2842
+[s4] disk_s4_r2_c1_x1_008: sigma=1.4756e-03/1.6105e-03 (corners detrend/no), sigma_whole=1.6101e-03, rms=1.4756e-03/1.6661e-03/1.6119e-03, real: sigma=1.5630e-01/1.7847e-01 rms=1.5630e-01/1.9972e-01, peak=5.71 Jy/beam, SNR=3868
+[s4] disk_s4_r4_c0_x0_000: sigma=1.6884e-03/1.7934e-03 (corners detrend/no), sigma_whole=1.6713e-03, rms=1.6884e-03/1.8011e-03/1.6721e-03, real: sigma=8.0116e-02/1.1476e-01 rms=8.0116e-02/1.4530e-01, peak=6.59 Jy/beam, SNR=3903
+[s4] disk_s4_r2_c1_x1_005: sigma=9.7641e-04/1.0592e-03 (corners detrend/no), sigma_whole=1.1305e-03, rms=9.7641e-04/1.0759e-03/1.1305e-03, real: sigma=5.7665e-02/6.9425e-02 rms=5.7665e-02/1.3829e-01, peak=4.35 Jy/beam, SNR=4458
+[progress] 320/360 targets done, 0 errors
+[s4] disk_s4_r4_c0_x0_001: sigma=1.5468e-03/1.6057e-03 (corners detrend/no), sigma_whole=1.5715e-03, rms=1.5468e-03/1.6171e-03/1.5737e-03, real: sigma=7.0194e-02/9.7945e-02 rms=7.0194e-02/2.0750e-01, peak=4.83 Jy/beam, SNR=3124
+[s4] disk_s4_r2_c1_x1_009: sigma=9.8115e-04/1.0223e-03 (corners detrend/no), sigma_whole=1.1635e-03, rms=9.8115e-04/1.0705e-03/1.1636e-03, real: sigma=1.0973e-01/1.4362e-01 rms=1.0973e-01/1.7968e-01, peak=5.21 Jy/beam, SNR=5307
+[s4] disk_s4_r4_c0_x0_003: sigma=1.4055e-03/1.5460e-03 (corners detrend/no), sigma_whole=1.6501e-03, rms=1.4055e-03/1.6236e-03/1.6542e-03, real: sigma=1.0449e-01/2.3352e-01 rms=1.0449e-01/4.0306e-01, peak=8.71 Jy/beam, SNR=6200
+[s4] disk_s4_r4_c0_x0_004: sigma=1.2818e-03/1.3061e-03 (corners detrend/no), sigma_whole=1.3050e-03, rms=1.2818e-03/1.3240e-03/1.3053e-03, real: sigma=5.4978e-02/7.5398e-02 rms=5.4978e-02/1.1111e-01, peak=2.16 Jy/beam, SNR=1687
+[s4] disk_s4_r4_c0_x0_006: sigma=1.7472e-03/1.8082e-03 (corners detrend/no), sigma_whole=1.9067e-03, rms=1.7472e-03/2.0002e-03/1.9167e-03, real: sigma=9.3563e-02/2.2292e-01 rms=9.3563e-02/4.3484e-01, peak=11.11 Jy/beam, SNR=6359
+[s4] disk_s4_r4_c0_x0_005: sigma=1.5022e-03/1.5430e-03 (corners detrend/no), sigma_whole=1.6007e-03, rms=1.5022e-03/1.5849e-03/1.6010e-03, real: sigma=1.4023e-01/1.4650e-01 rms=1.4023e-01/1.6567e-01, peak=2.52 Jy/beam, SNR=1675
+[s4] disk_s4_r4_c0_x0_002: sigma=1.1315e-03/1.1856e-03 (corners detrend/no), sigma_whole=1.2956e-03, rms=1.1315e-03/1.2074e-03/1.2956e-03, real: sigma=4.8619e-02/7.4684e-02 rms=4.8619e-02/1.8759e-01, peak=3.19 Jy/beam, SNR=2822
+[s4] disk_s4_r4_c0_x0_008: sigma=1.5809e-03/1.6294e-03 (corners detrend/no), sigma_whole=1.7283e-03, rms=1.5809e-03/1.6551e-03/1.7353e-03, real: sigma=1.0162e-01/8.6589e-02 rms=1.0162e-01/1.8790e-01, peak=3.77 Jy/beam, SNR=2382
+[s4] disk_s4_r4_c0_x1_001: sigma=1.8404e-03/1.9826e-03 (corners detrend/no), sigma_whole=2.1977e-03, rms=1.8404e-03/2.0794e-03/2.1994e-03, real: sigma=1.1218e-01/1.5814e-01 rms=1.1218e-01/2.2912e-01, peak=10.04 Jy/beam, SNR=5454
+[s4] disk_s4_r4_c0_x0_009: sigma=1.3070e-03/1.3349e-03 (corners detrend/no), sigma_whole=1.3799e-03, rms=1.3070e-03/1.3380e-03/1.3799e-03, real: sigma=8.8029e-02/9.5400e-02 rms=8.8029e-02/1.2567e-01, peak=2.14 Jy/beam, SNR=1641
+[progress] 330/360 targets done, 0 errors
+[s4] disk_s4_r4_c0_x0_007: sigma=1.0205e-03/1.0623e-03 (corners detrend/no), sigma_whole=1.0583e-03, rms=1.0205e-03/1.0832e-03/1.0583e-03, real: sigma=7.3883e-02/7.7837e-02 rms=7.3883e-02/7.8904e-02, peak=4.77 Jy/beam, SNR=4671
+[s4] disk_s4_r4_c0_x1_000: sigma=1.2403e-03/1.2906e-03 (corners detrend/no), sigma_whole=1.4247e-03, rms=1.2403e-03/1.3009e-03/1.4247e-03, real: sigma=1.0386e-01/1.2876e-01 rms=1.0386e-01/1.3323e-01, peak=1.96 Jy/beam, SNR=1583
+[s4] disk_s4_r4_c0_x1_003: sigma=1.2907e-03/1.3462e-03 (corners detrend/no), sigma_whole=1.4277e-03, rms=1.2907e-03/1.4162e-03/1.4332e-03, real: sigma=7.0662e-02/1.5172e-01 rms=7.0662e-02/2.3820e-01, peak=7.80 Jy/beam, SNR=6041
+[s4] disk_s4_r4_c0_x1_002: sigma=1.1165e-03/1.1802e-03 (corners detrend/no), sigma_whole=1.2338e-03, rms=1.1165e-03/1.2355e-03/1.2354e-03, real: sigma=5.6771e-02/8.4019e-02 rms=5.6771e-02/1.5924e-01, peak=4.66 Jy/beam, SNR=4178
+[s4] disk_s4_r4_c0_x1_006: sigma=1.6604e-03/1.9720e-03 (corners detrend/no), sigma_whole=2.0254e-03, rms=1.6604e-03/2.0551e-03/2.0261e-03, real: sigma=7.9425e-02/2.2158e-01 rms=7.9425e-02/3.7706e-01, peak=11.88 Jy/beam, SNR=7157
+[s4] disk_s4_r4_c0_x1_004: sigma=1.0950e-03/1.1162e-03 (corners detrend/no), sigma_whole=1.2124e-03, rms=1.0950e-03/1.1556e-03/1.2134e-03, real: sigma=1.9926e-01/2.0316e-01 rms=1.9926e-01/2.4524e-01, peak=3.37 Jy/beam, SNR=3074
+[s4] disk_s4_r4_c0_x1_007: sigma=1.3040e-03/1.4479e-03 (corners detrend/no), sigma_whole=1.4965e-03, rms=1.3040e-03/1.4789e-03/1.5046e-03, real: sigma=9.3048e-02/9.7148e-02 rms=9.3048e-02/1.0003e-01, peak=4.60 Jy/beam, SNR=3524
+[s4] disk_s4_r4_c0_x1_005: sigma=1.2304e-03/1.2643e-03 (corners detrend/no), sigma_whole=1.2315e-03, rms=1.2304e-03/1.2732e-03/1.2328e-03, real: sigma=9.1166e-02/1.2721e-01 rms=9.1166e-02/1.6022e-01, peak=4.59 Jy/beam, SNR=3734
+[s4] disk_s4_r4_c0_x1_008: sigma=1.6408e-03/1.7306e-03 (corners detrend/no), sigma_whole=1.7254e-03, rms=1.6408e-03/1.7982e-03/1.7254e-03, real: sigma=8.7004e-02/1.2771e-01 rms=8.7004e-02/3.4965e-01, peak=8.36 Jy/beam, SNR=5096
+[s4] disk_s4_r4_c0_x1_009: sigma=1.3285e-03/1.4561e-03 (corners detrend/no), sigma_whole=1.5215e-03, rms=1.3285e-03/1.5098e-03/1.5219e-03, real: sigma=8.6427e-02/1.6426e-01 rms=8.6427e-02/4.2252e-01, peak=7.28 Jy/beam, SNR=5482
+[progress] 340/360 targets done, 0 errors
+[s4] disk_s4_r4_c1_x0_001: sigma=1.3679e-03/1.5212e-03 (corners detrend/no), sigma_whole=1.5791e-03, rms=1.3679e-03/1.5856e-03/1.5875e-03, real: sigma=5.3591e-02/8.1141e-02 rms=5.3591e-02/2.2872e-01, peak=7.22 Jy/beam, SNR=5281
+[s4] disk_s4_r4_c1_x0_002: sigma=1.4721e-03/1.5325e-03 (corners detrend/no), sigma_whole=1.5113e-03, rms=1.4721e-03/1.5511e-03/1.5114e-03, real: sigma=5.3487e-02/1.0411e-01 rms=5.3487e-02/1.0583e-01, peak=3.18 Jy/beam, SNR=2162
+[s4] disk_s4_r4_c1_x0_000: sigma=1.1434e-03/1.1752e-03 (corners detrend/no), sigma_whole=1.1963e-03, rms=1.1434e-03/1.2047e-03/1.1969e-03, real: sigma=5.0631e-02/5.9238e-02 rms=5.0631e-02/7.7517e-02, peak=3.24 Jy/beam, SNR=2838
+[s4] disk_s4_r4_c1_x0_005: sigma=1.7663e-03/2.1121e-03 (corners detrend/no), sigma_whole=2.1906e-03, rms=1.7663e-03/2.2075e-03/2.1993e-03, real: sigma=5.1546e-02/1.2798e-01 rms=5.1546e-02/1.6335e-01, peak=8.36 Jy/beam, SNR=4736
+[s4] disk_s4_r4_c1_x0_003: sigma=1.3960e-03/1.4417e-03 (corners detrend/no), sigma_whole=1.4876e-03, rms=1.3960e-03/1.4685e-03/1.4876e-03, real: sigma=3.8116e-02/7.9670e-02 rms=3.8116e-02/1.2698e-01, peak=4.31 Jy/beam, SNR=3085
+[s4] disk_s4_r4_c1_x0_004: sigma=1.1514e-03/1.1999e-03 (corners detrend/no), sigma_whole=1.2133e-03, rms=1.1514e-03/1.2265e-03/1.2141e-03, real: sigma=3.9104e-02/6.4891e-02 rms=3.9104e-02/7.5861e-02, peak=3.48 Jy/beam, SNR=3019
+[s4] disk_s4_r4_c1_x0_009: sigma=1.3934e-03/1.4519e-03 (corners detrend/no), sigma_whole=1.6322e-03, rms=1.3934e-03/1.4705e-03/1.6419e-03, real: sigma=6.6824e-02/8.5171e-02 rms=6.6824e-02/1.7385e-01, peak=5.17 Jy/beam, SNR=3713
+[s4] disk_s4_r4_c1_x0_006: sigma=1.3637e-03/1.4492e-03 (corners detrend/no), sigma_whole=1.6473e-03, rms=1.3637e-03/1.5939e-03/1.6476e-03, real: sigma=5.4919e-02/8.1770e-02 rms=5.4919e-02/2.5476e-01, peak=7.61 Jy/beam, SNR=5578
+[s4] disk_s4_r4_c1_x0_007: sigma=1.3729e-03/1.4333e-03 (corners detrend/no), sigma_whole=1.4966e-03, rms=1.3729e-03/1.4548e-03/1.4967e-03, real: sigma=7.7394e-02/8.1576e-02 rms=7.7394e-02/1.0085e-01, peak=3.58 Jy/beam, SNR=2611
+[s4] disk_s4_r4_c1_x0_008: sigma=1.0544e-03/1.1070e-03 (corners detrend/no), sigma_whole=1.1507e-03, rms=1.0544e-03/1.1449e-03/1.1512e-03, real: sigma=6.8963e-02/1.1685e-01 rms=6.8963e-02/1.3868e-01, peak=3.87 Jy/beam, SNR=3673
+[progress] 350/360 targets done, 0 errors
+[s4] disk_s4_r4_c1_x1_000: sigma=1.0741e-03/1.1444e-03 (corners detrend/no), sigma_whole=1.1941e-03, rms=1.0741e-03/1.1661e-03/1.1951e-03, real: sigma=7.1597e-02/1.2500e-01 rms=7.1597e-02/1.2515e-01, peak=4.82 Jy/beam, SNR=4491
+[s4] disk_s4_r4_c1_x1_004: sigma=1.2344e-03/1.2680e-03 (corners detrend/no), sigma_whole=1.2993e-03, rms=1.2344e-03/1.2832e-03/1.3029e-03, real: sigma=3.9678e-02/5.8288e-02 rms=3.9678e-02/8.4576e-02, peak=3.45 Jy/beam, SNR=2798
+[s4] disk_s4_r4_c1_x1_002: sigma=1.2045e-03/1.2811e-03 (corners detrend/no), sigma_whole=1.2412e-03, rms=1.2045e-03/1.3221e-03/1.2415e-03, real: sigma=4.6871e-02/5.7286e-02 rms=4.6871e-02/8.8560e-02, peak=2.57 Jy/beam, SNR=2137
+[s4] disk_s4_r4_c1_x1_001: sigma=1.0666e-03/1.1810e-03 (corners detrend/no), sigma_whole=1.1225e-03, rms=1.0666e-03/1.2106e-03/1.1225e-03, real: sigma=5.3138e-02/7.6773e-02 rms=5.3138e-02/1.1150e-01, peak=3.69 Jy/beam, SNR=3459
+[s4] disk_s4_r4_c1_x1_003: sigma=1.1204e-03/1.2197e-03 (corners detrend/no), sigma_whole=1.1647e-03, rms=1.1204e-03/1.2745e-03/1.1647e-03, real: sigma=4.8350e-02/1.1781e-01 rms=4.8350e-02/1.2018e-01, peak=4.84 Jy/beam, SNR=4316
+[s4] disk_s4_r4_c1_x1_006: sigma=1.3502e-03/1.6237e-03 (corners detrend/no), sigma_whole=1.6100e-03, rms=1.3502e-03/1.6420e-03/1.6108e-03, real: sigma=7.5869e-02/8.3913e-02 rms=7.5869e-02/8.9479e-02, peak=8.56 Jy/beam, SNR=6341
+[s4] disk_s4_r4_c1_x1_005: sigma=1.3079e-03/1.3895e-03 (corners detrend/no), sigma_whole=1.3517e-03, rms=1.3079e-03/1.4395e-03/1.3535e-03, real: sigma=4.9423e-02/9.9131e-02 rms=4.9423e-02/1.0043e-01, peak=3.88 Jy/beam, SNR=2967
+[s4] disk_s4_r4_c1_x1_008: sigma=1.4890e-03/1.6143e-03 (corners detrend/no), sigma_whole=1.7174e-03, rms=1.4890e-03/1.7179e-03/1.7233e-03, real: sigma=8.8685e-02/1.4559e-01 rms=8.8685e-02/1.6614e-01, peak=6.32 Jy/beam, SNR=4248
+[s4] disk_s4_r4_c1_x1_007: sigma=1.3464e-03/1.4139e-03 (corners detrend/no), sigma_whole=1.5262e-03, rms=1.3464e-03/1.4721e-03/1.5263e-03, real: sigma=8.1435e-02/9.6441e-02 rms=8.1435e-02/9.9913e-02, peak=6.06 Jy/beam, SNR=4502
+[s4] disk_s4_r4_c1_x1_009: sigma=1.3279e-03/1.4666e-03 (corners detrend/no), sigma_whole=1.5369e-03, rms=1.3279e-03/1.4938e-03/1.5377e-03, real: sigma=1.2005e-01/1.5295e-01 rms=1.2005e-01/1.8845e-01, peak=6.53 Jy/beam, SNR=4921
+[progress] 360/360 targets done, 0 errors
+
+CSV: /home/mauro/projects/Thesis/RI-Benchmark/results/noise_validation/pure_noise_val360.csv
+Pure-noise validation over 360 validation targets
+CSV: /home/mauro/projects/Thesis/RI-Benchmark/results/noise_validation/pure_noise_val360.csv
+TODAS las estadisticas se calculan sobre la dirty de RUIDO PURO (y = n; DATA reemplazado por ruido gaussiano), salvo las tablas 'valores dirty real' (dirty REAL con la fuente, y = Ax + n).
+Valores en uJy/arcsec2: brillo de superficie, independientes del beam y del tamaño de píxel: comparables entre clases.
+Values in Jy/beam and uJy/beam; ratios are per-target means.
+
+[TODO - valores] n=360
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_measured (detrend) [ruido puro, esquinas] Jy/beam | 9.8402e-04 +/- 4.2157e-04 |
+| sigma_measured (detrend) [ruido puro, esquinas] uJy/beam | 984.0 +/- 421.6 |
+| sigma_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.1337e-03 +/- 3.8087e-04 |
+| sigma_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1133.7 +/- 380.9 |
+| sigma_whole [ruido puro, imagen completa] Jy/beam | 1.3359e-03 +/- 3.2959e-04 |
+| sigma_whole [ruido puro, imagen completa] uJy/beam | 1335.9 +/- 329.6 |
+| rms_corners (detrend) [ruido puro, esquinas] Jy/beam | 9.8402e-04 +/- 4.2157e-04 |
+| rms_corners (detrend) [ruido puro, esquinas] uJy/beam | 984.0 +/- 421.6 |
+| rms_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.3136e-03 +/- 3.5256e-04 |
+| rms_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1313.6 +/- 352.6 |
+| rms_whole [ruido puro, imagen completa] Jy/beam | 1.3506e-03 +/- 3.3118e-04 |
+| rms_whole [ruido puro, imagen completa] uJy/beam | 1350.6 +/- 331.2 |
+
+[TODO - valores dirty real] n=360
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_real (detrend) [dirty real, esquinas] Jy/beam | 1.5551e-01 +/- 1.0260e-01 |
+| sigma_real (detrend) [dirty real, esquinas] mJy/beam | 155.5 +/- 102.6 |
+| sigma_real_nodetrend [dirty real, esquinas] Jy/beam | 3.6780e-01 +/- 4.6864e-01 |
+| sigma_real_nodetrend [dirty real, esquinas] mJy/beam | 367.8 +/- 468.6 |
+| rms_real (detrend) [dirty real, esquinas] Jy/beam | 1.5551e-01 +/- 1.0260e-01 |
+| rms_real (detrend) [dirty real, esquinas] mJy/beam | 155.5 +/- 102.6 |
+| rms_real_nodetrend [dirty real, esquinas] Jy/beam | 8.0107e-01 +/- 1.3466e+00 |
+| rms_real_nodetrend [dirty real, esquinas] mJy/beam | 801.1 +/- 1346.6 |
+| dirty_peak [dirty real] Jy/beam | 2.2584e+01 +/- 2.6230e+01 |
+| snr_peak [dirty real] | 4.138e+04 +/- 6.103e+04 |
+
+[TODO - cocientes] n=360
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| detrend/nodetrend [ruido puro, esquinas] | 0.8414 +/- 0.1425 |
+| corners/whole (nodetrend) [ruido puro] | 0.8427 +/- 0.1644 |
+| rms/std patch (nodetrend) [ruido puro, esquinas] | 1.2252 +/- 0.4085 |
+| rms/std whole image [ruido puro] | 1.0117 +/- 0.0303 |
+
+[s0p5 - valores] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_measured (detrend) [ruido puro, esquinas] Jy/beam | 4.9636e-04 +/- 1.2086e-04 |
+| sigma_measured (detrend) [ruido puro, esquinas] uJy/beam | 496.4 +/- 120.9 |
+| sigma_corners_nodetrend [ruido puro, esquinas] Jy/beam | 7.5653e-04 +/- 1.8123e-04 |
+| sigma_corners_nodetrend [ruido puro, esquinas] uJy/beam | 756.5 +/- 181.2 |
+| sigma_whole [ruido puro, imagen completa] Jy/beam | 1.1949e-03 +/- 3.0243e-04 |
+| sigma_whole [ruido puro, imagen completa] uJy/beam | 1194.9 +/- 302.4 |
+| rms_corners (detrend) [ruido puro, esquinas] Jy/beam | 4.9636e-04 +/- 1.2086e-04 |
+| rms_corners (detrend) [ruido puro, esquinas] uJy/beam | 496.4 +/- 120.9 |
+| rms_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.1650e-03 +/- 3.5903e-04 |
+| rms_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1165.0 +/- 359.0 |
+| rms_whole [ruido puro, imagen completa] Jy/beam | 1.2326e-03 +/- 3.1789e-04 |
+| rms_whole [ruido puro, imagen completa] uJy/beam | 1232.6 +/- 317.9 |
+
+[s0p5 - valores dirty real] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_real (detrend) [dirty real, esquinas] Jy/beam | 1.9184e-01 +/- 1.3480e-01 |
+| sigma_real (detrend) [dirty real, esquinas] mJy/beam | 191.8 +/- 134.8 |
+| sigma_real_nodetrend [dirty real, esquinas] Jy/beam | 7.0331e-01 +/- 6.8351e-01 |
+| sigma_real_nodetrend [dirty real, esquinas] mJy/beam | 703.3 +/- 683.5 |
+| rms_real (detrend) [dirty real, esquinas] Jy/beam | 1.9184e-01 +/- 1.3480e-01 |
+| rms_real (detrend) [dirty real, esquinas] mJy/beam | 191.8 +/- 134.8 |
+| rms_real_nodetrend [dirty real, esquinas] Jy/beam | 1.6885e+00 +/- 1.9965e+00 |
+| rms_real_nodetrend [dirty real, esquinas] mJy/beam | 1688.5 +/- 1996.5 |
+| dirty_peak [dirty real] Jy/beam | 5.2274e+01 +/- 2.6411e+01 |
+| snr_peak [dirty real] | 1.108e+05 +/- 6.258e+04 |
+
+[s0p5 - cocientes] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| detrend/nodetrend [ruido puro, esquinas] | 0.6645 +/- 0.1010 |
+| corners/whole (nodetrend) [ruido puro] | 0.6465 +/- 0.1272 |
+| rms/std patch (nodetrend) [ruido puro, esquinas] | 1.5745 +/- 0.5596 |
+| rms/std whole image [ruido puro] | 1.0310 +/- 0.0461 |
+
+[s2 - valores] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_measured (detrend) [ruido puro, esquinas] Jy/beam | 1.0783e-03 +/- 2.1922e-04 |
+| sigma_measured (detrend) [ruido puro, esquinas] uJy/beam | 1078.3 +/- 219.2 |
+| sigma_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.1848e-03 +/- 2.5639e-04 |
+| sigma_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1184.8 +/- 256.4 |
+| sigma_whole [ruido puro, imagen completa] Jy/beam | 1.2907e-03 +/- 2.8651e-04 |
+| sigma_whole [ruido puro, imagen completa] uJy/beam | 1290.7 +/- 286.5 |
+| rms_corners (detrend) [ruido puro, esquinas] Jy/beam | 1.0783e-03 +/- 2.1922e-04 |
+| rms_corners (detrend) [ruido puro, esquinas] uJy/beam | 1078.3 +/- 219.2 |
+| rms_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.2748e-03 +/- 3.0209e-04 |
+| rms_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1274.8 +/- 302.1 |
+| rms_whole [ruido puro, imagen completa] Jy/beam | 1.2948e-03 +/- 2.9036e-04 |
+| rms_whole [ruido puro, imagen completa] uJy/beam | 1294.8 +/- 290.4 |
+
+[s2 - valores dirty real] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_real (detrend) [dirty real, esquinas] Jy/beam | 1.5575e-01 +/- 7.9392e-02 |
+| sigma_real (detrend) [dirty real, esquinas] mJy/beam | 155.8 +/- 79.4 |
+| sigma_real_nodetrend [dirty real, esquinas] Jy/beam | 2.4221e-01 +/- 1.1304e-01 |
+| sigma_real_nodetrend [dirty real, esquinas] mJy/beam | 242.2 +/- 113.0 |
+| rms_real (detrend) [dirty real, esquinas] Jy/beam | 1.5575e-01 +/- 7.9392e-02 |
+| rms_real (detrend) [dirty real, esquinas] mJy/beam | 155.8 +/- 79.4 |
+| rms_real_nodetrend [dirty real, esquinas] Jy/beam | 5.0305e-01 +/- 4.6616e-01 |
+| rms_real_nodetrend [dirty real, esquinas] mJy/beam | 503.0 +/- 466.2 |
+| dirty_peak [dirty real] Jy/beam | 1.0347e+01 +/- 5.0586e+00 |
+| snr_peak [dirty real] | 9620 +/- 4208 |
+
+[s2 - cocientes] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| detrend/nodetrend [ruido puro, esquinas] | 0.9135 +/- 0.0449 |
+| corners/whole (nodetrend) [ruido puro] | 0.9211 +/- 0.0648 |
+| rms/std patch (nodetrend) [ruido puro, esquinas] | 1.0733 +/- 0.0537 |
+| rms/std whole image [ruido puro] | 1.0028 +/- 0.0076 |
+
+[s4 - valores] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_measured (detrend) [ruido puro, esquinas] Jy/beam | 1.3774e-03 +/- 2.6271e-04 |
+| sigma_measured (detrend) [ruido puro, esquinas] uJy/beam | 1377.4 +/- 262.7 |
+| sigma_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.4596e-03 +/- 2.9245e-04 |
+| sigma_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1459.6 +/- 292.4 |
+| sigma_whole [ruido puro, imagen completa] Jy/beam | 1.5222e-03 +/- 3.0934e-04 |
+| sigma_whole [ruido puro, imagen completa] uJy/beam | 1522.2 +/- 309.3 |
+| rms_corners (detrend) [ruido puro, esquinas] Jy/beam | 1.3774e-03 +/- 2.6271e-04 |
+| rms_corners (detrend) [ruido puro, esquinas] uJy/beam | 1377.4 +/- 262.7 |
+| rms_corners_nodetrend [ruido puro, esquinas] Jy/beam | 1.5008e-03 +/- 3.0677e-04 |
+| rms_corners_nodetrend [ruido puro, esquinas] uJy/beam | 1500.8 +/- 306.8 |
+| rms_whole [ruido puro, imagen completa] Jy/beam | 1.5243e-03 +/- 3.1059e-04 |
+| rms_whole [ruido puro, imagen completa] uJy/beam | 1524.3 +/- 310.6 |
+
+[s4 - valores dirty real] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| sigma_real (detrend) [dirty real, esquinas] Jy/beam | 1.1892e-01 +/- 6.6714e-02 |
+| sigma_real (detrend) [dirty real, esquinas] mJy/beam | 118.9 +/- 66.7 |
+| sigma_real_nodetrend [dirty real, esquinas] Jy/beam | 1.5787e-01 +/- 8.0515e-02 |
+| sigma_real_nodetrend [dirty real, esquinas] mJy/beam | 157.9 +/- 80.5 |
+| rms_real (detrend) [dirty real, esquinas] Jy/beam | 1.1892e-01 +/- 6.6714e-02 |
+| rms_real (detrend) [dirty real, esquinas] mJy/beam | 118.9 +/- 66.7 |
+| rms_real_nodetrend [dirty real, esquinas] Jy/beam | 2.1167e-01 +/- 1.1387e-01 |
+| rms_real_nodetrend [dirty real, esquinas] mJy/beam | 211.7 +/- 113.9 |
+| dirty_peak [dirty real] Jy/beam | 5.1306e+00 +/- 2.2349e+00 |
+| snr_peak [dirty real] | 3748 +/- 1473 |
+
+[s4 - cocientes] n=120
+
+| estadistica | promedio +/- std |
+|-------------|------------------|
+| detrend/nodetrend [ruido puro, esquinas] | 0.9461 +/- 0.0350 |
+| corners/whole (nodetrend) [ruido puro] | 0.9606 +/- 0.0469 |
+| rms/std patch (nodetrend) [ruido puro, esquinas] | 1.0277 +/- 0.0241 |
+| rms/std whole image [ruido puro] | 1.0013 +/- 0.0019 |
+
+Summary: /home/mauro/projects/Thesis/RI-Benchmark/results/noise_validation/pure_noise_val360_summary.txt

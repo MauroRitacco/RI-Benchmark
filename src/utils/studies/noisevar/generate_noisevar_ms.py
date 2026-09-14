@@ -22,16 +22,12 @@ Each output dir gets <name>.MS, <name>.mat (y, nW, u, v, w, frequency,
 nominal_pixelsize, weight — same convention as the noises dataset) and
 <name>.json (mode, sigma_vis, snr_target).
 
-Both modes write the MS with INDEPENDENT complex Gaussian noise per
-correlation (each corr E|n|^2 = sigma_vis^2), matching exactly how
-results/noise_validation/pure_noise_val360.csv was built. This matters:
-the original MS duplicates the same visibility into both correlations, so
-duplicating the noise would make tclean's Stokes-I average cancel the
-sqrt(2) pol-combination gain and inflate the dirty image noise by sqrt(2)
-relative to the CSV calibration. The .mat keeps the corr-0 realization
-(single complex noise per visibility, the same visibility-space noise the
-CSV convention defines); the MS corr-1 gets its own independent
-realization.
+CONVENCION FINAL DE RUIDO (2026-09-14): XX=YY identicos — una unica
+realizacion de ruido gaussiano complejo por visibilidad (desvio sigma_vis),
+escrita igual en ambas correlaciones del MS y en el .mat ("Stokes I
+efectivo"). Consecuencia: nW = 1/sigma_vis en el .mat (no se copia de
+datasets viejos). R2D2: la escala de nW se cancela en normalize_instance.
+DeepInv: usa nW en su likelihood, necesita el valor correcto.
 
 Fixed verification targets (first two of each class, deterministic):
     s0p5: disk_s0p5_r1_c0_x0_000, disk_s0p5_r1_c0_x0_001
@@ -96,20 +92,17 @@ def read_calibration(path):
 
 
 def base_noises(target, M):
-    """Independent unit-variance complex noise per correlation (float64).
+    """Single unit-variance complex noise realization (float64), XX=YY.
 
-    Two draws from one per-target torch generator: corr-0 goes to the .mat
-    `y` (and MS corr-0), corr-1 gets its own realization for the MS.
+    One draw from one per-target torch generator (same seed convention as
+    the noises study); written identically to MS corr-0/corr-1 and the .mat.
     """
     gen = torch.Generator().manual_seed(noise_seed(target))
-
-    def draw():
-        return (
-            torch.randn(M, generator=gen, dtype=torch.float64)
-            + 1j * torch.randn(M, generator=gen, dtype=torch.float64)
-        ) / np.sqrt(2.0)
-
-    return draw(), draw()
+    n0 = (
+        torch.randn(M, generator=gen, dtype=torch.float64)
+        + 1j * torch.randn(M, generator=gen, dtype=torch.float64)
+    ) / np.sqrt(2.0)
+    return n0, n0
 
 
 def clean_visibilities(target, mat_path):
@@ -132,11 +125,11 @@ def clean_visibilities(target, mat_path):
     return mat, y_unit.numpy()
 
 
-def write_cell(target, L, y_mat, y_ms_corr1, sigma_vis, mode, subdir):
+def write_cell(target, L, y_mat, sigma_vis, mode, subdir):
     """Write <target>_snr<L>/ with MS (DATA replaced), .mat and .json.
 
-    The .mat `y` (and MS corr-0) carries y_mat; MS corr-1 carries its own
-    independent noise realization y_ms_corr1 (CSV convention).
+    XX=YY convention: the .mat `y` and BOTH MS correlations carry the same
+    realization y_mat ("effective Stokes I"); nW = 1/sigma_vis.
     """
     name = f"{target}_snr{L}"
     outdir = OUT_ROOT / subdir / name
@@ -148,7 +141,8 @@ def write_cell(target, L, y_mat, y_ms_corr1, sigma_vis, mode, subdir):
     mat = loadmat(str(src / f"{target}.mat"))
     savemat(str(outdir / f"{name}.mat"), {
         "y": np.asarray(y_mat).reshape(-1, 1),
-        "nW": mat["nW"],
+        "nW": np.full((int(np.asarray(y_mat).size), 1), 1.0 / sigma_vis,
+                      dtype=np.float32),
         "u": mat["u"],
         "v": mat["v"],
         "w": mat["w"],
@@ -164,8 +158,9 @@ def write_cell(target, L, y_mat, y_ms_corr1, sigma_vis, mode, subdir):
         "sigma_vis": sigma_vis,
         "noise_seed_target": target,
         "noise_convention": (
-            "independent CN(0,sigma_vis^2) noise per MS correlation, float64, "
-            "seed=noise_seed(target); .mat y = corr-0 realization"
+            "XX=YY single CN(0,sigma_vis^2) realization, float64, "
+            "seed=noise_seed(target); .mat y = same realization; "
+            "nW = 1/sigma_vis (effective Stokes I)"
         ),
     }
     if mode == "signal":
@@ -173,8 +168,8 @@ def write_cell(target, L, y_mat, y_ms_corr1, sigma_vis, mode, subdir):
     (outdir / f"{name}.json").write_text(json.dumps(meta, indent=2))
 
     # MS: copy of the original (same uvw/FLAG) with DATA replaced on
-    # unflagged rows; corr-0 and corr-1 get independent noise realizations,
-    # matching the pure-noise CSV measurement convention.
+    # unflagged rows; corr-0 and corr-1 get the SAME noise realization
+    # (XX=YY final convention).
     new_ms = outdir / f"{name}.MS"
     shutil.copytree(str(src / f"{target}.MS"), str(new_ms))
     from casatools import table
@@ -187,7 +182,7 @@ def write_cell(target, L, y_mat, y_ms_corr1, sigma_vis, mode, subdir):
         tb.close()
         raise RuntimeError(f"{name}: unflagged rows {int(mask.sum())} != M {M}")
     ms_data[0, 0, mask] = np.asarray(y_mat).reshape(-1)
-    ms_data[1, 0, mask] = np.asarray(y_ms_corr1).reshape(-1)
+    ms_data[1, 0, mask] = np.asarray(y_mat).reshape(-1)
     tb.putcol("DATA", ms_data)
     tb.close()
     print(f"[{mode}] {name}: sigma_vis={sigma_vis:.6e} -> {outdir}", flush=True)
@@ -213,16 +208,14 @@ def main():
     for target in targets:
         if args.mode == "signal":
             _, y_unit = clean_visibilities(target, SIM_DATA / target / f"{target}.mat")
-        n0, n1 = base_noises(target, loadmat(str(SIM_DATA / target / f"{target}.mat"))["u"].size)
+        n0, _ = base_noises(target, loadmat(str(SIM_DATA / target / f"{target}.mat"))["u"].size)
         for L in levels:
             sigma_vis = cal[(target, L)]["sigma_vis"]
             if args.mode == "noise":
                 y_mat = sigma_vis * n0.numpy()
-                y_ms = sigma_vis * n1.numpy()
             else:
                 y_mat = y_unit + sigma_vis * n0.numpy()
-                y_ms = y_unit + sigma_vis * n1.numpy()
-            write_cell(target, L, y_mat, y_ms, sigma_vis, args.mode, subdir)
+            write_cell(target, L, y_mat, sigma_vis, args.mode, subdir)
 
 
 if __name__ == "__main__":
