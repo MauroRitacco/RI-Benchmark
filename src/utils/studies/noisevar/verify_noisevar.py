@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Noisevar steps 2/3 verification: tclean dirty pass + checks.
 
-  --mode noise  (linearity): for each noisevar/linearity MS, tclean niter=0
+  --mode noise  (linearity): for each noisevar/noisevar MS, tclean niter=0
       (briggs robust=2, standard gridder, 64x64, nominal pixel — the exact
       params used to build pure_noise_val360.csv) on the pure-noise MS and
       measure sigma_whole = nanstd of the dirty image (identical to the
@@ -11,11 +11,11 @@
 
       for the 3 levels of each target (linearity in sigma_vis).
 
-  --mode signal (signal intact): for each noisevar/signal MS (original GT +
-      noise at sigma_vis of level 50), check:
+  --mode signal (signal intact): for each noisevar/noisevar/snr<L> MS
+      (original GT + noise at sigma_vis of level L), for the 3 levels, check:
 
-          pico ~= dirty_peak_CSV                     (+-10%)
-          pico / (sigma_whole_CSV * sigma_vis) ~= 50 (+-10%)
+          pico ~= dirty_peak_CSV                          (+-10%)
+          pico / (sigma_whole_CSV * sigma_vis) ~= L       (+-5%)
 
 Outputs results/noisevar/linearity_check.csv / signal_check.csv and prints
 the tables. Runs inside the CASA venv:
@@ -111,7 +111,7 @@ def check_noise(targets):
         cls = index[target]["cls"]
         for L in (50, 200, 500):
             name = f"{target}_snr{L}"
-            tdir = NOISEVAR / "linearity" / name
+            tdir = NOISEVAR / "noisevar" / f"snr{L}" / name
             ms = tdir / f"{name}.MS"
             sigma_vis = cal[(target, L)]
             pixel = float(loadmat(str(tdir / f"{name}.mat"))["nominal_pixelsize"].item())
@@ -141,39 +141,41 @@ def check_noise(targets):
 def check_signal(targets):
     index = read_csv_index(CSV_PATH)
     cal = read_calibration(CAL_CSV)
+    TOL_SNR = 0.05  # spot-check gate B: pico/sigma vs SNR objetivo
     rows = []
     for target in targets:
         cls = index[target]["cls"]
         sigma_whole_csv = index[target]["sigma_whole"]
         dirty_peak_csv = index[target]["dirty_peak"]
-        name = f"{target}_snr50"
-        tdir = NOISEVAR / "signal" / name
-        ms = tdir / f"{name}.MS"
-        sigma_vis = cal[(target, 50)]
-        pixel = float(loadmat(str(tdir / f"{name}.mat"))["nominal_pixelsize"].item())
-        with tempfile.TemporaryDirectory(dir=str(OUT_DIR)) as tmp:
-            dirty_fits = dirty_pass(ms, pixel, Path(tmp))
-            data = fits.getdata(str(dirty_fits)).squeeze()
-            peak = float(np.nanmax(data))
-        ratio_peak = peak / dirty_peak_csv
-        snr_medido = peak / (sigma_whole_csv * sigma_vis)
-        ok_peak = abs(ratio_peak - 1.0) <= TOL
-        ok_snr = abs(snr_medido / 50.0 - 1.0) <= TOL
-        ok = ok_peak and ok_snr
-        rows.append((cls, target, sigma_vis, dirty_peak_csv, peak,
-                     ratio_peak, snr_medido, ok))
-        print(f"[{cls}] {name}: sigma_vis={sigma_vis:.4e}  "
-              f"peak_csv={dirty_peak_csv:.4e}  pico={peak:.4e}  "
-              f"pico/peak_csv={ratio_peak:.3f}  SNR={snr_medido:.1f}  "
-              f"{'OK' if ok else 'FAIL'}", flush=True)
+        for L in (50, 200, 500):
+            name = f"{target}_snr{L}"
+            tdir = NOISEVAR / "noisevar" / f"snr{L}" / name
+            ms = tdir / f"{name}.MS"
+            sigma_vis = cal[(target, L)]
+            pixel = float(loadmat(str(tdir / f"{name}.mat"))["nominal_pixelsize"].item())
+            with tempfile.TemporaryDirectory(dir=str(OUT_DIR)) as tmp:
+                dirty_fits = dirty_pass(ms, pixel, Path(tmp))
+                data = fits.getdata(str(dirty_fits)).squeeze()
+                peak = float(np.nanmax(data))
+            ratio_peak = peak / dirty_peak_csv
+            snr_medido = peak / (sigma_whole_csv * sigma_vis)
+            ok_peak = abs(ratio_peak - 1.0) <= TOL
+            ok_snr = abs(snr_medido / L - 1.0) <= TOL_SNR
+            ok = ok_peak and ok_snr
+            rows.append((cls, target, L, sigma_vis, dirty_peak_csv, peak,
+                         ratio_peak, snr_medido, ok))
+            print(f"[{cls}] {name}: sigma_vis={sigma_vis:.4e}  "
+                  f"peak_csv={dirty_peak_csv:.4e}  pico={peak:.4e}  "
+                  f"pico/peak_csv={ratio_peak:.3f}  SNR={snr_medido:.1f} (obj {L})  "
+                  f"{'OK' if ok else 'FAIL'}", flush=True)
 
     out_csv = OUT_DIR / "signal_check.csv"
     with open(out_csv, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["target", "clase", "sigma_vis", "dirty_peak_csv",
+        w.writerow(["target", "clase", "nivel", "sigma_vis", "dirty_peak_csv",
                     "pico_medido", "pico_sobre_peak_csv", "snr_pico_medido", "ok"])
-        for cls, target, sigma_vis, peak_csv, peak, ratio_peak, snr, ok in rows:
-            w.writerow([target, cls, f"{sigma_vis:.6e}", f"{peak_csv:.6e}",
+        for cls, target, L, sigma_vis, peak_csv, peak, ratio_peak, snr, ok in rows:
+            w.writerow([target, cls, L, f"{sigma_vis:.6e}", f"{peak_csv:.6e}",
                         f"{peak:.6e}", f"{ratio_peak:.4f}", f"{snr:.2f}", int(ok)])
     print(f"\nWrote {out_csv}")
     return rows, out_csv
@@ -193,9 +195,9 @@ def main():
               f"(sigma_medido/sigma_vis vs sigma_whole_CSV, tol +-10%)")
     else:
         rows, _ = check_signal(args.targets or SIGNAL_TARGETS)
-        n_fail = sum(1 for r in rows if not r[7])
+        n_fail = sum(1 for r in rows if not r[8])
         print(f"\n{len(rows) - n_fail}/{len(rows)} passed "
-              f"(pico vs dirty_peak y SNR vs 50, tol +-10%)")
+              f"(pico vs dirty_peak +-10% y SNR vs objetivo +-5%)")
     sys.exit(1 if n_fail else 0)
 
 

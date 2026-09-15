@@ -6,12 +6,15 @@ Two modes:
   --mode noise  (linearity test): pure-noise MS, y = sigma_vis * CN(0,1),
       same base noise realization for all 3 levels of a target (per-target
       seed, same noise_seed() convention as the noises study). Output under
-      data/noisevar/linearity/<target>_snr<L>/.
+      data/noisevar/noisevar/<target>_snr<L>/.
 
-  --mode signal (signal-intact test): y = y_unit + sigma_vis(50) * CN(0,1),
+  --mode signal (signal+noise): y = y_unit + sigma_vis * CN(0,1),
       with y_unit the clean visibilities of the ORIGINAL unscaled GT through
-      the same measurement operator/grid. Output under
-      data/noisevar/signal/<target>_snr50/.
+      the same measurement operator/grid. Gate-B cells (1 target/class,
+      snr50 only) go to data/noisevar/signal/; the full dataset (all levels)
+      with --snr-subdirs goes to data/noisevar/noisevar/snr<L>/ (in-place
+      overwrite of the noise-mode cells). Each .json carries gt_fits: the
+      absolute path to the original unscaled GT FITS (data/simulated/).
 
 sigma_vis per (target, level) comes from results/noisevar/calibration_table.csv
 (step 1). The MS is a copy of the original (data/simulated/<target>/, never
@@ -125,14 +128,14 @@ def clean_visibilities(target, mat_path):
     return mat, y_unit.numpy()
 
 
-def write_cell(target, L, y_mat, sigma_vis, mode, subdir):
+def write_cell(target, L, y_mat, sigma_vis, mode, subdir, snr_subdirs=False):
     """Write <target>_snr<L>/ with MS (DATA replaced), .mat and .json.
 
     XX=YY convention: the .mat `y` and BOTH MS correlations carry the same
     realization y_mat ("effective Stokes I"); nW = 1/sigma_vis.
     """
     name = f"{target}_snr{L}"
-    outdir = OUT_ROOT / subdir / name
+    outdir = OUT_ROOT / subdir / (f"snr{L}" if snr_subdirs else "") / name
     if outdir.exists():
         shutil.rmtree(str(outdir))
     outdir.mkdir(parents=True)
@@ -157,6 +160,7 @@ def write_cell(target, L, y_mat, sigma_vis, mode, subdir):
         "snr_target": L,
         "sigma_vis": sigma_vis,
         "noise_seed_target": target,
+        "gt_fits": str(SIM_DATA / target / f"{target}.fits"),
         "noise_convention": (
             "XX=YY single CN(0,sigma_vis^2) realization, float64, "
             "seed=noise_seed(target); .mat y = same realization; "
@@ -193,17 +197,23 @@ def main():
     parser.add_argument("--mode", choices=("noise", "signal"), required=True)
     parser.add_argument("--targets", nargs="+", default=None)
     parser.add_argument("--levels", nargs="+", type=int, default=None)
+    parser.add_argument("--snr-subdirs", action="store_true",
+                        help="write under <subdir>/snr<L>/ (dataset layout)")
+    parser.add_argument("--out-subdir", default=None,
+                        help="override output subdir (default: noisevar/signal by mode)")
     args = parser.parse_args()
 
     cal = read_calibration(CAL_CSV)
     if args.mode == "noise":
         targets = args.targets or NOISE_TARGETS
         levels = tuple(args.levels or LEVELS)
-        subdir = "linearity"
+        subdir = "noisevar"
     else:
         targets = args.targets or SIGNAL_TARGETS
         levels = tuple(args.levels or (50,))
         subdir = "signal"
+    if args.out_subdir:
+        subdir = args.out_subdir
 
     for target in targets:
         if args.mode == "signal":
@@ -215,7 +225,8 @@ def main():
                 y_mat = sigma_vis * n0.numpy()
             else:
                 y_mat = y_unit + sigma_vis * n0.numpy()
-            write_cell(target, L, y_mat, sigma_vis, args.mode, subdir)
+            write_cell(target, L, y_mat, sigma_vis, args.mode, subdir,
+                       snr_subdirs=args.snr_subdirs)
 
 
 if __name__ == "__main__":
