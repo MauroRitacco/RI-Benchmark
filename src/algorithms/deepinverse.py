@@ -269,15 +269,42 @@ def main(target, config_json=None, n=1):
     # print(f"PSF max: {psf_max:.6f} — reconstruction normalized by PSF max")
 
     # Flux-conserving calibration: scale the reconstruction so its total flux
-    # matches the estimated total flux from the maximum visibility amplitude
-    # (near-zero-spacing visibility ≈ total flux for compact/centred sources).
-    total_flux_estimate = y_raw.abs().max().item()
+    # matches F_est, the total flux estimated from the cell MS by polynomial
+    # extrapolation of the short-baseline visibilities to uv=0 (positive
+    # source: V(0) = total flux). Falls back to the coherent short-baseline
+    # mean, and ultimately to max|y_raw|, if the MS estimate is unavailable.
+    max_y_raw = y_raw.abs().max().item()
+    ms_path = vis_path.replace('.mat', '.MS')
+    flux_estimator = "max_visibility"
+    total_flux_estimate = max_y_raw
+    try:
+        from src.utils.flux_estimate import estimate_total_flux
+        total_flux_estimate, flux_estimator = estimate_total_flux(ms_path)
+    except Exception as e:
+        print(f"Warning: MS flux estimate failed ({e}); falling back to max|y_raw|")
     recon_sum = torch.clamp(x_model, min=0).sum().item()
     if recon_sum > 0 and total_flux_estimate > 0:
         flux_scale = total_flux_estimate / recon_sum
         x_model = x_model * flux_scale
-        print(f"Flux calibration: estimated total flux = {total_flux_estimate:.4f}, "
-              f"recon sum before = {recon_sum:.4f}, scale = {flux_scale:.6f}")
+        print(f"Flux calibration: estimator={flux_estimator}, F_est={total_flux_estimate:.4f}, "
+              f"max|y_raw|={max_y_raw:.4f}, recon sum before={recon_sum:.4f}, scale={flux_scale:.6f}")
+
+    # Per-cell flux-calibration log (estimator path, F_est vs old max|y_raw|).
+    fluxcal_csv = os.path.join(base_dir, 'results', 'fluxcal_log.csv')
+    try:
+        import csv as _csv
+        write_header = not os.path.exists(fluxcal_csv)
+        with open(fluxcal_csv, 'a', newline='') as fcsv:
+            w = _csv.writer(fcsv)
+            if write_header:
+                w.writerow(["target", "mode", "cell", "estimator",
+                            "F_est", "max_y_raw", "F_est_over_max"])
+            w.writerow([target, mode or "default", os.path.basename(out_dir.rstrip('/')),
+                        flux_estimator, f"{total_flux_estimate:.6f}",
+                        f"{max_y_raw:.6f}",
+                        f"{(total_flux_estimate / max_y_raw) if max_y_raw > 0 else float('nan'):.6f}"])
+    except Exception as e:
+        print(f"Warning: could not write fluxcal log: {e}")
 
     savefits(x_model, '')
 
@@ -290,7 +317,8 @@ def main(target, config_json=None, n=1):
         f.write(f"Real projection: {real_projection}\n")
         f.write(f"Device: {device}\n")
         f.write(f"Operator norm (raw): {opnorm}\n")
-        f.write(f"Flux estimate (max_visibility): {total_flux_estimate:.6f}\n")
+        f.write(f"Flux estimate ({flux_estimator}): {total_flux_estimate:.6f}\n")
+        f.write(f"Max |y_raw| (legacy estimator): {max_y_raw:.6f}\n")
         f.write(f"Flux calibration scale (flux_estimate / recon_sum): {flux_scale:.6e}\n\n")
         # f.write(f"Normalization scale: {scale} (1/sqrt(opnorm))\n\n")
         
