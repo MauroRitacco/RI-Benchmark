@@ -1,0 +1,14 @@
+# Noisevar study (mode --noisevar): 360 validation targets at SNR 50/200/500
+# (data/noisevar/noisevar/{snr50,snr200,snr500}/, target names carry the level prefix).
+# CASA/WSClean: gain fixed at 0.1, threshold-sigma sweep with per-image auto
+# thresholds (corner noise estimator, multiplier x sigma), plus one absolute
+# threshold config 'abs3s': 3 x sigma_imagen_objetivo from
+# results/noisevar/calibration_table.csv (pure-noise characterization).
+# DeepInverse: lambda 1.0 / 0.1, max_iter 50. R2D2: frozen k5 winner.
+casa,gain,0.1
+casa,threshold,auto:0.1,auto:1,auto:2,auto:3,abs3s
+wsclean,gain,0.1
+wsclean,threshold,auto:0.1,auto:1,auto:2,auto:3,abs3s
+deepinv,lambda_factor,1,0.1
+deepinv,max_iter,50
+r2d2,config,k5

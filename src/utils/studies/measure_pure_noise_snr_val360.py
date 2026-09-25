@@ -35,7 +35,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(BASE_DIR))
 
-OUT_DIR = BASE_DIR / "results" / "noise_validation"
+OUT_DIR = BASE_DIR / "results" / "noise_validation" / "bright"
 CSV_PATH = OUT_DIR / "pure_noise_val360.csv"
 SUMMARY_PATH = OUT_DIR / "pure_noise_val360_summary.txt"
 CASA_PYTHON = BASE_DIR / ".envs" / ".casa" / "bin" / "python"

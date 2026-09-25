@@ -30,17 +30,42 @@ R2D2_REPO="$BASE_DIR/external/R2D2-RI"
 VENV_PYTHON="$BASE_DIR/.envs/.r2d2/bin/python"
 BENCH_PYTHON="$BASE_DIR/.envs/.benchmark/bin/python"
 
-if [ "${RI_BENCH_TEST:-0}" = "1" ]; then
-    SIM_DIR="$BASE_DIR/data/simulated/test"
+MODE="${RI_BENCH_MODE:-}"
+if [ -z "$MODE" ] && [ "${RI_BENCH_TEST:-0}" = "1" ]; then
+    MODE="test"
+fi
+LEVEL_DIR=""
+
+if [ -n "$MODE" ]; then
+    SIM_DIR="$BASE_DIR/data/simulated/$MODE"
 else
     SIM_DIR="$BASE_DIR/data/simulated"
+fi
+
+# Noises dataset: inputs are split per SNR level, with the level directory
+# derived from the target's '_snr<L>' name suffix.
+if [ "$MODE" = "noises" ]; then
+    LEVEL_DIR=$(echo "$TARGET" | sed -n 's/.*_snr\([0-9][0-9]*\)$/\1s/p')
+    if [ -n "$LEVEL_DIR" ]; then
+        SIM_DIR="$SIM_DIR/$LEVEL_DIR"
+    fi
+fi
+
+# Noisevar dataset: inputs at data/noisevar/noisevar/<snr<L>>/ (GT fixed,
+# referenced via gt_fits in the cell .json).
+if [ "$MODE" = "noisevar" ]; then
+    SIM_DIR="$BASE_DIR/data/noisevar/noisevar"
+    LEVEL_DIR=$(echo "$TARGET" | sed -n 's/.*_snr\([0-9][0-9]*\)$/snr\1/p')
+    if [ -n "$LEVEL_DIR" ]; then
+        SIM_DIR="$SIM_DIR/$LEVEL_DIR"
+    fi
 fi
 
 if [ -d "$SIM_DIR/$TARGET" ]; then
     MS_FILE="$SIM_DIR/$TARGET/${TARGET}.MS"
     DATA_FILE="$SIM_DIR/$TARGET/${TARGET}.mat"
-    if [ "${RI_BENCH_TEST:-0}" = "1" ]; then
-        CATEGORY="test"
+    if [ -n "$MODE" ]; then
+        CATEGORY="$MODE"
     else
         CATEGORY="simulated"
     fi
@@ -54,7 +79,11 @@ fi
 
 # Default: standard benchmark layout; --output-dir overrides.
 if [ -z "$OUTPUT_DIR" ]; then
-    OUTPUT_DIR="$BASE_DIR/experiments/$CATEGORY/$TARGET/${TARGET}_r2d2"
+    if [ "$MODE" = "noisevar" ] && [ -n "$LEVEL_DIR" ]; then
+        OUTPUT_DIR="$BASE_DIR/experiments/noisevar/$LEVEL_DIR/$TARGET/${TARGET}_r2d2"
+    else
+        OUTPUT_DIR="$BASE_DIR/experiments/$CATEGORY/$TARGET/${TARGET}_r2d2"
+    fi
 fi
 LOG_FILE="$OUTPUT_DIR/${TARGET}_r2d2.log"
 

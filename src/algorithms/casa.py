@@ -23,10 +23,25 @@ def _parse_auto_threshold(threshold):
     return False, None
 
 
+def _mode():
+    """Special data mode from the environment: '', 'test' or 'debil'."""
+    return os.environ.get("RI_BENCH_MODE") or (
+        "test" if os.environ.get("RI_BENCH_TEST") == "1" else ""
+    )
+
+
 def _find_gt_path(base_dir, target):
     """Return the ground-truth FITS path if it exists, else None."""
-    if os.environ.get("RI_BENCH_TEST") == "1":
-        gt = os.path.join(base_dir, "data", "simulated", "test", target, f"{target}.fits")
+    mode = _mode()
+    if mode == "noises":
+        from src.utils.noises_paths import noises_dirs
+        gt = os.path.join(noises_dirs(base_dir, target, "data"), target, f"{target}.fits")
+        return gt if os.path.exists(gt) else None
+    if mode == "noisevar":
+        from src.utils.noisevar_paths import noisevar_gt_path
+        return noisevar_gt_path(base_dir, target)
+    if mode:
+        gt = os.path.join(base_dir, "data", "simulated", mode, target, f"{target}.fits")
         return gt if os.path.exists(gt) else None
     for category in ("simulated", "archival"):
         gt = os.path.join(base_dir, "data", category, target, f"{target}.fits")
@@ -51,10 +66,19 @@ def _append_noise_log(log_path, noise_result, multiplier, threshold):
 
 def main(target, config_json=None, n=3):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
-    # Test mode reads from data/simulated/test/
-    if os.environ.get("RI_BENCH_TEST") == "1":
-        sim_dir = os.path.join(base_dir, 'data', 'simulated', 'test')
-        exp_dir = os.path.join(base_dir, 'experiments', 'test')
+    # Special modes read from data/simulated/<mode>/
+    mode = _mode()
+    if mode == "noises":
+        from src.utils.noises_paths import noises_dirs
+        sim_dir = noises_dirs(base_dir, target, "data")
+        exp_dir = noises_dirs(base_dir, target, "exp")
+    elif mode == "noisevar":
+        from src.utils.noisevar_paths import noisevar_dirs
+        sim_dir = noisevar_dirs(base_dir, target, "data")
+        exp_dir = noisevar_dirs(base_dir, target, "exp")
+    elif mode:
+        sim_dir = os.path.join(base_dir, 'data', 'simulated', mode)
+        exp_dir = os.path.join(base_dir, 'experiments', mode)
     else:
         sim_dir = os.path.join(base_dir, 'data', 'simulated')
         exp_dir = os.path.join(base_dir, 'experiments', 'simulated')
@@ -152,6 +176,11 @@ def main(target, config_json=None, n=3):
             f"threshold={threshold_jy:.6e} Jy", 'INFO'
         )
         _append_noise_log(name + '.log', noise_result, multiplier, threshold_jy)
+    elif 'threshold' in tclean_kwargs:
+        casatasks.casalog.post(
+            f"[noise] absolute threshold={tclean_kwargs['threshold']} "
+            f"(resolved from sweep config)", 'INFO'
+        )
 
     start = time.perf_counter()
 

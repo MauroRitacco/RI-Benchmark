@@ -36,7 +36,7 @@ from scipy.io import loadmat
 BASE_DIR = Path(__file__).resolve().parents[4]
 NOISEVAR = BASE_DIR / "data" / "noisevar"
 OUT_DIR = BASE_DIR / "results" / "noisevar"
-CSV_PATH = BASE_DIR / "results" / "noise_validation" / "pure_noise_val360.csv"
+CSV_PATH = BASE_DIR / "results" / "noise_validation" / "bright" / "pure_noise_val360.csv"
 CAL_CSV = OUT_DIR / "calibration_table.csv"
 
 TOL = 0.10

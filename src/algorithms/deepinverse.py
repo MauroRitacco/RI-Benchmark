@@ -46,9 +46,20 @@ def main(target, config_json=None, n=1):
 
     # Optional out_dir override (used by the sweep driver).
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')) # Project root
-    if os.environ.get("RI_BENCH_TEST") == "1":
-        sim_dir = os.path.join(base_dir, 'data', 'simulated', 'test')
-        exp_dir = os.path.join(base_dir, 'experiments', 'test')
+    mode = os.environ.get("RI_BENCH_MODE") or (
+        "test" if os.environ.get("RI_BENCH_TEST") == "1" else ""
+    )
+    if mode == "noises":
+        from src.utils.noises_paths import noises_dirs
+        sim_dir = noises_dirs(base_dir, target, "data")
+        exp_dir = noises_dirs(base_dir, target, "exp")
+    elif mode == "noisevar":
+        from src.utils.noisevar_paths import noisevar_dirs
+        sim_dir = noisevar_dirs(base_dir, target, "data")
+        exp_dir = noisevar_dirs(base_dir, target, "exp")
+    elif mode:
+        sim_dir = os.path.join(base_dir, 'data', 'simulated', mode)
+        exp_dir = os.path.join(base_dir, 'experiments', mode)
     else:
         sim_dir = os.path.join(base_dir, 'data', 'simulated')
         exp_dir = os.path.join(base_dir, 'experiments', 'simulated')

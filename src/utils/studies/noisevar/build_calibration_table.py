@@ -10,7 +10,7 @@ level so that the dirty image has the target peak SNR:
 
 where dirty_peak and sigma_whole are the per-target values measured with
 unit visibility noise (sigma_vis=1) in
-results/noise_validation/pure_noise_val360.csv.
+results/noise_validation/bright/pure_noise_val360.csv.
 
 Output: results/noisevar/calibration_table.csv with one row per target and
 level (360 targets x 3 levels = 1080 rows):
@@ -26,7 +26,7 @@ from collections import defaultdict
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[4]
-CSV_PATH = BASE_DIR / "results" / "noise_validation" / "pure_noise_val360.csv"
+CSV_PATH = BASE_DIR / "results" / "noise_validation" / "bright" / "pure_noise_val360.csv"
 OUT_DIR = BASE_DIR / "results" / "noisevar"
 OUT_CSV = OUT_DIR / "calibration_table.csv"
 

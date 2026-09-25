@@ -1,0 +1,10 @@
+# Faint-SNR study (mode --debil): threshold-sigma sweep for CASA/WSClean
+# (gain fixed at 0.1) + R2D2 (k5) and DeepInverse (l0p1_i50) frozen winners.
+# Thresholds are per-image auto (corner noise estimator, multiplier x sigma).
+casa,gain,0.1
+casa,threshold,auto:3,auto:2,auto:1,auto:0.05,auto:0.01
+wsclean,gain,0.1
+wsclean,threshold,auto:3,auto:2,auto:1,auto:0.05,auto:0.01
+deepinv,lambda_factor,0.1
+deepinv,max_iter,50
+r2d2,config,k5

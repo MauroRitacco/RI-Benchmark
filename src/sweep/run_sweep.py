@@ -28,6 +28,8 @@ sys.path.insert(0, str(BASE_DIR))
 
 from src.compute_metrics import clip_negatives, compute_ground_truth_metrics, extract_runtime
 from src.utils.wsclean_dirty_noise import get_wsclean_sigma_noise
+from src.utils.noises_paths import snr_level_dir
+from src.utils.noisevar_paths import noisevar_level_dir
 
 # {method: [(config_id, params_dict), ...]}
 SWEEP_GRIDS = None
@@ -141,9 +143,14 @@ def _config_id_from_params(params):
     """Build a short config id from a {param: value} dict, in insertion order.
 
     'auto:' thresholds use a 'ts' tag so they never collide with legacy 't' ids.
+    The 'abs3s' token (absolute 3-sigma threshold from the pure-noise
+    characterization) uses its own 'a3s' tag.
     """
     parts = []
     for param, value in params.items():
+        if param == "threshold" and value == ABS3S_TOKEN:
+            parts.append("a3s")
+            continue
         tag = PARAM_TAGS.get(param, param[0])
         if param == "threshold" and isinstance(value, str) and value.startswith("auto:"):
             tag = "ts"
@@ -232,37 +239,78 @@ def build_r2d2_config(params):
     return cfg
 
 
-# Test mode (--test): inputs from data/simulated/test/, outputs to
-# experiments/test/ and results/test/. Subprocesses see RI_BENCH_TEST=1.
-TEST_MODE = False
+# Special modes: "test" (final evaluation, single config per method, 1 worker),
+# "debil" (deprecated alias of the faint-SNR study, kept for the old dataset)
+# and "noises" (faint-SNR study over the 3-level noises dataset: inputs at
+# data/simulated/noises/<L>s/<target>/, outputs under experiments/simulated/
+# noises/ and results/simulated/noises/). Subprocesses see the mode in
+# RI_BENCH_MODE (RI_BENCH_TEST=1 is also set for test, for backwards
+# compatibility with older wrappers).
+MODE = ""
 
 
 def data_root():
     """Directory holding the input target folders (MS/.mat/FITS)."""
-    if TEST_MODE:
-        return BASE_DIR / "data" / "simulated" / "test"
+    if MODE == "noisevar":
+        return BASE_DIR / "data" / "noisevar" / "noisevar"
+    if MODE:
+        return BASE_DIR / "data" / "simulated" / MODE
     return BASE_DIR / "data" / "simulated"
 
 
 def exp_root():
     """Root directory for reconstruction outputs."""
-    if TEST_MODE:
-        return BASE_DIR / "experiments" / "test"
+    if MODE == "noises":
+        return BASE_DIR / "experiments" / "simulated" / "noises"
+    if MODE == "noisevar":
+        return BASE_DIR / "experiments" / "noisevar"
+    if MODE:
+        return BASE_DIR / "experiments" / MODE
     return BASE_DIR / "experiments" / "simulated"
 
 
 def results_root():
     """Root directory for sweep state files and reports."""
-    if TEST_MODE:
-        return BASE_DIR / "results" / "test"
+    if MODE == "noises":
+        return BASE_DIR / "results" / "simulated" / "noises"
+    if MODE == "noisevar":
+        return BASE_DIR / "results" / "noisevar" / "sweep"
+    if MODE:
+        return BASE_DIR / "results" / MODE
     return BASE_DIR / "results" / "sweep"
 
 
 def target_dir(base_dir, target):
+    if MODE == "noises":
+        lvl = snr_level_dir(target)
+        if lvl:
+            return data_root() / lvl / target
+    if MODE == "noisevar":
+        lvl = noisevar_level_dir(target)
+        if lvl:
+            return data_root() / lvl / target
     return data_root() / target
 
 
+def state_csv_name():
+    """Sweep state CSV name for the current mode."""
+    return f"{MODE}_state.csv" if MODE else "sweep_state.csv"
+
+
+def results_report_name():
+    """Evaluation report name for the current mode."""
+    return f"{MODE}_results.txt" if MODE else "sweep_results.txt"
+
+
 def exp_target_dir(base_dir, target):
+    if MODE == "noises":
+        lvl = snr_level_dir(target)
+        if lvl:
+            return exp_root() / lvl / target
+    if MODE == "noisevar":
+        lvl = noisevar_level_dir(target)
+        if lvl:
+            return exp_root() / lvl / target
     return exp_root() / target
 
 
@@ -300,6 +348,32 @@ def _is_auto_threshold(threshold):
     return isinstance(threshold, str) and threshold.startswith("auto:")
 
 
+# 'abs3s' threshold token: absolute 3-sigma threshold taken from the pure-noise
+# characterization (results/noisevar/calibration_table.csv) instead of the
+# per-image sigma estimated during cleaning. Noisevar mode only.
+ABS3S_TOKEN = "abs3s"
+_ABS3S_TABLE_CACHE = {}
+
+
+def abs3s_threshold(target):
+    """Resolve the 'abs3s' token to an absolute Jy threshold for one cell.
+
+    thr = 3 * sigma_imagen_objetivo, where sigma_imagen_objetivo =
+    sigma_vis * sigma_whole from results/noisevar/calibration_table.csv
+    (image-domain noise in Jy/beam). Returns None if not found.
+    """
+    if not _ABS3S_TABLE_CACHE:
+        path = BASE_DIR / "results" / "noisevar" / "calibration_table.csv"
+        with open(path) as f:
+            for row in csv.DictReader(f):
+                _ABS3S_TABLE_CACHE[(row["target"], row["nivel"])] = float(
+                    row["sigma_imagen_objetivo_jy_per_beam"])
+    level = noisevar_level_dir(target).replace("snr", "")
+    base_target = target[: -len(noisevar_level_dir(target)) - 1] if level else target
+    sigma_pure = _ABS3S_TABLE_CACHE.get((base_target, level))
+    return None if sigma_pure is None else 3.0 * sigma_pure
+
+
 def _auto_multiplier(threshold):
     """Extract the numeric multiplier from an 'auto:X' string."""
     return float(threshold.split(":", 1)[1])
@@ -307,14 +381,28 @@ def _auto_multiplier(threshold):
 
 def _find_gt_path(base_dir, target):
     """Return the ground-truth FITS path if it exists, else None."""
-    if TEST_MODE:
-        gt = data_root() / target / f"{target}.fits"
+    if MODE:
+        gt = target_dir(base_dir, target) / f"{target}.fits"
         return str(gt) if gt.exists() else None
     for category in ("simulated", "archival"):
         gt = base_dir / "data" / category / target / f"{target}.fits"
         if gt.exists():
             return str(gt)
     return None
+
+
+def gt_fits_path(target):
+    """Ground-truth FITS for metrics (never rescaled).
+
+    noisevar: the GT is fixed and lives OUTSIDE the cell; read the absolute
+    gt_fits reference from the cell's .json (written by the generator). The
+    original unscaled FITS is used as-is. Other modes: <target>.fits in the
+    target dir.
+    """
+    if MODE == "noisevar":
+        from src.utils.noisevar_paths import noisevar_gt_path
+        return noisevar_gt_path(str(BASE_DIR), target)
+    return _find_gt_path(BASE_DIR, target)
 
 
 def load_state(state_csv):
@@ -339,22 +427,33 @@ def load_state(state_csv):
 STATE_HEADER = ["target", "method", "config_id", "status", "time", "psnr", "ssim", "mse", "t"]
 
 
+def _write_state_locked(state_csv, state_rows):
+    """Write the full state dict to CSV. Caller must hold the lock."""
+    state_csv.parent.mkdir(parents=True, exist_ok=True)
+    with open(state_csv, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=STATE_HEADER)
+        writer.writeheader()
+        for row in state_rows.values():
+            writer.writerow({k: row.get(k, "") for k in STATE_HEADER})
+
+
 def save_state(state_csv, lock, state_rows):
     """Write the full state dict to CSV, keeping one row per (target,method,config_id)."""
     with lock:
-        state_csv.parent.mkdir(parents=True, exist_ok=True)
-        with open(state_csv, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=STATE_HEADER)
-            writer.writeheader()
-            for row in state_rows.values():
-                writer.writerow({k: row.get(k, "") for k in STATE_HEADER})
+        _write_state_locked(state_csv, state_rows)
 
 
 def update_state_row(state_csv, lock, state_rows, row):
-    """Insert or update a state row and persist the CSV."""
+    """Insert or update a state row and persist the CSV.
+
+    The insert and the write are atomic under the lock: otherwise a worker
+    adding a new key while another worker writes the CSV triggers
+    "dictionary changed size during iteration" and kills the worker.
+    """
     key = (row["target"], row["method"], row["config_id"])
-    state_rows[key] = row
-    save_state(state_csv, lock, state_rows)
+    with lock:
+        state_rows[key] = row
+        _write_state_locked(state_csv, state_rows)
 
 
 def count_job_states(state_rows):
@@ -408,11 +507,6 @@ def evaluate_state(state_csv, output_path):
             except (ValueError, TypeError):
                 r[k] = None
 
-    groups = {}
-    for r in completed:
-        key = (r["method"], r["config_id"])
-        groups.setdefault(key, []).append(r)
-
     def _mean(vals):
         vals = [v for v in vals if v is not None]
         return sum(vals) / len(vals) if vals else None
@@ -421,29 +515,39 @@ def evaluate_state(state_csv, output_path):
         vals = [v for v in vals if v is not None]
         return statistics.stdev(vals) if len(vals) > 1 else 0.0
 
-    stats = []
-    for (method, config_id), grp in sorted(groups.items()):
-        n = len(grp)
-        psnr_vals = [r["psnr"] for r in grp]
-        ssim_vals = [r["ssim"] for r in grp]
-        mse_vals = [r["mse"] for r in grp]
-        t_vals = [r["t"] for r in grp]
-        time_vals = [r["time"] for r in grp]
-        stats.append({
-            "method": method,
-            "config_id": config_id,
-            "n": n,
-            "psnr_mean": _mean(psnr_vals),
-            "psnr_std": _std(psnr_vals),
-            "ssim_mean": _mean(ssim_vals),
-            "ssim_std": _std(ssim_vals),
-            "mse_mean": _mean(mse_vals),
-            "mse_std": _std(mse_vals),
-            "t_mean": _mean(t_vals),
-            "t_std": _std(t_vals),
-            "time_mean": _mean(time_vals),
-            "time_std": _std(time_vals),
-        })
+    def _fov_class(target):
+        parts = (target or "").split("_")
+        return parts[1] if len(parts) > 1 else ""
+
+    def build_stats(completed_rows):
+        grp = {}
+        for r in completed_rows:
+            key = (r["method"], r["config_id"])
+            grp.setdefault(key, []).append(r)
+        out = []
+        for (method, config_id), g in sorted(grp.items()):
+            out.append({
+                "method": method,
+                "config_id": config_id,
+                "n": len(g),
+                "psnr_mean": _mean([r["psnr"] for r in g]),
+                "psnr_std": _std([r["psnr"] for r in g]),
+                "ssim_mean": _mean([r["ssim"] for r in g]),
+                "ssim_std": _std([r["ssim"] for r in g]),
+                "psnr_fov": {
+                    cls: _mean([r["psnr"] for r in g if _fov_class(r["target"]) == cls])
+                    for cls in ("s0p5", "s2", "s4")
+                },
+                "mse_mean": _mean([r["mse"] for r in g]),
+                "mse_std": _std([r["mse"] for r in g]),
+                "t_mean": _mean([r["t"] for r in g]),
+                "t_std": _std([r["t"] for r in g]),
+                "time_mean": _mean([r["time"] for r in g]),
+                "time_std": _std([r["time"] for r in g]),
+            })
+        return out
+
+    stats = build_stats(completed)
 
     methods = sorted(set(s["method"] for s in stats))
 
@@ -546,16 +650,57 @@ def evaluate_state(state_csv, output_path):
             lines.append("  No completed configs for this method.")
         lines.append("")
 
+    # In noises/noisevar mode, show mean PSNR per FOV class (s0p5/s2/s4) next to psnr.
+    FOV_CLASSES = ("s0p5", "s2", "s4")
+    show_fov = MODE in ("noises", "noisevar")
+    fov_hdr = "".join(f" {('psnr_' + c):>10}" for c in FOV_CLASSES) if show_fov else ""
+    table_hdr = (
+        f"{'method':<12} {'config_id':<20} {'n':>5} {'psnr':>8}"
+        f"{fov_hdr} {'ssim':>8} {'mse':>8} {'t(s)':>8} {'time(s)':>8}"
+    )
+
+    def fmt_row(s):
+        fov_cells = ""
+        if show_fov:
+            cells = []
+            for c in FOV_CLASSES:
+                v = s["psnr_fov"][c]
+                cells.append(f"{v:>10.2f}" if v is not None else f"{'-':>10}")
+            fov_cells = " " + " ".join(cells)
+        return (
+            f"{s['method']:<12} {s['config_id']:<20} {s['n']:>5} "
+            f"{s['psnr_mean']:>8.2f}{fov_cells} {s['ssim_mean']:>8.4f} "
+            f"{s['mse_mean']:>8.4f} {s['t_mean']:>8.2f} {s['time_mean']:>8.2f}"
+        )
+
     lines.append("All configurations (averages)")
     lines.append("-" * 80)
-    lines.append(f"{'method':<12} {'config_id':<20} {'n':>5} {'psnr':>8} {'ssim':>8} {'mse':>8} {'t(s)':>8} {'time(s)':>8}")
+    lines.append(table_hdr)
     for s in sorted(stats, key=lambda x: (x["method"], x["config_id"])):
-        lines.append(
-            f"{s['method']:<12} {s['config_id']:<20} {s['n']:>5} "
-            f"{s['psnr_mean']:>8.2f} {s['ssim_mean']:>8.4f} {s['mse_mean']:>8.4f} "
-            f"{s['t_mean']:>8.2f} {s['time_mean']:>8.2f}"
-        )
+        lines.append(fmt_row(s))
     lines.append("")
+
+    if MODE in ("noises", "noisevar"):
+        # Per-SNR-level tables: same layout as the global table above, one
+        # table per level (level dir derived from '_snr<L>' suffix).
+        if MODE == "noises":
+            levels = ("50s", "200s", "500s")
+            lvl_of = snr_level_dir
+        else:
+            levels = ("snr50", "snr200", "snr500")
+            lvl_of = noisevar_level_dir
+        for lvl in levels:
+            lvl_rows = [r for r in completed if lvl_of(r["target"]) == lvl]
+            lvl_stats = build_stats(lvl_rows)
+            lines.append(f"All configurations (averages) — nivel {lvl}")
+            lines.append("-" * 80)
+            lines.append(table_hdr)
+            if lvl_stats:
+                for s in sorted(lvl_stats, key=lambda x: (x["method"], x["config_id"])):
+                    lines.append(fmt_row(s))
+            else:
+                lines.append("(no completed jobs at this level yet)")
+            lines.append("")
 
     text = "\n".join(lines)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -567,9 +712,9 @@ def evaluate_state(state_csv, output_path):
 
 def evaluate_job(target, method, config_id):
     """Compute PSNR/SSIM/MSE and imaging time for a finished sweep cell."""
-    if TEST_MODE:
-        gt_path = data_root() / target / f"{target}.fits"
-        cell_dir = exp_root() / target / f"{target}_{method}" / f"{target}_{method}_{config_id}"
+    if MODE:
+        gt_path = Path(gt_fits_path(target) or "")
+        cell_dir = exp_target_dir(BASE_DIR, target) / f"{target}_{method}" / f"{target}_{method}_{config_id}"
     elif os.path.exists(str(BASE_DIR / "data" / "simulated" / target)):
         gt_path = BASE_DIR / "data" / "simulated" / target / f"{target}.fits"
         cell_dir = BASE_DIR / "experiments" / "simulated" / target / f"{target}_{method}" / f"{target}_{method}_{config_id}"
@@ -652,7 +797,9 @@ def read_or_create_gt_index(index_csv, target):
                 if row["target"] == target:
                     return float(row["gt_total_flux"])
 
-    gt_path = target_dir(BASE_DIR, target) / f"{target}.fits"
+    gt_path = gt_fits_path(target)
+    if gt_path is None:
+        raise FileNotFoundError(f"GT FITS not found for {target}")
     gt = fits.getdata(gt_path).squeeze().astype(np.float64)
     total = gt.sum()
 
@@ -795,7 +942,7 @@ def run_wsclean(target, pixel_size, config_id, params, dry_run=False):
             params["threshold"] = "AUTO"  # placeholder for dry-run print
         else:
             ms = target_dir(BASE_DIR, target) / f"{target}.MS"
-            gt_path = _find_gt_path(BASE_DIR, target)
+            gt_path = gt_fits_path(target)
             dirty_prefix = out / f"{target}_wsclean_dirty_pass"
             cache_path = out / ".wsclean_dirty_noise.json"
 
@@ -855,6 +1002,10 @@ def run_wsclean(target, pixel_size, config_id, params, dry_run=False):
             _log("[noise] multiplier=%.2f -> threshold=%.6e", multiplier, computed_threshold)
 
             cmd = build_wsclean_args(target, pixel_size, str(prefix), params)
+
+        if "threshold" in params and not str(params["threshold"]).startswith("AUTO"):
+            _log("[noise] absolute threshold=%.6e Jy (resolved from sweep config)",
+                 float(params["threshold"]))
 
         result = subprocess.run(cmd, cwd=out, stdout=logf, stderr=subprocess.STDOUT)
     elapsed = time.perf_counter() - t0
@@ -1034,6 +1185,20 @@ def run_cpu_jobs_for_target(target, pixel_size, state_csv, state_lock, state_row
             print(f"[skip] {target} {method} {cid} already done")
             continue
 
+        params = dict(params)
+        if params.get("threshold") == ABS3S_TOKEN:
+            thr = abs3s_threshold(target)
+            if thr is None:
+                print(f"[error] {target} {method} {cid}: abs3s threshold not found "
+                      f"in calibration table")
+                update_state_row(state_csv, state_lock, state_rows, {
+                    "target": target, "method": method, "config_id": cid,
+                    "status": "failed", "time": "0",
+                })
+                continue
+            params["threshold"] = thr
+            print(f"[noise] {target} {method} {cid}: abs3s threshold = {thr:.6e} Jy")
+
         print(f"[run]  {target} {method} {cid}")
         update_state_row(state_csv, state_lock, state_rows, {
             "target": target,
@@ -1188,6 +1353,22 @@ def main():
                         help="Final-evaluation mode: read targets from data/simulated/test/, write to "
                              "experiments/test/ and results/test/. Exactly one config per method is required; "
                              "workers are forced to 1.")
+    parser.add_argument("--noises", action="store_true",
+                        help="Faint-SNR study mode over the 3-level noises dataset: read targets from "
+                             "data/simulated/noises/<L>s/<target>/ (level dir derived from the '_snr<L>' "
+                             "name suffix), write to experiments/simulated/noises/ and "
+                             "results/simulated/noises/. The sweep grid is NOT restricted to a single "
+                             "config per method.")
+    parser.add_argument("--debil", action="store_true",
+                        help="DEPRECATED alias of the old faint-SNR study (data/simulated/debil/, "
+                             "experiments/debil/, results/debil/). Use --noises for the current study; "
+                             "--debil is kept only to rerun the old dataset.")
+    parser.add_argument("--noisevar", action="store_true",
+                        help="GT-fixed + variable-noise study mode: read targets from "
+                             "data/noisevar/noisevar/<snr<L>>/<target>/ (level dir derived "
+                             "from the '_snr<L>' name suffix), GT from the cell .json "
+                             "gt_fits reference (never rescaled), write to "
+                             "experiments/noisevar/ and results/noisevar/sweep/.")
     parser.add_argument("--cpu-workers", type=int, default=1,
                         help="Number of CPU workers for CASA + WSClean targets.")
     parser.add_argument("--gpu-workers", type=int, default=1,
@@ -1200,19 +1381,35 @@ def main():
                         help="Analyze sweep_state.csv and write a summary report without running any reconstruction.")
     args = parser.parse_args()
 
-    global TEST_MODE
+    global MODE
+    modes = [args.test, args.noises, args.debil, args.noisevar]
+    if sum(1 for m in modes if m) > 1:
+        print("ERROR: --test, --noises, --debil and --noisevar are mutually exclusive.")
+        sys.exit(1)
     if args.test:
-        TEST_MODE = True
+        MODE = "test"
+        os.environ["RI_BENCH_MODE"] = "test"
         os.environ["RI_BENCH_TEST"] = "1"
         if args.cpu_workers != 1 or args.gpu_workers != 1:
             print("[test] forcing --cpu-workers 1 and --gpu-workers 1")
         args.cpu_workers = 1
         args.gpu_workers = 1
+    elif args.noises:
+        MODE = "noises"
+        os.environ["RI_BENCH_MODE"] = "noises"
+    elif args.noisevar:
+        MODE = "noisevar"
+        os.environ["RI_BENCH_MODE"] = "noisevar"
+    elif args.debil:
+        print("WARNING: --debil is DEPRECATED (old faint-SNR study over data/simulated/debil/); "
+              "use --noises for the current noises study.")
+        MODE = "debil"
+        os.environ["RI_BENCH_MODE"] = "debil"
 
     if args.targets is None:
-        args.targets = str(BASE_DIR / "scripts" / ("test_targets.txt" if TEST_MODE else "sweep_targets.txt"))
+        args.targets = str(BASE_DIR / "scripts" / (f"{MODE}_targets.txt" if MODE else "sweep_targets.txt"))
     if args.sweep_config is None:
-        args.sweep_config = str(BASE_DIR / "scripts" / ("test_config.txt" if TEST_MODE else "sweep_config.txt"))
+        args.sweep_config = str(BASE_DIR / "scripts" / (f"{MODE}_config.txt" if MODE else "sweep_config.txt"))
 
     sweep_config_file = Path(args.sweep_config)
     if not sweep_config_file.exists():
@@ -1224,7 +1421,7 @@ def main():
     SWEEP_GRIDS = build_sweep_grids(sweep_config_file)
     print("Loaded sweep methods:", list(SWEEP_GRIDS.keys()))
 
-    if TEST_MODE:
+    if MODE == "test":
         # Guardrail: the test set is evaluated once with a single winning config
         # per method, not swept. Abort if any method expands to more than one cell.
         for method, combos in SWEEP_GRIDS.items():
@@ -1233,8 +1430,8 @@ def main():
                 sys.exit(1)
 
     if args.evaluate:
-        state_csv = sweep_dir(BASE_DIR) / ("test_state.csv" if TEST_MODE else "sweep_state.csv")
-        output_path = sweep_dir(BASE_DIR) / ("test_results.txt" if TEST_MODE else "sweep_results.txt")
+        state_csv = sweep_dir(BASE_DIR) / state_csv_name()
+        output_path = sweep_dir(BASE_DIR) / results_report_name()
         evaluate_state(state_csv, output_path)
         return
 
@@ -1251,7 +1448,7 @@ def main():
     print(f"Loaded {len(targets)} targets: {targets}")
 
     sweep_root = sweep_dir(BASE_DIR)
-    state_csv = sweep_root / ("test_state.csv" if TEST_MODE else "sweep_state.csv")
+    state_csv = sweep_root / state_csv_name()
     state_lock = threading.Lock()
     state_rows = load_state(state_csv)
     if not args.dry_run:

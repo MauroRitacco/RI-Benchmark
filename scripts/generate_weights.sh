@@ -13,8 +13,24 @@ ROBUST=${3:-2}
 BASE_DIR=$(pwd)
 WSCLEAN_VENV="$BASE_DIR/.envs/.wsclean/bin/activate"
 
-if [ "${RI_BENCH_TEST:-0}" = "1" ]; then
-    DATA_DIR="$BASE_DIR/data/simulated/test/$TARGET"
+MODE="${RI_BENCH_MODE:-}"
+if [ -z "$MODE" ] && [ "${RI_BENCH_TEST:-0}" = "1" ]; then
+    MODE="test"
+fi
+
+if [ -n "$MODE" ] && [ -d "$BASE_DIR/data/simulated/$MODE/$TARGET" ]; then
+    DATA_DIR="$BASE_DIR/data/simulated/$MODE/$TARGET"
+elif [ "$MODE" = "noises" ]; then
+    # Noises dataset: inputs are split per SNR level, derived from the
+    # target's '_snr<L>' name suffix.
+    LEVEL_DIR=$(echo "$TARGET" | sed -n 's/.*_snr\([0-9][0-9]*\)$/\1s/p')
+    if [ -n "$LEVEL_DIR" ] && [ -d "$BASE_DIR/data/simulated/$MODE/$LEVEL_DIR/$TARGET" ]; then
+        DATA_DIR="$BASE_DIR/data/simulated/$MODE/$LEVEL_DIR/$TARGET"
+    elif [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
+        DATA_DIR="$BASE_DIR/data/simulated/$TARGET"
+    else
+        DATA_DIR="$BASE_DIR/data/archival/$TARGET"
+    fi
 elif [ -d "$BASE_DIR/data/simulated/$TARGET" ]; then
     DATA_DIR="$BASE_DIR/data/simulated/$TARGET"
 else

@@ -1,0 +1,12 @@
+# Noises study (mode --noises): 360 validation targets at SNR 50/200/500
+# (data/simulated/noises/{50s,200s,500s}/, target names carry the level prefix).
+# CASA/WSClean: gain fixed at 0.1, threshold-sigma sweep with per-image auto
+# thresholds (corner noise estimator, multiplier x sigma).
+# DeepInverse: lambda 1.0 / 0.1, max_iter 50. R2D2: frozen k5 winner.
+casa,gain,0.1
+casa,threshold,auto:0.1,auto:1,auto:2,auto:3
+wsclean,gain,0.1
+wsclean,threshold,auto:0.1,auto:1,auto:2,auto:3
+deepinv,lambda_factor,1,0.1
+deepinv,max_iter,50
+r2d2,config,k5
