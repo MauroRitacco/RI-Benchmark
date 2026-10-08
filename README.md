@@ -48,12 +48,10 @@ hf download MauroRitacco/R2Disk2 --include "ckpt/*" --local-dir external/R2D2-RI
 ./scripts/run_all.sh --target <name>         # single target, all four methods
 ```
 
-All `run_*.sh` scripts accept `--dry-run`: they print the exact commands without
-executing.
 
 ## Data
 
-`data/` and `experiments/` are gitignored (size). Synthetic disks and visibilities
+Synthetic disks and visibilities
 are generated with the companion [DiskGenerator](https://github.com/mauroritacco/DiskGenerator)
 repository; the test set is a held-out split of the same generator (see its
 `sweep_experiment/` grids). Archival Measurement Sets convert to `.mat` with
