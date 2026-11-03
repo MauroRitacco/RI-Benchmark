@@ -17,6 +17,9 @@ wsclean,threshold,auto:0.5,auto:0.1,auto:0.01
 
 deepinv,lambda_factor,3e-2, 1e-1, 3e-1
 deepinv,max_iter,50
+# version=2: output calibration with F_est + nW=1 fix in the .mat
+# (src/utils/studies/fix_simulated_nw.py), vs the stale-nW v1 rows.
+deepinv,version,2
 
 # R2D2 is run with a single fixed configuration; the config_id is fixed to k5.
 r2d2,config,k5

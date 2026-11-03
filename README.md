@@ -31,7 +31,7 @@ Hyper-parameter sweep grids: `results/sweep/`.
 - `data/` — targets: `data/{simulated,simulated/test,archival}/<target>/` with `.MS`, `.mat`, ground truth and a `<target>.yaml` of imaging parameters. Not tracked.
 - `experiments/` — reconstruction outputs. Not tracked.
 - `results/` — metric tables and sweep/test reports.
-- `external/` — vendored [basp-group/R2D2-RI](https://github.com/basp-group/R2D2-RI) used for R2D2 inference. Not tracked.
+- `external/` — vendored [basp-group/R2D2-RI](https://github.com/basp-group/R2D2-RI) used for R2D2 inference (code only; checkpoints downloaded separately, see below).
 - `.envs/` — one virtualenv per algorithm. Not tracked.
 
 ## Reproducing
@@ -57,7 +57,9 @@ executing.
 are generated with the companion [DiskGenerator](https://github.com/mauroritacco/DiskGenerator)
 repository; the test set is a held-out split of the same generator (see its
 `sweep_experiment/` grids). Archival Measurement Sets convert to `.mat` with
-`src/utils/ms2mat.py`.
+`src/utils/ms2mat.py` (adapted from a script in the
+[R2D2 repository](https://github.com/basp-group/R2D2-RI), original author
+A. Dabbech).
 
 ## License
 

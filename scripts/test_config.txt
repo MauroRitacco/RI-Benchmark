@@ -8,5 +8,8 @@ wsclean,threshold,auto:1.0
 
 deepinv,lambda_factor,0.1
 deepinv,max_iter,50
+# version=2: F_est output calibration + nW=1 .mat (fix_simulated_nw.py --test)
+# + fresh operator norm; supersedes the stale-nW l0p1_i50 rows.
+deepinv,version,2
 
 r2d2,config,k5

@@ -1,0 +1,12 @@
+
+ms2mat/.DS_Store
+.DS_Store
+
+local/
+ckpt/
+results/
+*.ipynb
+__pycache__/
+r2d2_env/
+
+!tutorial_r2d2_python_v2.ipynb

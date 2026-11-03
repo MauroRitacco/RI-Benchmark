@@ -180,6 +180,18 @@ def main(target, config_json=None, n=1):
     opnorm_cache_path = vis_path.replace('.mat', '_opnorm.json')
     cached_opnorm = cfg.get("opnorm")
 
+    # Precedence: explicit config override -> JSON cache next to the mat ->
+    # compute. The JSON is written after every computation (below) so it is
+    # always warm for the next run of the same vis_path.
+    if cached_opnorm is None:
+        try:
+            with open(opnorm_cache_path) as f:
+                cached_opnorm = json.load(f).get("opnorm")
+            if cached_opnorm is not None:
+                print(f"Using cached operator norm: {cached_opnorm} ({opnorm_cache_path})")
+        except (OSError, ValueError) as e:
+            print(f"Operator norm cache not usable ({e}); computing")
+
     if cached_opnorm is not None:
         opnorm = float(cached_opnorm)
         print(f"Using cached operator norm: {opnorm}")
