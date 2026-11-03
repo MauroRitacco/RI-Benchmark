@@ -1,0 +1,70 @@
+# Example imaging parameters for this target, using the winning per-method
+# configurations of the benchmark's final test evaluation (see
+# scripts/test_config.txt). Sections follow the schema read by
+# scripts/parse_target_yaml.py: one mapping per method under "methods",
+# plus optional top-level keys such as "nval". Any missing section makes
+# the corresponding runner fall back to its hardcoded defaults.
+
+nval: 1
+
+methods:
+  casa:
+    imsize: 64
+    specmode: mfs
+    deconvolver: hogbom
+    gridder: standard
+    weighting: briggs
+    robust: 2
+    gain: 0.1
+    niter: 1000000000
+    threshold: "auto:1.0"
+    datacolumn: "data"
+
+  wsclean:
+    size: 64
+    padding: 2
+    j: 1
+    weight: "briggs 2"
+    multiscale: true
+    multiscale_scales: "0,5,15"
+    mgain: 0.8
+    gain: 0.1
+    auto_threshold: 0.5
+    abs_threshold: "auto:1.0"
+    auto_mask: ""
+    niter: 200000
+    data_column: "DATA"
+
+  deepinv:
+    img_size: [64, 64]
+    real_projection: true
+    prior: wavelet
+    prior_level: 3
+    prior_wavelets: ["db1", "db2", "db3", "db4", "db5", "db6", "db7", "db8"]
+    prior_p: 1
+    prior_clamp_min: 0
+    stepsize_factor: 1.5
+    lambda_factor: 0.1
+    params_algo_a: 3
+    max_iter: 50
+    early_stop: true
+    thres_conv: 1.0e-5
+    weight_robustness: 2
+
+  r2d2:
+    imager_config: "config/imaging/R2D2_small.yaml"
+    architecture: unet
+    prune: true
+    sigma_res_tol: 1.0e-4
+    super_resolution: 1
+    meas_op_on_gpu: true
+    im_dim_x: 64
+    im_dim_y: 64
+    weight_robustness: 2
+    weight_type: briggs
+    num_iter: 5
+    series: R2D2
+    layers: 1
+    ckpt_path: "ckpt/R2D2_small_ALMA3"
+    ckpt_realisations: 1
+    num_chans: 32

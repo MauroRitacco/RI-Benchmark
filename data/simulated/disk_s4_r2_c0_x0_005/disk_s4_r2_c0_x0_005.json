@@ -1,0 +1,49 @@
+{
+  "name": "disk_s4_r2_c0_x0_005.fits",
+  "cell": {
+    "image_size_arcsec": 4.0,
+    "num_rings": 2,
+    "has_center": false,
+    "has_extra": false,
+    "cell_index": 31,
+    "repetition": 5
+  },
+  "sampled_params": {
+    "q_index": 1.1455847029428963,
+    "axis_ratio": 0.2935982307222731,
+    "inc_rad": 1.272807533917852,
+    "pa_deg": 1.0236937214171382,
+    "r_ref": 3.84,
+    "n_rings": 2,
+    "has_center": false,
+    "has_extra": false,
+    "ext_x": 0.0,
+    "ext_y": 0.0,
+    "ext_s": 0.0,
+    "ext_a": 0.0,
+    "star_dsf": 1.0,
+    "star_sig": 0.0,
+    "seed": 2315000000,
+    "nominal_pixelsize": 0.0625,
+    "rings": [
+      {
+        "radius": 9.025740585337719,
+        "sigma": 2.0468491074697184,
+        "amplitude": 0.38387219918590165,
+        "dx": 0.05985792635300272,
+        "dy": -0.6261206361974632,
+        "inc_rad": 1.2025130174516252,
+        "pa_deg": 1.117396465889584
+      },
+      {
+        "radius": 19.870215071839013,
+        "sigma": 2.1475824329269604,
+        "amplitude": 0.15477705216666549,
+        "dx": -0.1281376216247483,
+        "dy": -0.09806401591306525,
+        "inc_rad": 1.2108144220992372,
+        "pa_deg": 2.5949162103472165
+      }
+    ]
+  }
+}

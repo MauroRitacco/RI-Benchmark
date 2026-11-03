@@ -18,8 +18,11 @@ casa-*.log
 .ipynb_checkpoints/
 
 # Data and logs
-data/
-!data/simulated/disk_0000/
+data/*
+!data/simulated/
+data/simulated/*
+!data/simulated/disk_s4_r2_c0_x0_005/
+table.lock
 datasets/
 logs/
 training_logs/
@@ -34,8 +37,8 @@ external/*
 !external/R2D2-RI/
 external/R2D2-RI/ckpt/
 external/R2D2-RI/data/
+external/R2D2-RI/src/ri_measurement_operator/data/
 external/R2D2-RI/tutorial_r2d2_python_v2.ipynb
-external/R2D2-RI/PATCHES.md
 external/R2D2-RI/.gitmodules
 
 # Pure-noise SNR study outputs
