@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""Parse <target>.yaml for a given target and method.
-
-Usage examples:
-  python parse_target_yaml.py --target disk_1111 --method casa
-  python parse_target_yaml.py --target disk_1111 --method casa --key niter
-  python parse_target_yaml.py --target disk_1111 --key nval
-"""
+# Print a method section (or a single key) of <target>.yaml as JSON,
+# with optional JSON overrides from the sweep driver.
 import argparse
 import json
 import os

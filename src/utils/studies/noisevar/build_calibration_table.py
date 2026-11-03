@@ -1,25 +1,8 @@
 #!/usr/bin/env python3
-"""Noisevar step 1: build the sigma_vis calibration table.
-
-For the "GT fijo + ruido variable" experiment the GT is NOT rescaled;
-instead the visibility noise level sigma_vis is varied per target and SNR
-level so that the dirty image has the target peak SNR:
-
-    sigma_imagen_objetivo = dirty_peak / SNR
-    sigma_vis = sigma_imagen_objetivo / sigma_whole
-
-where dirty_peak and sigma_whole are the per-target values measured with
-unit visibility noise (sigma_vis=1) in
-results/noise_validation/bright/pure_noise_val360.csv.
-
-Output: results/noisevar/calibration_table.csv with one row per target and
-level (360 targets x 3 levels = 1080 rows):
-    target, clase, nivel, dirty_peak_jy_per_beam, sigma_whole_jy_per_beam,
-    sigma_imagen_objetivo_jy_per_beam, sigma_vis
-
-Usage:
-  .envs/.benchmark/bin/python src/utils/studies/noisevar/build_calibration_table.py
-"""
+# Noisevar step 1: sigma_vis per (target, level) so the dirty image of the
+# fixed GT reaches peak SNR 50/200/500. Reads the unit-noise measurements in
+# results/noise_validation/bright/pure_noise_val360.csv; writes
+# results/noisevar/calibration_table.csv (1080 rows).
 import csv
 import sys
 from collections import defaultdict

@@ -1,47 +1,18 @@
 #!/usr/bin/env python3
-"""Noisevar steps 2/3: generate test MeasurementSets (GT fixed, noise varied).
-
-Two modes:
-
-  --mode noise  (linearity test): pure-noise MS, y = sigma_vis * CN(0,1),
-      same base noise realization for all 3 levels of a target (per-target
-      seed, same noise_seed() convention as the noises study). Output under
-      data/noisevar/noisevar/<target>_snr<L>/.
-
-  --mode signal (signal+noise): y = y_unit + sigma_vis * CN(0,1),
-      with y_unit the clean visibilities of the ORIGINAL unscaled GT through
-      the same measurement operator/grid. Gate-B cells (1 target/class,
-      snr50 only) go to data/noisevar/signal/; the full dataset (all levels)
-      with --snr-subdirs goes to data/noisevar/noisevar/snr<L>/ (in-place
-      overwrite of the noise-mode cells). Each .json carries gt_fits: the
-      absolute path to the original unscaled GT FITS (data/simulated/).
-
-sigma_vis per (target, level) comes from results/noisevar/calibration_table.csv
-(step 1). The MS is a copy of the original (data/simulated/<target>/, never
-modified) with only the DATA column replaced on unflagged rows: same uv grid
-and flags. Noise is generated in float64.
-
-Each output dir gets <name>.MS, <name>.mat (y, nW, u, v, w, frequency,
-nominal_pixelsize, weight — same convention as the noises dataset) and
-<name>.json (mode, sigma_vis, snr_target).
-
-CONVENCION FINAL DE RUIDO (2026-09-14): XX=YY identicos — una unica
-realizacion de ruido gaussiano complejo por visibilidad (desvio sigma_vis),
-escrita igual en ambas correlaciones del MS y en el .mat ("Stokes I
-efectivo"). Consecuencia: nW = 1/sigma_vis en el .mat (no se copia de
-datasets viejos). R2D2: la escala de nW se cancela en normalize_instance.
-DeepInv: usa nW en su likelihood, necesita el valor correcto.
-
-Fixed verification targets (first two of each class, deterministic):
-    s0p5: disk_s0p5_r1_c0_x0_000, disk_s0p5_r1_c0_x0_001
-    s2:   disk_s2_r1_c0_x0_000,   disk_s2_r1_c0_x0_001
-    s4:   disk_s4_r1_c0_x0_000,   disk_s4_r1_c0_x0_001
-signal mode uses the first of each class.
-
-Runs inside the DiskGenerator venv (torch + torchkbnufft + casatools):
-  DiskGenerator/.venv/bin/python src/utils/studies/noisevar/generate_noisevar_ms.py --mode noise
-  DiskGenerator/.venv/bin/python src/utils/studies/noisevar/generate_noisevar_ms.py --mode signal
-"""
+# Noisevar steps 2/3: regenerate MS/.mat cells with the GT fixed and the noise
+# level set by calibration_table.csv.
+#
+#   --mode noise:   pure-noise cells y = sigma_vis * CN(0,1); the same base
+#                   noise realization is reused across the 3 levels of a target.
+#   --mode signal:  y = y_unit + sigma_vis * CN(0,1), y_unit = operator(GT).
+#
+# The original MS is never modified: cells are copies with DATA replaced on
+# unflagged rows. Noise convention (2026-09-14): XX=YY, a single CN(0,sigma_vis^2)
+# realization per visibility written to both MS correlations and the .mat;
+# nW = 1/sigma_vis in the .mat. The cell .json carries sigma_vis, snr_target and
+# gt_fits (absolute path to the original unscaled GT FITS).
+#
+# Runs with the DiskGenerator venv (torch + torchkbnufft + casatools).
 import argparse
 import csv
 import json

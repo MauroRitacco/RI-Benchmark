@@ -119,7 +119,7 @@ def smooth_to_beam(input_path, output_path, bmaj_deg, bmin_deg, bpa_deg):
     except RuntimeError as e:
         error_msg = str(e)
         if "identical to or larger than" in error_msg or "setAxialRatio" in error_msg:
-            # Beam is already at or above target resolution — no further smoothing needed.
+            # Beam already at or above target resolution; no smoothing needed.
             print(f"Note: Beam already at/above target resolution. Copying original.")
             import shutil
             shutil.copy2(input_path, output_path)

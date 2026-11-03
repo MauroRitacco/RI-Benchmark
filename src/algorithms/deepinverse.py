@@ -121,8 +121,6 @@ def main(target, config_json=None, n=1):
         
         # Normalize the main reconstruction to [0, 1] (skip dirty/psf)
         # if not name:
-        #     from src.utils.transforms import normalize_fits_peak
-        #     normalize_fits_peak(filepath)
         
         print(f"Saved: {filepath}")
         
@@ -180,9 +178,7 @@ def main(target, config_json=None, n=1):
     opnorm_cache_path = vis_path.replace('.mat', '_opnorm.json')
     cached_opnorm = cfg.get("opnorm")
 
-    # Precedence: explicit config override -> JSON cache next to the mat ->
-    # compute. The JSON is written after every computation (below) so it is
-    # always warm for the next run of the same vis_path.
+    # Precedence: config override -> JSON cache -> compute (cache is kept warm)
     if cached_opnorm is None:
         try:
             with open(opnorm_cache_path) as f:
@@ -210,16 +206,6 @@ def main(target, config_json=None, n=1):
             print(f"Cached operator norm to {opnorm_cache_path}")
         except Exception as e:
             print(f"Warning: could not cache operator norm: {e}")
-    
-    # # Normalize weights and data so operator norm ≈ 1.0 across all datasets
-    # # This preserves the *relative* Briggs weighting but standardizes the scale
-    # scale = 1.0 / (opnorm ** 0.5)
-    # nWimag_norm = nWimag * scale
-    # y = y * scale
-    # physics.setWeight(nWimag_norm)
-    
-    # # Recompute dirty image with normalized weights
-    # x_hat = physics.A_adjoint(y).to(device)
 
     from deepinv.optim.data_fidelity import L2
     from deepinv.optim.prior import WaveletPrior
@@ -274,19 +260,8 @@ def main(target, config_json=None, n=1):
     runtime = end_time - start_time
     imaging_time = end_time - start_time
     
-    # PSF peak normalization is intentionally disabled to match the demo_ri_basic.py
-    # workflow, which returns the FISTA solution in the input image scale without
-    # rescaling by the PSF maximum.
-    # psf_max = PSF.max().item()
-    # if psf_max > 0:
-    #     x_model = x_model / psf_max
-    # print(f"PSF max: {psf_max:.6f} — reconstruction normalized by PSF max")
-
-    # Flux-conserving calibration: scale the reconstruction so its total flux
-    # matches F_est, the total flux estimated from the cell MS by polynomial
-    # extrapolation of the short-baseline visibilities to uv=0 (positive
-    # source: V(0) = total flux). Falls back to the coherent short-baseline
-    # mean, and ultimately to max|y_raw|, if the MS estimate is unavailable.
+    # Flux calibration: rescale so total flux matches F_est (polynomial fit of
+    # short-baseline visibilities to uv=0; fallback max|y_raw|).
     max_y_raw = y_raw.abs().max().item()
     ms_path = vis_path.replace('.mat', '.MS')
     if not os.path.exists(ms_path):
@@ -317,7 +292,7 @@ def main(target, config_json=None, n=1):
         print(f"Flux calibration: estimator={flux_estimator}, F_est={total_flux_estimate:.4f}, "
               f"max|y_raw|={max_y_raw:.4f}, recon sum before={recon_sum:.4f}, scale={flux_scale:.6f}")
 
-    # Per-cell flux-calibration log (estimator path, F_est vs old max|y_raw|).
+    # Log flux calibration per cell
     fluxcal_csv = os.path.join(base_dir, 'results', 'fluxcal_log.csv')
     try:
         import csv as _csv

@@ -356,12 +356,8 @@ _ABS3S_TABLE_CACHE = {}
 
 
 def abs3s_threshold(target):
-    """Resolve the 'abs3s' token to an absolute Jy threshold for one cell.
-
-    thr = 3 * sigma_imagen_objetivo, where sigma_imagen_objetivo =
-    sigma_vis * sigma_whole from results/noisevar/calibration_table.csv
-    (image-domain noise in Jy/beam). Returns None if not found.
-    """
+    """Resolve the 'abs3s' token to an absolute Jy threshold (3*sigma_imagen_objetivo
+    from results/noisevar/calibration_table.csv)."""
     if not _ABS3S_TABLE_CACHE:
         path = BASE_DIR / "results" / "noisevar" / "calibration_table.csv"
         with open(path) as f:
@@ -392,13 +388,9 @@ def _find_gt_path(base_dir, target):
 
 
 def gt_fits_path(target):
-    """Ground-truth FITS for metrics (never rescaled).
-
-    noisevar: the GT is fixed and lives OUTSIDE the cell; read the absolute
-    gt_fits reference from the cell's .json (written by the generator). The
-    original unscaled FITS is used as-is. Other modes: <target>.fits in the
-    target dir.
-    """
+    """Ground-truth FITS for metrics. noisevar: fixed GT, read the absolute
+    gt_fits reference from the cell .json (never rescaled). Other modes:
+    <target>.fits in the target dir."""
     if MODE == "noisevar":
         from src.utils.noisevar_paths import noisevar_gt_path
         return noisevar_gt_path(str(BASE_DIR), target)
@@ -444,12 +436,7 @@ def save_state(state_csv, lock, state_rows):
 
 
 def update_state_row(state_csv, lock, state_rows, row):
-    """Insert or update a state row and persist the CSV.
-
-    The insert and the write are atomic under the lock: otherwise a worker
-    adding a new key while another worker writes the CSV triggers
-    "dictionary changed size during iteration" and kills the worker.
-    """
+    """Insert or update a state row and persist the CSV (atomic under the lock)."""
     key = (row["target"], row["method"], row["config_id"])
     with lock:
         state_rows[key] = row
@@ -810,11 +797,7 @@ def read_or_create_gt_index(index_csv, target):
 
 
 def prepare_target(target):
-    """Ensure GT index entry and DeepInverse weights exist for a target.
-
-    Weights live inside the target's .mat file; the old
-    experiments/<target>/<target>_weights/ dir is removed if present.
-    """
+    """Ensure GT index entry and DeepInverse weights exist for a target."""
     index_csv = sweep_dir(BASE_DIR) / "gt_flux_index.csv"
     gt_total = read_or_create_gt_index(index_csv, target)
     print(f"[prep] {target}: GT total flux = {gt_total:.4f}")
@@ -1060,9 +1043,8 @@ def run_deepinverse(target, config_id, config, dry_run=False):
 
 
 def run_r2d2(target, config_id, config, dry_run=False):
-    """Run R2D2 via scripts/run_r2d2.sh, then rename the generic <target>_r2d2.*
-    outputs to the sweep's <target>_r2d2_<config_id>.* naming so evaluate_job
-    can locate them."""
+    """Run R2D2 via scripts/run_r2d2.sh and rename the outputs to the sweep's
+    <target>_r2d2_<config_id> naming."""
     out = exp_target_dir(BASE_DIR, target)
     cell_dir = out / f"{target}_r2d2" / f"{target}_r2d2_{config_id}"
     cell_dir.mkdir(parents=True, exist_ok=True)

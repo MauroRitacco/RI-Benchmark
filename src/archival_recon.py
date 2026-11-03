@@ -1,79 +1,31 @@
 #!/usr/bin/env python3
 """Orchestrator for archival (real, no ground truth) reconstructions.
 
-One target at a time. Modes:
+One target at a time. Modes (reconstruction):
+  --dirty    full-resolution dirty image (cell from the longest baseline of
+             the MS) with CASA tclean niter=0, kept in Jy/beam: its rms gives
+             the absolute 3-sigma threshold for casa/wsclean.
+  --casa     tclean hogbom, 3*sigma absolute threshold, same grid as the dirty.
+  --wsclean  single-scale clean, same grid and threshold convention as --casa.
+  --r2d2     R2D2 (k5) on the no-cutoff mat at the common grid (64x64 @
+             0.0476 arcsec); variants: --nocut/--allch/--avg, --cpu-op, --tag.
+  --deepinv  DeepInverse (l1_i50_v2 + flux calibration) on a rescaled copy of
+             the mat at the accepted r2d2 grid; weighting natural only
+             (briggs=1, declared deviation: wsclean 3.7 cannot persist briggs
+             imaging weights on this multi-spw MS).
 
-  --dirty   Generate only the full-resolution dirty image (cell from the
-            longest baseline of the MS) with CASA tclean (niter=0), saved
-            at target level in experiments/archival/<target>/ together with
-            a parameter log. Kept in Jy/beam so its rms gives the absolute
-            sigma threshold for casa/wsclean directly.
+Modes (figures, from existing products, no reconstruction):
+  --png         comparison panel (DSHARP + 4 methods), --asinh/--units/--test/--tuned
+  --tidy        minimal 5-panel abstract figure (mJy/arcsec^2, common asinh scale)
+  --lam-sweep   deepinv lambda-variant strip
+  --png-diff    BPSA allch-vs-avg 3-row comparison
 
-  --casa    CASA tclean reconstruction (hogbom, same grid as the dirty,
-            3*sigma absolute threshold). The absolute threshold (3*sigma,
-            Jy/beam) is passed directly via --threshold. Output (Jy/pixel)
-            goes to experiments/archival/<target>/<target>_casa/<target>_casa/
-            with a log.
-
-  --wsclean WSClean reconstruction (single-scale clean, hogbom-equivalent,
-            same grid + threshold convention as --casa). Output (Jy/pixel)
-            goes to experiments/archival/<target>/<target>_wsclean/
-            <target>_wsclean/ with a log.
-
-  --deepinv DeepInverse reconstruction (FISTA + WaveletPrior, archival-yaml
-            config l1_i50_v2 + fluxcal) on the no-cutoff mat at the accepted
-            r2d2 grid (64x64 @ ~0.0476 arcsec): the mat is copied with
-            nominal_pixelsize rescaled (uv unchanged; declared). Weighting is
-            natural only (mat nW), briggs=1 — declared deviation: wsclean 3.7
-            cannot persist briggs imaging weights on this multi-spw MS, while
-            casa/wsclean image with briggs robust=2. Output (Jy/pixel) goes
-            to experiments/archival/<target>/<target>_deepinverse/
-            <target>_deepinverse[_<variant>]/ with a log. Variants (--allch,
-            --tag, e.g. sweep lambdas) are subdirs of the method container;
-            run_dir() builds all paths.
-
-  --tidy    Render the minimal abstract figure (no reconstruction) from the
-            existing products: DSHARP reference + casa + wsclean (canonical
-            robust 2 runs) + BPSA (avg_lam3e-4) + R2Disk2 (avg). Everything
-            is converted to surface brightness in mJy/arcsec^2 (DSHARP from
-            Jy/beam via its header beam, 1.133 x BMAJ x BMIN; the Jy/pixel
-            reconstructions via their own pixel area), shown on a single
-            common asinh scale (vmin=0, common vmax, per-method asinh
-            linear_width from the --lw-<method> flags in mJy/px of the
-            64x64 grid, the DSHARP panel from 10 x its corner rms), single
-            colorbar, no histograms / DR / rms / timings. Beam drawn on
-            DSHARP/tclean/WSClean only (BPSA and R2Disk2 are model images,
-            not convolved with a clean beam); common 0.5 arcsec angular
-            scale bar per panel. Saved to
-            results/archival/<target>/<variant>/tidy/<target>_continuum_comparison.png
-            (300 dpi) + .pdf.
-
-  --png     Render only the comparison panel PNG (no reconstruction) from the
-            existing products: DSHARP published reference + casa + wsclean +
-            deepinv + r2d2. Faithful single-row port of the noisevar mold
-            (src/utils/studies/noisevar/plot_noisevar_comparisons.py,
-            render_all_preview, compact geometry, own colorbar per panel,
-            log-count histogram under each panel). Saved to
-            results/archival/<target>/<variant>/<target>_panel.png, where
-            <variant> is v1 (1-channel mat), avg (channel-averaged mat) or
-            all_channels (full-band mat, --allch).
-            All images Jy/pixel (DSHARP
-            converted from Jy/beam with its header beam). No GT, no error
-            row, no metrics.
-
-Run with the benchmark env (casacore + astropy + scipy):
+Units: reconstruction FITS are Jy/pixel; the dirty image stays Jy/beam.
+Conversions use the effective beam area from the dirty-PSF sum (the fitted
+Gaussian under-covers the dirty beam at robust=2, factor ~1.1-2.4x on
+archival data). Run with the benchmark env:
 
     .envs/.benchmark/bin/python src/archival_recon.py --target <name> --dirty
-
-Units convention (same as the rest of the pipeline): reconstruction FITS are
-in Jy/pixel. The dirty image is kept in Jy/beam (native CASA units) because
-the absolute sigma threshold for casa/wsclean is set from its rms: sigma
-[Jy/beam] -> 3*sigma threshold, no conversion needed. Reconstructions are
-converted with the *effective* beam area: 1/A_eff, A_eff from the dirty-PSF
-image sum (peak-normalised). The residual/restored are in Jy/beam of the
-dirty beam, whose effective area exceeds the fitted Gaussian (robust=2);
-converting with the fitted-beam formula inflates extended emission by
-A_eff/A_fit (~1.1-2.4x on archival data).
 """
 
 from __future__ import annotations
@@ -135,13 +87,10 @@ def target_paths(target: str) -> tuple[Path, Path]:
 
 def run_dir(exp_dir: Path, target: str, method: str,
             variant: str | None = None) -> Path:
-    """Output dir of one reconstruction run, two fixed levels by method:
+    """Output dir of one run: experiments/archival/<t>/<t>_<method>[_<variant>]/.
 
-        experiments/archival/<target>/<target>_<method>/<target>_<method>[_<variant>]/
-
-    The run dir holds files named <target>_<method>.* (identical names in
-    every variant); the method-level dir is just a container that groups
-    the canonical run with its variants (e.g. sweep lambdas, _allch).
+    The run dir holds files named <t>_<method>.*; the method-level dir groups
+    the canonical run with its variants (sweep lambdas, _allch, ...).
     """
     name = f"{target}_{method}"
     return exp_dir / name / (f"{name}_{variant}" if variant else name)
@@ -181,20 +130,12 @@ def resolve_cell(args, ms: Path, mat: Path) -> tuple[float, str]:
 
 def jybeam_to_jypixel(restored_fits: Path, out_fits: Path, model_fits: Path,
                       residual_fits: Path, psf_fits: Path) -> dict:
-    """Rebuild the restored image in Jy/pixel from its products and write it.
+    """Rebuild the restored image in Jy/pixel term by term (flux-exact).
 
-    The restored = model (Jy/px, point sources) convolved with the clean
-    beam (Gaussian, fitted BMAJ/BMIN) plus the residual, and the residual is
-    in Jy/beam of the *dirty* beam, whose effective area A_eff exceeds the
-    fitted Gaussian at robust=2. A single conversion factor on the restored
-    therefore cannot be flux-exact: the model component converts with
-    A_px/A_fit, the residual with 1/A_eff (A_eff from the PSF image sum,
-    peak-normalised). This rebuilds the image term by term:
-
-        out = model (*) clean_beam            [Jy/px, flux = F_model]
-            + residual * (PSF_peak/PSF_sum)   [Jy/px, flux = F_residual]
-
-    so the pixel sum equals F_model + F_residual exactly.
+    restored = model (*) clean beam [converts with A_px/A_fit]
+             + residual * (PSF_peak/PSF_sum)   [converts with 1/A_eff]
+    A_eff from the dirty-PSF sum exceeds the fitted Gaussian at robust=2, so a
+    single conversion factor on the restored cannot be flux-exact.
     """
     from astropy.io import fits
     from scipy.signal import fftconvolve
@@ -562,7 +503,7 @@ def fix_fits_wcs(method_dir: Path, target: str, cell_arcsec: float) -> dict:
 
     transforms.formatfits derives the pixel size from <MS_basename>.mat, which
     is wrong when the run used a different mat (e.g. the no-cutoff one).
-    Keeps CRVAL/CRPIX written by formatfits (phase center is correct).
+    Keeps CRVAL/CRPIX (phase centre is correct).
     """
     from astropy.io import fits
     from astropy.modeling import models, fitting
@@ -612,10 +553,8 @@ def cmd_r2d2(args) -> None:
     ms, mat = target_paths(args.target)
     exp_dir = EXPERIMENTS_DIR / args.target
 
-    # Default: full-baseline (no-cutoff) mat at the common grid, super_res 1.0
-    # (the uv_cutoff=2e6 mat is dropped). --nocut kept as an explicit alias for
-    # the raw nocut mat at its own nominal scale (probe, declared).
-    # --allch selects the all-channels mat (every channel of every SPW).
+    # Default: full-baseline (no-cutoff) mat at the common grid (super_res 1.0);
+    # --nocut/--allch/--avg select raw probes off the common grid.
     mat_nocut = DATA_DIR / args.target / f"{args.target}_nocut.mat"
     mat_allch = DATA_DIR / args.target / f"{args.target}_allch.mat"
     mat_avg = DATA_DIR / args.target / f"{args.target}_avg.mat"
@@ -680,9 +619,8 @@ def cmd_r2d2(args) -> None:
     r2d2_repo = BASE_DIR / "external" / "R2D2-RI"
     venv_python = BASE_DIR / ".envs" / ".r2d2" / "bin" / "python"
     ckpt = r2d2_repo / "ckpt" / "R2D2_small_ALMA3"
-    # The yaml pins meas_op_on_gpu: True (un-overridable store_true CLI flag);
-    # --cpu-op swaps in a yaml variant with the operator on CPU (24.9M-point
-    # NUFFT OOMs on the 2GB GPU); the unet prior still runs on GPU.
+    # --cpu-op swaps in the CPU-operator yaml (the 24.9M-point NUFFT OOMs on
+    # the 2GB GPU; the unet prior still runs on GPU)
     config = (BASE_DIR / "config" / "imaging" / "R2D2_small_cpuop.yaml" if args.cpu_op
               else BASE_DIR / "config" / "imaging" / "R2D2_small.yaml")
     cmd = [str(venv_python), "src/imager.py",
@@ -799,9 +737,8 @@ def cmd_r2d2(args) -> None:
 
 
 def make_rescaled_mat(src_mat: Path, dst_mat: Path, cell_arcsec: float) -> Path:
-    """Copy a mat with nominal_pixelsize overwritten (same trick as r2d2's
-    --super-resolution: uv in lambda are unchanged, only the image domain is
-    rescaled). deepinverse.py derives the operator cell from this value."""
+    """Copy a mat with nominal_pixelsize overwritten (uv in lambda unchanged;
+    image-domain rescale only). deepinverse.py derives the cell from it."""
     from scipy.io import loadmat, savemat
 
     d = loadmat(src_mat)
@@ -813,8 +750,8 @@ def make_rescaled_mat(src_mat: Path, dst_mat: Path, cell_arcsec: float) -> Path:
 def deepinv_cell_from_r2d2(exp_dir: Path, target: str, nocut_mat: Path,
                            variant: str | None = "nocut",
                            fallback_super_res: float = 0.4847) -> tuple[float, str]:
-    """Cell matching the accepted r2d2 run (same grid for both regularized
-    methods); falls back to mat_nominal / fallback_super_res."""
+    """Cell of the accepted r2d2 run (same grid for both regularized methods);
+    fallback: mat_nominal / fallback_super_res."""
     from astropy.io import fits
 
     r2d2_fits = run_dir(exp_dir, target, "r2d2", variant) / f"{target}_r2d2.fits"
@@ -876,19 +813,16 @@ def cmd_deepinv(args) -> None:
         print("[deepinv] dry-run: not executing")
         return
 
-    # Flux calibration computed here (benchmark env casacore) and passed
-    # explicitly: reading this 2.4M-row MS with casacore inside the .deepinv
-    # env aborts with a double-free corruption.
+    # Compute F_est here and pass it explicitly: casacore double-frees on this
+    # MS inside the .deepinv env.
     from src.utils.flux_estimate import estimate_total_flux
     f_est, f_est_path = estimate_total_flux(str(ms))
     print("[deepinv] flux estimate: F_est=%.4f Jy (estimator=%s, computed in benchmark env)"
           % (f_est, f_est_path))
     cfg["flux_estimate"] = f_est
 
-    # 1) weighting: natural only (mat nW), briggs=1. Deliberate deviation,
-    #    declared in the log: wsclean 3.7 cannot persist briggs imaging weights
-    #    on this multi-spw MS (-store-imaging-weights is lost with -reorder),
-    #    so casa/wsclean's briggs robust=2 is not applied for deepinv.
+    # 1) weighting: natural only (mat nW), briggs=1: wsclean 3.7 cannot persist
+    #    briggs imaging weights on this multi-spw MS (declared deviation)
     print("[deepinv] weighting: natural (mat nW), briggs=1 (declared deviation; "
           "casa/wsclean use briggs robust=2)")
 
@@ -1017,13 +951,11 @@ def _panel_load(path: Path, crop_fov_arcsec: float | None = None):
 
 
 def _hires_beam_arcsec(target: str, robust: float) -> tuple[float, float, float] | None:
-    """Synthesized beam (BMAJ, BMIN arcsec, BPA deg) from the high-res PSF dirty.
+    """Synthesized beam (arcsec, arcsec, deg) from the 512x512 @ cell/8 dirty.
 
-    casa/wsclean fit the beam on the recon grid (64x64), where the PSF is
-    under-sampled and the fitted size comes out overestimated (up to ~2x on
-    these elongated beams). The 512x512 @ cell/8 dirty carries a clean fit in
-    its FITS header — that is the beam to draw. Returns None if the product
-    is missing (caller keeps the header beam).
+    The 64x64 recon grid under-samples the PSF and overestimates the beam (up
+    to ~2x on these elongated beams). Returns None if the product is missing
+    (caller keeps the header beam).
     """
     tag = "r0p5" if robust < 1.0 else "r2"
     p = EXPERIMENTS_DIR / target / f"{target}_dirty_hires_{tag}.fits"
@@ -1038,9 +970,8 @@ def _hires_beam_arcsec(target: str, robust: float) -> tuple[float, float, float]
 
 
 def _corner_rms(img, patch_size: int = 9) -> tuple[float, int]:
-    """Corner-patch noise sigma, the user's estimator (src/utils/dirty_noise.py):
-    four square corner patches, a 2D plane fit and removed per patch, patches
-    with std > 2x the median std discarded, sigma = mean std of the survivors.
+    """Corner-patch noise sigma (src/utils/dirty_noise.py): 2D-plane detrended
+    corner patches, std > 2x median discarded, sigma = mean std of survivors.
     Returns (sigma, n_valid_patches) in the image's own units."""
     from src.utils.dirty_noise import (compute_patch_stats,
                                        define_corner_patches,
@@ -1056,13 +987,11 @@ def _corner_rms(img, patch_size: int = 9) -> tuple[float, int]:
 
 
 def _dirty_sigma_jybeam(target: str) -> tuple[float, str]:
-    """Sigma (Jy/beam) of the target's full-FOV dirty image, as hand-measured.
+    """Sigma (Jy/beam) of the full-FOV dirty, as hand-measured.
 
-    Primary source: the canonical casa run log — `threshold_jybeam` is the
-    3-sigma absolute threshold whose note records that sigma was measured by
-    hand on the full-FOV dirty image. Fallback: corner-patch estimate on
-    <target>_dirty.fits. Returns (sigma_jybeam, source note).
-    """
+    Primary: the canonical casa run log (threshold_jybeam = 3*sigma).
+    Fallback: corner-patch estimate on <target>_dirty.fits.
+    Returns (sigma_jybeam, source note)."""
     from astropy.io import fits as _fits
     casa_dir = EXPERIMENTS_DIR / target / f"{target}_casa"
     for lp in sorted(casa_dir.glob(f"**/{target}_casa.log")):
@@ -1081,14 +1010,9 @@ def _dirty_sigma_jybeam(target: str) -> tuple[float, str]:
 
 def _dirty_sigma_display(target: str, unit: str,
                          cell_arcsec: float) -> tuple[float, str]:
-    """Hand-measured dirty sigma converted to display units, with source note.
-
-    Jy/arcsec^2 divides by the beam area; mJy/px multiplies by the recon
-    pixel area over the beam area (beam from the dirty FITS header, the image
-    sigma was measured on). This is the common asinh stretch reference
-    (--png --asinh, --lam-sweep): comparable across methods and immune to
-    reconstructions whose background is exactly zero.
-    """
+    """Hand-measured dirty sigma in display units (Jy/arcsec^2 or mJy/px),
+    with source note. Common asinh stretch reference: comparable across
+    methods and immune to exactly-zero reconstruction backgrounds."""
     from astropy.io import fits as _fits
     sigma_beam, src = _dirty_sigma_jybeam(target)
     hdr = _fits.getheader(EXPERIMENTS_DIR / target / f"{target}_dirty.fits")
@@ -1102,13 +1026,9 @@ def _dirty_sigma_display(target: str, unit: str,
 def _linear_asinh_ticks(vmax: float, lw: float) -> list[float]:
     """Linearly spaced colorbar ticks (0, step, 2*step, ...) for an asinh bar.
 
-    The step is the smallest 1-2-5 value that keeps the labels from
-    overlapping: on an asinh bar equal linear steps compress toward vmax
-    (dp/dv shrinks as ~1/(vmax*span) at the top), so the binding constraint
-    is the last kept pair being >= 14% of the bar apart in the transformed
-    coordinate, with the last tick at <= 93% of the bar (a label centered
-    further right would stick out over the next panel's colorbar).
-    """
+    Step = smallest 1-2-5 value that keeps the top-end labels from
+    overlapping in the transformed coordinate (asinh compresses equal linear
+    steps toward vmax)."""
     span = float(np.arcsinh(vmax / lw))
 
     def p_of(v: float) -> float:
@@ -1144,11 +1064,9 @@ def _fmt_duration(s: float) -> str:
 def cmd_png(args) -> None:
     """Render the archival comparison panel from existing products (no recon).
 
-    Mold: upper row of the noisevar comparisons (render_all_preview, compact
-    geometry, own colorbar per panel, log-count histogram under each panel).
-    Row: DSHARP (published reference, Jy/beam -> Jy/pixel) | casa | wsclean |
-    deepinv | r2d2. No GT and no error row; each reconstruction title reports
-    the corner-patch rms and dynamic range (peak/rms) of that image.
+    Row: DSHARP reference (Jy/beam -> Jy/pixel) | casa | wsclean | deepinv |
+    r2d2; own colorbar + log-count histogram per panel (noisevar mold). Each
+    title reports corner-patch rms and dynamic range (peak/rms).
     """
     import matplotlib
     matplotlib.use("Agg")
@@ -1158,17 +1076,14 @@ def cmd_png(args) -> None:
         HIST_BINS, CB_H, CB_PAD, add_colorbar, hist_peak, style_hist)
 
     exp_dir = EXPERIMENTS_DIR / args.target
-    # Three generations: v1 = 1-channel mat (effectively 10/24 SPWs);
-    # avg = channel-averaged mat (2.31M vis, all 24 SPWs); all_channels =
-    # full-band mat (24.9M vis). PNGs are grouped per target:
+    # Three generations: v1 = 1-channel mat (effectively 10/24 SPWs); avg =
+    # channel-averaged (all 24 SPWs); allch = full-band. PNGs land in
     # results/archival/<target>/<variant>/.
     if args.test or args.tuned:
         # Winner-config panel (experiment 1 test set): casa/wsclean keep the
-        # archival 3*sigma manual threshold with default cyclefactor/mgain;
-        # BPSA uses the winner lambda (0.1, l0p1_i50_v2) from a dedicated
-        # avg_test run; r2d2 reuses the canonical avg run (already the winner
-        # k5 config). --tuned additionally uses dedicated casa/wsclean runs
-        # with briggs robust 0.5 (hand-tuned for the archival data).
+        # archival 3*sigma threshold; BPSA uses the winner lambda (0.1) from a
+        # dedicated avg_test run; r2d2 reuses the canonical avg run. --tuned
+        # uses dedicated casa/wsclean runs at briggs robust 0.5.
         if args.test and args.tuned:
             raise SystemExit("--png: --test and --tuned are mutually exclusive")
         if args.allch or args.avg or args.units != "mjypx" or args.tag:
@@ -1210,10 +1125,8 @@ def cmd_png(args) -> None:
         cw_variant = None
     deepinv_dir = run_dir(exp_dir, args.target, "deepinverse", deepinv_variant)
 
-    # DSHARP published reference: crop to ~the reconstructions' FOV so the
-    # comparison is fair. The reference FITS sits at
-    # data/archival/<target>/<target>.fits (inside the target directory, next
-    # to the MS and the mats). Its native unit is Jy/beam.
+    # DSHARP reference: crop to ~the reconstructions' FOV (64 x cell) so the
+    # comparison is fair. Native unit Jy/beam.
     dsharp_path = DATA_DIR / args.target / f"{args.target}.fits"
     _rcell = _panel_load(r2d2_dir / f"{args.target}_r2d2.fits")[1]
     _fov = 64 * _rcell  # reconstructions' FOV (64 x cell)
@@ -1303,13 +1216,9 @@ def cmd_png(args) -> None:
         peak_ct = max(peak_ct, hist_peak(img, float(img.min()), float(img.max())))
     hist_ylim = (0.8, peak_ct * 1.2)
 
-    # asinh stretch (only with --asinh): common linear_width for the
-    # reconstruction panels (ASINH_LW_FAC x the target's full-FOV dirty sigma,
-    # display units); the DSHARP reference (col 0) gets its own lower width
-    # (ASINH_LW_FAC x its own corner-patch rms — its background is orders of
-    # magnitude quieter, so the common width leaves its faint ring at the
-    # colormap floor). vmax stays per-panel (each image's own max); the dirty
-    # reference makes the stretch immune to zero backgrounds.
+    # asinh stretch (--asinh): recons share linear_width = ASINH_LW_FAC x the
+    # full-FOV dirty sigma (display units); DSHARP gets its own width (factor
+    # x its corner rms, much quieter background). vmax stays per-panel.
     lw_asinh = None
     lw_dsharp = None
     if args.asinh:
@@ -1399,10 +1308,9 @@ def cmd_png(args) -> None:
         cb = add_colorbar(fig, im, ax)
         cb.ax.tick_params(labelsize=16)
         if args.asinh:
-            # Labels linearly spaced (0, step, 2*step, ...): on the asinh bar
-            # they compress toward vmax, so the step grows (1-2-5) until the
-            # top-end labels stop overlapping. The auto asinh minor ticks no
-            # longer line up with the labels: switch them off.
+            # Linearly spaced labels (asinh compresses them toward vmax; the
+            # step grows 1-2-5 until the top labels stop overlapping); the
+            # auto asinh minor ticks no longer match: switch them off.
             ticks = _linear_asinh_ticks(vmax, plw)
             cb.set_ticks(ticks)
             labels = cb.ax.set_xticklabels([f"{v:g}" for v in ticks])
@@ -1438,15 +1346,10 @@ def cmd_png(args) -> None:
 def cmd_tidy(args) -> None:
     """Render the minimal abstract comparison figure (no reconstruction).
 
-    DSHARP reference + casa + wsclean (canonical robust 2 runs) + BPSA
-    (avg_lam3e-4) + R2Disk2 (avg), all converted to surface brightness in
-    mJy/arcsec^2 and shown on a single common asinh scale. Five panels
-    (3 over 2), one colorbar, no histograms/DR/rms, imaging time under
-    each reconstruction title, beams on
-    DSHARP/tclean/WSClean only, common 0.5 arcsec scale bar per panel.
-    See the module docstring for the unit conventions. Saved to
-    results/archival/<target>/<variant>/tidy/<target>_continuum_comparison.png
-    (300 dpi) + .pdf.
+    DSHARP + casa + wsclean (robust 2) + BPSA (avg_lam3e-4) + R2Disk2 (avg)
+    in mJy/arcsec^2 on a single common asinh scale: 5 panels (3 over 2), one
+    colorbar, no histograms, beams on DSHARP/tclean/WSClean only. Saved to
+    results/archival/<target>/<variant>/tidy/<target>_comparison.png+.pdf (300 dpi).
     """
     import matplotlib
     matplotlib.use("Agg")
@@ -1731,11 +1634,10 @@ def cmd_tidy(args) -> None:
 def cmd_png_diff(args) -> None:
     """Render the 3-row BPSA allch-vs-avg comparison PNG (no reconstruction).
 
-    Row 1: --allch BPSA per lambda; row 2: --avg BPSA per lambda (same
-    lambdas); row 3: pixel difference allch - avg with the diff-image rms in
-    the title. Layout is identical to cmd_lam_sweep's strip (own colorbar +
-    log-count histogram per panel, same sizes). Products must exist already
-    (run --deepinv [--allch|--avg] [--tag lam<X>]).
+    Row 1: --allch BPSA per lambda; row 2: --avg BPSA per lambda; row 3:
+    pixel difference allch - avg with the diff rms in the title. Layout as
+    cmd_lam_sweep (own colorbar + histogram per panel). Products must exist
+    already (run --deepinv [--allch|--avg] [--tag lam<X>]).
     Saved to results/archival/<target>/<target>_bpsa_allch_vs_avg.png.
     """
     import matplotlib
@@ -1796,10 +1698,8 @@ def cmd_png_diff(args) -> None:
                   diff * 1e3, "RdBu_r", unit_diff)
                  for lab, a, v, diff, rms in cols])
 
-    # Same mold as cmd_lam_sweep: per-column image + own colorbar + log-count
-    # histogram, one shared hist y scale per row (each row is a sweep strip).
-    # One deviation, per request: thinner colorbar than the mold's CB_H
-    # (same full panel width as the mold's add_colorbar).
+    # Same mold as cmd_lam_sweep (own colorbar + histogram per panel, shared
+    # hist y scale per row), with a thinner colorbar than the mold's CB_H.
     from src.utils.studies.noisevar.plot_noisevar_comparisons import (
         HIST_BINS, CB_PAD, hist_peak, style_hist)
 
@@ -1887,11 +1787,9 @@ def cmd_png_diff(args) -> None:
 def cmd_lam_sweep(args) -> None:
     """Render the deepinv lambda-sweep strip from existing products (no recon).
 
-    One panel per lambda variant (run dir <target>_deepinverse[_lam<tag>] inside
-    the <target>_deepinverse container).
-    Shared vmax, native Jy/pixel. Each
-    title reports imaging time + DR, and the corner-patch rms (the user's
-    estimator from src/utils/dirty_noise.py, same as --png).
+    One panel per lambda variant (canonical dir + every _lam<tag> variant
+    found, sorted by lambda descending). Shared vmax, native Jy/pixel; titles
+    report imaging time, corner-patch rms and DR.
     """
     import matplotlib
     matplotlib.use("Agg")
@@ -1917,10 +1815,8 @@ def cmd_lam_sweep(args) -> None:
         return f"{root}_{v}" if v else root
 
     di = lambda v: run_dir(exp_dir, t, "deepinverse", _v(v))  # noqa: E731
-    # Entries are discovered dynamically: the canonical dir (avg/allch: λ=1e-3;
-    # v1: λ=1e-1) plus every _lam<tag> variant dir that exists, sorted by λ
-    # descending (tag parsed as float). New sweep points only need a
-    # --deepinv run with --tag lam<value>; nothing here is hardcoded.
+    # Entries discovered dynamically: the canonical dir (avg/allch: λ=1e-3;
+    # v1: λ=1e-1) plus every _lam<tag> variant dir, sorted by λ descending.
     root = "allch" if allch else ("avg" if avg else None)
     cont = run_dir(exp_dir, t, "deepinverse").parent  # method-level container
     canon_value = 1e-3 if root else 1e-1
@@ -2000,7 +1896,7 @@ def cmd_lam_sweep(args) -> None:
     hist_pairs, top_panels = [], []
 
     # asinh stretch: common linear_width for every panel, factor x sigma of the
-    # target's full-FOV dirty (display units) — comparable across lambdas and
+    # target's full-FOV dirty (display units): comparable across lambdas and
     # immune to sparse (exactly-zero) backgrounds.
     sfac = (ASINH_LW_FAC_SWEEP if getattr(args, "asinh_lw_sweep", None) is None
             else args.asinh_lw_sweep)

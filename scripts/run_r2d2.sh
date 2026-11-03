@@ -42,8 +42,7 @@ else
     SIM_DIR="$BASE_DIR/data/simulated"
 fi
 
-# Noises dataset: inputs are split per SNR level, with the level directory
-# derived from the target's '_snr<L>' name suffix.
+# Noises dataset: inputs split per SNR level, dir from the '_snr<L>' suffix.
 if [ "$MODE" = "noises" ]; then
     LEVEL_DIR=$(echo "$TARGET" | sed -n 's/.*_snr\([0-9][0-9]*\)$/\1s/p')
     if [ -n "$LEVEL_DIR" ]; then

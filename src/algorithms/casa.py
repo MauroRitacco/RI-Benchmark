@@ -118,8 +118,7 @@ def main(target, config_json=None, n=3):
 
     import sys
     sys.path.insert(0, base_dir)
-    # nominal_pixelsize from the .mat: exact pixel scale used during visibility simulation,
-    # so CASA images at the same angular scale as the groundtruth.
+    # Pixel scale from the .mat, same as the simulation
     from scipy.io import loadmat
     mat_path = vis_path.replace('.MS', '.mat')
     pixel_size = float(loadmat(mat_path)['nominal_pixelsize'].item())
@@ -202,13 +201,8 @@ def main(target, config_json=None, n=3):
             fitsimage=f'{name}.fits', 
             overwrite=True
         )
-        # smoothimage(f'{name}.fits', os.path.join(base_dir,'data','simulated',target, target + '.fits'))
 
         convert_jybeam_to_jypixel(f'{name}.fits')
-
-        # Normalize to [0, 1] via peak normalization
-        # from src.utils.transforms import normalize_fits_peak
-        # normalize_fits_peak(f'{name}.fits')
     
     with open(name+'.log', 'a') as f:
         f.write("tclean config:\n")

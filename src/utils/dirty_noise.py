@@ -1,9 +1,8 @@
 """Estimate noise in a dirty image from four corner patches.
 
-For a 64x64 image the emission is confined to the central ~32 px (see
-DiskGenerator/src/disk_generator.py), so 9x9 corner patches are outside the
-disk and star.  Patches overlapping a known point source (from the ground
-truth FITS header) or failing a purity test (rms ~ std) are discarded.
+Emission stays in the central ~32 px of the 64x64 images, so 9x9 corner
+patches are background. Patches overlapping a known point source (from the
+GT FITS header) or failing a std-consistency test are discarded.
 """
 
 from __future__ import annotations
@@ -93,12 +92,11 @@ def source_pixel_in_dirty(
     ext_x: float,
     ext_y: float,
 ) -> tuple[float, float]:
-    """Map the source offset (EXT_X, EXT_Y) to pixel coordinates in the dirty image.
+    """Map the source offset (EXT_X, EXT_Y) to dirty-image pixel coordinates.
 
-    The pixel offset is transferred directly via CRPIX instead of going through
-    sky coordinates: the synthetic ground truth has CRVAL=(0,0) while dirty
-    images inherit the observation phase centre as CRVAL, so a WCS transfer
-    would mix two different reference points and give wrong (often NaN) positions.
+    Direct CRPIX transfer: the synthetic GT has CRVAL=(0,0) but the dirty
+    inherits the observation phase centre, so a WCS transfer mixes reference
+    points and gives wrong positions.
     """
     gt_path = Path(gt_path)
     dirty_path = Path(dirty_path)

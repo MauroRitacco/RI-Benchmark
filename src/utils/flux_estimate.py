@@ -1,19 +1,11 @@
 """Total-flux estimator from a Measurement Set (extrapolation to uv=0).
 
-For a positive source the zero-spacing visibility equals the total flux
-density: V(0) = sum(x). Real arrays have no zero baseline and short baselines
-resolve out extended emission, so instead of averaging the shortest decile we
-fit the visibility trend at short baselines and extrapolate to uv=0:
-
-1. compute uv radius per row from UVW,
-2. keep rows in the lowest `fit_frac` quantile of uv radius (flags applied),
-3. bin the remaining visibilities radially and take the coherent (complex)
-   mean per bin (noise cancels in phase within each bin),
-4. fit a low-order polynomial in r^2 to the bin means and evaluate at r=0.
-
-Fallback: if the fit fails, is non-finite/non-positive, or exceeds
-`absurd_factor` times the global max visibility, use the coherent mean over
-the lowest `fallback_frac` quantile (the original short-baseline estimator).
+For a positive source V(0) = total flux. No zero baseline exists and short
+baselines resolve out extended emission, so the short-baseline visibility
+trend is binned radially and a low-order polynomial in r^2 is extrapolated
+to r=0 (shortest 1% of rows, 8 bins). Fallback: coherent mean over the
+shortest 10% (rejects fits that are non-finite/non-positive or above
+ABSURD_FACTOR x max|V|).
 
 Returns (F_est, path) with path in {"fit", "fallback"}.
 """
