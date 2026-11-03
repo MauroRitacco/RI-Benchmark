@@ -30,10 +30,25 @@ results/*
 !results/test/
 results/test/*
 !results/test/test_results.txt
-external/
+external/*
+!external/R2D2-RI/
+external/R2D2-RI/ckpt/
+external/R2D2-RI/data/
+external/R2D2-RI/tutorial_r2d2_python_v2.ipynb
+external/R2D2-RI/PATCHES.md
+external/R2D2-RI/.gitmodules
 
 # Pure-noise SNR study outputs
 results/noise_snr/
 
 # Experimental / study scripts (not part of sweep or test pipeline)
-src/utils/studies/
+src/utils/studies/*
+!src/utils/studies/noisevar/
+src/utils/studies/noisevar/*
+!src/utils/studies/noisevar/build_calibration_table.py
+!src/utils/studies/noisevar/generate_noisevar_ms.py
+
+# Local-only (not for publication)
+STATUS.md
+verification/
+config/imaging/R2D2_small_cpuop.yaml

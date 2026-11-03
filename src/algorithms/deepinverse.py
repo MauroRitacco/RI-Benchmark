@@ -70,6 +70,8 @@ def main(target, config_json=None, n=1):
         vis_path = os.path.join(base_dir, 'data','archival',target, target + '.mat')
         default_out_dir = os.path.join(base_dir, 'experiments', 'archival', target, target + '_deepinverse') + '/'
     
+    # Optional vis_path override (archival no-cutoff / rescaled mats).
+    vis_path = cfg.pop('vis_path', vis_path)
     out_dir = cfg.pop('out_dir', default_out_dir)
     if not out_dir.endswith('/'):
         out_dir += '/'
@@ -178,6 +180,18 @@ def main(target, config_json=None, n=1):
     opnorm_cache_path = vis_path.replace('.mat', '_opnorm.json')
     cached_opnorm = cfg.get("opnorm")
 
+    # Precedence: explicit config override -> JSON cache next to the mat ->
+    # compute. The JSON is written after every computation (below) so it is
+    # always warm for the next run of the same vis_path.
+    if cached_opnorm is None:
+        try:
+            with open(opnorm_cache_path) as f:
+                cached_opnorm = json.load(f).get("opnorm")
+            if cached_opnorm is not None:
+                print(f"Using cached operator norm: {cached_opnorm} ({opnorm_cache_path})")
+        except (OSError, ValueError) as e:
+            print(f"Operator norm cache not usable ({e}); computing")
+
     if cached_opnorm is not None:
         opnorm = float(cached_opnorm)
         print(f"Using cached operator norm: {opnorm}")
@@ -269,15 +283,56 @@ def main(target, config_json=None, n=1):
     # print(f"PSF max: {psf_max:.6f} — reconstruction normalized by PSF max")
 
     # Flux-conserving calibration: scale the reconstruction so its total flux
-    # matches the estimated total flux from the maximum visibility amplitude
-    # (near-zero-spacing visibility ≈ total flux for compact/centred sources).
-    total_flux_estimate = y_raw.abs().max().item()
+    # matches F_est, the total flux estimated from the cell MS by polynomial
+    # extrapolation of the short-baseline visibilities to uv=0 (positive
+    # source: V(0) = total flux). Falls back to the coherent short-baseline
+    # mean, and ultimately to max|y_raw|, if the MS estimate is unavailable.
+    max_y_raw = y_raw.abs().max().item()
+    ms_path = vis_path.replace('.mat', '.MS')
+    if not os.path.exists(ms_path):
+        # vis_path is a derived mat (no-cutoff/rescaled): fall back to the
+        # target's companion MS in the same directory.
+        alt_ms_path = os.path.join(os.path.dirname(vis_path), target + '.MS')
+        if os.path.exists(alt_ms_path):
+            ms_path = alt_ms_path
+    # Explicit override (derived mats living outside data/archival/<target>).
+    ms_path = cfg.pop('ms_path', ms_path)
+    flux_estimate_override = cfg.pop('flux_estimate', None)
+    flux_estimator = "max_visibility"
+    total_flux_estimate = max_y_raw
+    if flux_estimate_override is not None:
+        # Precomputed by the driver (avoids reading the MS in restricted envs).
+        total_flux_estimate = float(flux_estimate_override)
+        flux_estimator = "config_override"
+    else:
+        try:
+            from src.utils.flux_estimate import estimate_total_flux
+            total_flux_estimate, flux_estimator = estimate_total_flux(ms_path)
+        except Exception as e:
+            print(f"Warning: MS flux estimate failed ({e}); falling back to max|y_raw|")
     recon_sum = torch.clamp(x_model, min=0).sum().item()
     if recon_sum > 0 and total_flux_estimate > 0:
         flux_scale = total_flux_estimate / recon_sum
         x_model = x_model * flux_scale
-        print(f"Flux calibration: estimated total flux = {total_flux_estimate:.4f}, "
-              f"recon sum before = {recon_sum:.4f}, scale = {flux_scale:.6f}")
+        print(f"Flux calibration: estimator={flux_estimator}, F_est={total_flux_estimate:.4f}, "
+              f"max|y_raw|={max_y_raw:.4f}, recon sum before={recon_sum:.4f}, scale={flux_scale:.6f}")
+
+    # Per-cell flux-calibration log (estimator path, F_est vs old max|y_raw|).
+    fluxcal_csv = os.path.join(base_dir, 'results', 'fluxcal_log.csv')
+    try:
+        import csv as _csv
+        write_header = not os.path.exists(fluxcal_csv)
+        with open(fluxcal_csv, 'a', newline='') as fcsv:
+            w = _csv.writer(fcsv)
+            if write_header:
+                w.writerow(["target", "mode", "cell", "estimator",
+                            "F_est", "max_y_raw", "F_est_over_max"])
+            w.writerow([target, mode or "default", os.path.basename(out_dir.rstrip('/')),
+                        flux_estimator, f"{total_flux_estimate:.6f}",
+                        f"{max_y_raw:.6f}",
+                        f"{(total_flux_estimate / max_y_raw) if max_y_raw > 0 else float('nan'):.6f}"])
+    except Exception as e:
+        print(f"Warning: could not write fluxcal log: {e}")
 
     savefits(x_model, '')
 
@@ -290,7 +345,8 @@ def main(target, config_json=None, n=1):
         f.write(f"Real projection: {real_projection}\n")
         f.write(f"Device: {device}\n")
         f.write(f"Operator norm (raw): {opnorm}\n")
-        f.write(f"Flux estimate (max_visibility): {total_flux_estimate:.6f}\n")
+        f.write(f"Flux estimate ({flux_estimator}): {total_flux_estimate:.6f}\n")
+        f.write(f"Max |y_raw| (legacy estimator): {max_y_raw:.6f}\n")
         f.write(f"Flux calibration scale (flux_estimate / recon_sum): {flux_scale:.6e}\n\n")
         # f.write(f"Normalization scale: {scale} (1/sqrt(opnorm))\n\n")
         
@@ -351,7 +407,13 @@ def mattonpy(mat, n=3):
     # Briggs weights from wsclean imaging weights
     briggs = mat_data.get('weight')
     if briggs is None:
-        briggs = np.ones((y.shape[0], 1), dtype=np.float32)
+        # Fall back to imaging weights stored by ms2mat as nWimag (sqrt of the
+        # per-row imaging weight): 'weight' only exists after generate_weights.sh.
+        nWimag = mat_data.get('nWimag')
+        if nWimag is not None and np.asarray(nWimag).size:
+            briggs = np.square(nWimag)
+        else:
+            briggs = np.ones((y.shape[0], 1), dtype=np.float32)
     np.save(mat.replace('.mat', '_briggs.npy'), briggs)
     
     # Save natural weights nW = 1/tau (inverse noise std from simulator)
