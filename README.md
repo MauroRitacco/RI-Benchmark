@@ -143,6 +143,46 @@ PSNR and SSIM are higher-is-better (↑); MSE and runtime are lower-is-better (�
 
 The table reproduces the final evaluation report dated 2026-10-08. It documents the reported benchmark, not a new verification performed for this release.
 
+### Variable-noise study
+
+The same 360 validation disks were re-measured with regenerated visibility
+noise at three noise levels, defined by the peak SNR of the dirty image
+(SNR = 50, 200 and 500), keeping the ground truth fixed (1,080 cells in
+total; n = 360 per cell). Values are mean ± std over the cells of each
+level; "Global" is the mean over all cells. Sweep configuration ids are
+given in parentheses.
+
+PSNR (dB), higher is better:
+
+| Method | Configuration | SNR = 50 | SNR = 200 | SNR = 500 | Global |
+| --- | --- | ---: | ---: | ---: | ---: |
+| CASA (`tclean`) | 3σ_auto (`g0p1_ts3`) | 26.86 ± 4.11 | 28.51 ± 5.32 | 28.68 ± 5.48 | 28.01 |
+| CASA (`tclean`) | 3σ_abs (`g0p1_a3s`) | 27.25 ± 4.23 | 29.79 ± 6.22 | 30.22 ± 6.74 | 29.08 |
+| WSClean | 3σ_auto (`g0p1_ts3`) | 26.82 ± 4.47 | 28.20 ± 5.64 | 28.34 ± 5.79 | 27.79 |
+| WSClean | 3σ_abs (`g0p1_a3s`) | **27.27 ± 4.63** | 29.30 ± 6.46 | 29.61 ± 6.86 | 28.72 |
+| DeepInverse (BPSA) | λ = 1 (`l1_i50_v2`) | 24.21 ± 4.49 | **34.56 ± 5.20** | **40.12 ± 7.93** | **32.96** |
+| DeepInverse (BPSA) | λ = 0.1 (`l0p1_i50_v2`) | 22.89 ± 4.60 | 31.39 ± 4.74 | 37.27 ± 5.89 | 30.52 |
+| R2Disk2 | checkpoint `R2D2_small_ALMA3` (`k5`) | 22.87 ± 5.98 | 32.90 ± 5.98 | 36.22 ± 7.38 | 30.66 |
+
+Mean imaging time per image (s), lower is better:
+
+| Method | Configuration | SNR = 50 | SNR = 200 | SNR = 500 | Global |
+| --- | --- | ---: | ---: | ---: | ---: |
+| CASA (`tclean`) | 3σ_auto | 3.3 | 3.5 | 3.1 | 3.3 |
+| CASA (`tclean`) | 3σ_abs | 3.5 | 8.1 | 7.8 | 6.5 |
+| WSClean | 3σ_auto | 1.1 | 1.2 | 1.1 | 1.2 |
+| WSClean | 3σ_abs | 1.0 | 1.4 | 1.7 | 1.4 |
+| DeepInverse (BPSA) | λ = 1 | 14.6 | 14.1 | 14.1 | 14.2 |
+| DeepInverse (BPSA) | λ = 0.1 | 14.5 | 14.1 | 14.1 | 14.2 |
+| R2Disk2 | checkpoint `R2D2_small_ALMA3` | 1.6 | 1.7 | 1.5 | 1.6 |
+
+The ranking crosses with the noise level: at SNR = 50 the CLEAN-class
+methods (CASA, WSClean) lead, while at SNR = 200 and 500 DeepInverse and
+R2Disk2 clearly outperform them, with DeepInverse reaching the highest PSNR
+at every level above 50. Both non-CLEAN methods degrade more strongly as
+noise increases. These tables reproduce the results chapter of the thesis
+project; they document the reported study, not a new verification.
+
 ## Third-party code and local modifications
 
 - `external/R2D2-RI/` is a vendored copy of [basp-group/R2D2-RI](https://github.com/basp-group/R2D2-RI), based on upstream commit `2266925` and distributed under its original GPL-3.0 license.
@@ -158,5 +198,6 @@ The table reproduces the final evaluation report dated 2026-10-08. It documents 
 
 This repository is distributed under GPL-3.0; see [LICENSE](LICENSE). Third-party components retain their original licenses.
 
+- Thesis abstract: [PDF](docs/Thesis_abstract_Ritacco.pdf)
 - Companion data generator: [DiskGenerator](https://github.com/MauroRitacco/DiskGenerator)
 - Author: [Mauro Ritacco](https://github.com/MauroRitacco)
