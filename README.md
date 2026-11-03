@@ -136,10 +136,10 @@ PSNR and SSIM are higher-is-better (↑); MSE and runtime are lower-is-better (�
 
 | Method | Configuration | PSNR (dB) ↑ | SSIM ↑ | MSE ↓ | Time/image (s) ↓ |
 | --- | --- | ---: | ---: | ---: | ---: |
-| DeepInverse (FISTA + wavelet) | `l0p1_i50_v2` | 46.72 | 0.9876 | 0.0003 | 15.17 |
-| R2Disk2 | `k5` | 37.72 | 0.9494 | 0.0012 | 1.48 |
-| CASA (`tclean` / CLEAN) | `g0p1_ts1p0` | 29.77 | 0.8192 | 0.0028 | 3.77 |
-| WSClean | `g0p1_ts1p0` | 29.26 | 0.8034 | 0.0033 | 1.30 |
+| DeepInverse (FISTA + wavelet) | λ = 0.1, 50 iterations | 46.72 | 0.9876 | 0.0003 | 15.17 |
+| R2Disk2 | 5 iterations, single recurrent layer | 37.72 | 0.9494 | 0.0012 | 1.48 |
+| CASA (`tclean` / CLEAN) | gain 0.1, threshold 1σ (background-estimated) | 29.77 | 0.8192 | 0.0028 | 3.77 |
+| WSClean | gain 0.1, threshold 1σ (background-estimated) | 29.26 | 0.8034 | 0.0033 | 1.30 |
 
 The table reproduces the final evaluation report dated 2026-10-08. It documents the reported benchmark, not a new verification performed for this release.
 
@@ -149,32 +149,36 @@ The same 360 validation disks were re-measured with regenerated visibility
 noise at three noise levels, defined by the peak SNR of the dirty image
 (SNR = 50, 200 and 500), keeping the ground truth fixed (1,080 cells in
 total; n = 360 per cell). Values are mean ± std over the cells of each
-level; "Global" is the mean over all cells. Sweep configuration ids are
-given in parentheses.
+level; "Global" is the mean over all cells.
+
+For CASA and WSClean, two stopping thresholds were compared: one
+determined automatically per target as 3× the noise level estimated from
+the background of its own dirty image, and one fixed at 3× the noise level
+injected in the simulation (calibrated per target and noise level).
 
 PSNR (dB), higher is better:
 
 | Method | Configuration | SNR = 50 | SNR = 200 | SNR = 500 | Global |
 | --- | --- | ---: | ---: | ---: | ---: |
-| CASA (`tclean`) | 3σ_auto (`g0p1_ts3`) | 26.86 ± 4.11 | 28.51 ± 5.32 | 28.68 ± 5.48 | 28.01 |
-| CASA (`tclean`) | 3σ_abs (`g0p1_a3s`) | 27.25 ± 4.23 | 29.79 ± 6.22 | 30.22 ± 6.74 | 29.08 |
-| WSClean | 3σ_auto (`g0p1_ts3`) | 26.82 ± 4.47 | 28.20 ± 5.64 | 28.34 ± 5.79 | 27.79 |
-| WSClean | 3σ_abs (`g0p1_a3s`) | **27.27 ± 4.63** | 29.30 ± 6.46 | 29.61 ± 6.86 | 28.72 |
-| DeepInverse (BPSA) | λ = 1 (`l1_i50_v2`) | 24.21 ± 4.49 | **34.56 ± 5.20** | **40.12 ± 7.93** | **32.96** |
-| DeepInverse (BPSA) | λ = 0.1 (`l0p1_i50_v2`) | 22.89 ± 4.60 | 31.39 ± 4.74 | 37.27 ± 5.89 | 30.52 |
-| R2Disk2 | checkpoint `R2D2_small_ALMA3` (`k5`) | 22.87 ± 5.98 | 32.90 ± 5.98 | 36.22 ± 7.38 | 30.66 |
+| CASA (`tclean`) | 3σ (background-estimated) | 26.86 ± 4.11 | 28.51 ± 5.32 | 28.68 ± 5.48 | 28.01 |
+| CASA (`tclean`) | 3σ (injected-noise calibrated) | 27.25 ± 4.23 | 29.79 ± 6.22 | 30.22 ± 6.74 | 29.08 |
+| WSClean | 3σ (background-estimated) | 26.82 ± 4.47 | 28.20 ± 5.64 | 28.34 ± 5.79 | 27.79 |
+| WSClean | 3σ (injected-noise calibrated) | **27.27 ± 4.63** | 29.30 ± 6.46 | 29.61 ± 6.86 | 28.72 |
+| DeepInverse (BPSA) | λ = 1 | 24.21 ± 4.49 | **34.56 ± 5.20** | **40.12 ± 7.93** | **32.96** |
+| DeepInverse (BPSA) | λ = 0.1 | 22.89 ± 4.60 | 31.39 ± 4.74 | 37.27 ± 5.89 | 30.52 |
+| R2Disk2 | 5 iterations, single recurrent layer | 22.87 ± 5.98 | 32.90 ± 5.98 | 36.22 ± 7.38 | 30.66 |
 
 Mean imaging time per image (s), lower is better:
 
 | Method | Configuration | SNR = 50 | SNR = 200 | SNR = 500 | Global |
 | --- | --- | ---: | ---: | ---: | ---: |
-| CASA (`tclean`) | 3σ_auto | 3.3 | 3.5 | 3.1 | 3.3 |
-| CASA (`tclean`) | 3σ_abs | 3.5 | 8.1 | 7.8 | 6.5 |
-| WSClean | 3σ_auto | 1.1 | 1.2 | 1.1 | 1.2 |
-| WSClean | 3σ_abs | 1.0 | 1.4 | 1.7 | 1.4 |
+| CASA (`tclean`) | 3σ (background-estimated) | 3.3 | 3.5 | 3.1 | 3.3 |
+| CASA (`tclean`) | 3σ (injected-noise calibrated) | 3.5 | 8.1 | 7.8 | 6.5 |
+| WSClean | 3σ (background-estimated) | 1.1 | 1.2 | 1.1 | 1.2 |
+| WSClean | 3σ (injected-noise calibrated) | 1.0 | 1.4 | 1.7 | 1.4 |
 | DeepInverse (BPSA) | λ = 1 | 14.6 | 14.1 | 14.1 | 14.2 |
 | DeepInverse (BPSA) | λ = 0.1 | 14.5 | 14.1 | 14.1 | 14.2 |
-| R2Disk2 | checkpoint `R2D2_small_ALMA3` | 1.6 | 1.7 | 1.5 | 1.6 |
+| R2Disk2 | 5 iterations, single recurrent layer | 1.6 | 1.7 | 1.5 | 1.6 |
 
 The ranking crosses with the noise level: at SNR = 50 the CLEAN-class
 methods (CASA, WSClean) lead, while at SNR = 200 and 500 DeepInverse and
